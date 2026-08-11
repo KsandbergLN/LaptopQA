@@ -32,7 +32,7 @@ foreach ($entry in $manifest.Files) {
     }
 }
 
-$handoffRoot = Split-Path -Parent $PSScriptRoot
+$handoffRoot = $PSScriptRoot
 $appFolder = Join-Path $package 'LAPTOP QA\App'
 $sourceExe = Join-Path $appFolder 'LaptopQATestingV4.exe'
 $silentLauncher = Join-Path $package 'Windows Laptop QA Launcher.vbs'
@@ -45,7 +45,7 @@ if ($OneDrive) {
         throw "OneDrive deployment helper not found: $syncScript"
     }
     if ($PSCmdlet.ShouldProcess('OneDrive release location', "Deploy accepted package $package")) {
-        $results += & $syncScript -SourceFolder $package -VersionPrefix 'LaptopQATestingV4' -DelayMinutes 30
+        $results += & $syncScript -SourceFolder $package -VersionPrefix 'LaptopQA' -DelayMinutes 30
     }
 }
 

@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $sourceFiles = @(
-    (Join-Path $PSScriptRoot '..\V4\MainWindow.xaml'),
+    (Join-Path $PSScriptRoot '..\MainWindow.xaml'),
     (Join-Path $PSScriptRoot '..\Mac\MainWindow.axaml'),
     (Join-Path $PSScriptRoot '..\Mac\SettingsWindow.axaml')
 )

@@ -31,9 +31,10 @@
 
   <ItemGroup>
     <Compile Remove="Launcher\**\*.cs" />
+    <Compile Remove="Shared\UiLocalization.cs" />
     <None Remove="Launcher\**\*" />
-    <Compile Include="..\Shared\UiLocalization.cs" Link="UiLocalization.cs" />
-    <EmbeddedResource Include="..\Shared\ui-translations.json" LogicalName="LaptopQA.ui-translations.json" Condition="Exists('..\Shared\ui-translations.json')" />
+    <Compile Include="Shared\UiLocalization.cs" Link="UiLocalization.cs" />
+    <EmbeddedResource Include="Shared\ui-translations.json" LogicalName="LaptopQA.ui-translations.json" Condition="Exists('Shared\ui-translations.json')" />
   </ItemGroup>
 
 </Project>

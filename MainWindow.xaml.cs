@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -124,6 +125,10 @@ public partial class MainWindow : Window, IComponentConnector
 	private string _warranty = "Unknown";
 
 	private string _warrantyCachedServiceTag = "";
+
+	private DateTime _warrantyComparisonDate = DateTime.Today;
+
+	private string _warrantyComparisonDateSource = "Windows system clock";
 
 	private string _batterySummary = "Battery Health: unavailable";
 
@@ -349,14 +354,14 @@ public partial class MainWindow : Window, IComponentConnector
 		LanguageCatalog.ApplyCulture(_config.AppLanguage);
 		ApplyAppTheme(_config.AppTheme);
 		WpfLocalization.Apply(this, _config.AppLanguage);
+		SetWindowFitToScreen();
+		BringStartupSplashToFront();
+		await SetStartupSplashStatusAsync(NextStartupJokeForLaunch());
 		PromptForTechnicianNameIfNeeded();
 		HeaderTechnician.Text = L(string.IsNullOrWhiteSpace(_config.TechnicianName) ? "Technician: not set" : ("Technician: " + _config.TechnicianName));
 		AddActivity("System", "Laptop QA Testing V4 started.");
 		AddActivity("System", "App folder ready: " + _appRoot);
 		AddActivity("System", "Data folder ready: " + _dataRoot);
-		SetWindowFitToScreen();
-		BringStartupSplashToFront();
-		await SetStartupSplashStatusAsync(NextStartupJokeForLaunch());
 		CleanupOldFiles(HashDir, 90, "Hash", "hash file(s)");
 		CleanupOldFiles(QaDir, 90, "QA Sheet", "QA sheet file(s)");
 		CleanupOldFiles(LogsDir, 90, "Logs", "log file(s)", recursive: true);
@@ -1935,18 +1940,19 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private async Task RefreshWarrantyAsync()
 	{
+		await RefreshWarrantyComparisonDateAsync();
 		if (string.IsNullOrWhiteSpace(_serviceTag) || _serviceTag.Equals("Unknown", StringComparison.OrdinalIgnoreCase))
 		{
 			_warranty = "";
-			HeaderWarranty.Text = L("Warranty:");
+			HeaderWarranty.Text = L("Warranty: X unavailable");
 			HeaderWarranty.ToolTip = "Service Tag unavailable.";
 			AddActivity("Warranty", "Warranty lookup skipped: Service Tag unavailable.");
 			return;
 		}
 		if (!string.IsNullOrWhiteSpace(_warranty) && string.Equals(_warrantyCachedServiceTag, _serviceTag, StringComparison.OrdinalIgnoreCase))
 		{
-			HeaderWarranty.Text = L("Warranty: " + _warranty);
-			HeaderWarranty.ToolTip = "Warranty expiration date: " + _warranty;
+			HeaderWarranty.Text = L("Warranty: " + WarrantyDisplayText());
+			HeaderWarranty.ToolTip = WarrantyToolTipText();
 			AddActivity("Warranty", "Using cached warranty expiration: " + _warranty);
 			return;
 		}
@@ -1958,17 +1964,94 @@ public partial class MainWindow : Window, IComponentConnector
 		{
 			_warranty = warrantyResult.ExpirationDateText;
 			_warrantyCachedServiceTag = _serviceTag;
-			HeaderWarranty.Text = L("Warranty: " + _warranty);
-			HeaderWarranty.ToolTip = "Warranty expiration date: " + _warranty;
+			HeaderWarranty.Text = L("Warranty: " + WarrantyDisplayText());
+			HeaderWarranty.ToolTip = WarrantyToolTipText();
 			AddActivity("Warranty", "Warranty expiration loaded: " + _warranty);
 		}
 		else
 		{
 			_warranty = "";
-			HeaderWarranty.Text = L("Warranty: unavailable");
+			HeaderWarranty.Text = L("Warranty: X unavailable");
 			HeaderWarranty.ToolTip = (string.IsNullOrWhiteSpace(warrantyResult.Message) ? "No warranty expiration date returned." : warrantyResult.Message);
 			AddActivity("Warranty", $"Warranty expiration not loaded: {HeaderWarranty.ToolTip}");
 		}
+	}
+
+	private string WarrantyDisplayText()
+	{
+		if (string.IsNullOrWhiteSpace(_warranty))
+		{
+			return "X unavailable";
+		}
+		return (IsWarrantyCurrent(_warranty) ? "✓ " : "X ") + _warranty;
+	}
+
+	private string WarrantyToolTipText()
+	{
+		if (string.IsNullOrWhiteSpace(_warranty))
+		{
+			return "Warranty was not loaded.";
+		}
+		return IsWarrantyCurrent(_warranty)
+			? "Warranty is active through " + _warranty + ". Checked against " + _warrantyComparisonDateSource + ": " + _warrantyComparisonDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+			: "Warranty expired on " + _warranty + ". Checked against " + _warrantyComparisonDateSource + ": " + _warrantyComparisonDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+	}
+
+	private bool IsWarrantyCurrent(string warrantyText)
+	{
+		DateTime? date = ParseWarrantyCliDate(warrantyText);
+		return date.HasValue && date.Value.Date >= _warrantyComparisonDate.Date;
+	}
+
+	private async Task RefreshWarrantyComparisonDateAsync()
+	{
+		try
+		{
+			DateTime? networkDate = await GetNetworkDateAsync();
+			if (networkDate.HasValue)
+			{
+				_warrantyComparisonDate = networkDate.Value.Date;
+				_warrantyComparisonDateSource = "network date";
+				AddActivity("Warranty", "Warranty date comparison will use network date: " + _warrantyComparisonDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+				return;
+			}
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Warranty", "Network date lookup failed: " + ex.Message);
+		}
+
+		_warrantyComparisonDate = DateTime.Today;
+		_warrantyComparisonDateSource = "Windows system clock";
+		AddActivity("Warranty", "Warranty date comparison will use Windows system clock: " + _warrantyComparisonDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+	}
+
+	private static async Task<DateTime?> GetNetworkDateAsync()
+	{
+		string[] urls =
+		{
+			"https://www.microsoft.com",
+			"https://www.bing.com",
+			"https://www.dell.com"
+		};
+		using HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(4.0) };
+		foreach (string requestUri in urls)
+		{
+			try
+			{
+				using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, requestUri);
+				using HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+				DateTimeOffset? date = response.Headers.Date;
+				if (date.HasValue)
+				{
+					return date.Value.LocalDateTime.Date;
+				}
+			}
+			catch
+			{
+			}
+		}
+		return null;
 	}
 
 	private async Task<WarrantyResult> GetDellWarrantyExpirationAsync(string serviceTag)
@@ -5261,8 +5344,8 @@ $items = @(
 		if (cache.Warranty != null)
 		{
 			_warranty = cache.Warranty;
-			HeaderWarranty.Text = L(string.IsNullOrWhiteSpace(_warranty) ? "Warranty:" : ("Warranty: " + _warranty));
-			HeaderWarranty.ToolTip = (string.IsNullOrWhiteSpace(_warranty) ? "Warranty was not loaded." : ("Warranty expiration date: " + _warranty));
+			HeaderWarranty.Text = L("Warranty: " + WarrantyDisplayText());
+			HeaderWarranty.ToolTip = WarrantyToolTipText();
 		}
 		if (!string.IsNullOrWhiteSpace(cache.WarrantyCachedServiceTag))
 		{
@@ -6134,7 +6217,7 @@ $items = @(
 		string value = ((text7 == "Passed") ? "overall-pass" : ((text7 == "Needs Attention") ? "overall-fail" : "overall-incomplete"));
 		string value2 = string.Join(Environment.NewLine, source.Select(((string, string, string, string) r) => $"                        <tr>\n                            <td><div class=\"task\">{H(r.Item2)}</div></td>\n                            <td><span class=\"status {ClassName(r.Item3)}\">{H(Label(r.Item3))}</span></td>\n                            <td>{H(r.Item4)}</td>\n                        </tr>"));
 		DateTime now = DateTime.Now;
-		string value3 = (string.IsNullOrWhiteSpace(_warranty) ? "" : _warranty);
+		string value3 = WarrantyDisplayText();
 		string value4 = JsonSerializer.Serialize(BuildServiceNowRequestDescription()).Replace("</", "<\\/");
 		string value5 = JsonSerializer.Serialize(GetServiceNowRequestUrl()).Replace("</", "<\\/");
 		return $"<!doctype html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <title>Laptop QA Sheet - {H(Environment.MachineName)}</title>\n    <style>\n        @page {{ size: Letter; margin: 0.45in; }}\n        * {{ box-sizing: border-box; }}\n        html {{ background: transparent; }}\n        body {{ margin: 0; background: transparent; color: #13252d; font-family: \"Segoe UI\", Arial, sans-serif; font-size: 12px; line-height: 1.35; }}\n        .print-action {{ width: 8in; margin: 14px auto 0; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }}\n        .print-action button {{ border: 0; border-radius: 7px; padding: 9px 14px; color: white; background: #244f5c; font-weight: 700; cursor: pointer; }}\n        .print-action button.secondary {{ background: #60757e; }}\n        .sheet {{ width: 8in; min-height: 10.1in; margin: 0; background: #ffffff; border: 0; border-radius: 16px; box-shadow: none; overflow: hidden; }}\n        .titlebar {{ display: grid; grid-template-columns: 1fr 1.55in; gap: 18px; padding: 22px 26px 20px; color: #ffffff; background: linear-gradient(135deg, #18333d 0%, #2d5965 58%, #5f858d 100%); }}\n        h1 {{ margin: 0 0 4px; font-size: 25px; letter-spacing: 0; line-height: 1.05; }}\n        .overall {{ align-self: start; justify-self: end; min-width: 1.35in; padding: 11px 12px; border: 1px solid rgba(255,255,255,0.32); border-radius: 9px; background: rgba(255,255,255,0.12); text-align: center; }}\n        .overall .label {{ display: block; color: #d8e8ec; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }}\n        .overall .value {{ display: block; margin-top: 4px; color: #ffffff; font-size: 16px; font-weight: 800; }}\n        .content {{ padding: 18px 26px 24px; }}\n        .meta-grid {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }}\n        .field, .note-box {{ border: 1px solid #cbd9df; border-radius: 7px; background: #f7fafb; }}\n        .field {{ min-height: 46px; padding: 8px 9px; }}\n        .label {{ display: block; margin-bottom: 4px; color: #52666f; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }}\n        .value {{ color: #13252d; font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }}\n        .hardware-grid {{ display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 0; margin: 0 0 11px; padding: 8px 10px; border: 1px solid #cbd9df; border-radius: 7px; background: #fbfcfd; }}\n        .hardware-row {{ display: grid; grid-template-columns: 0.72in 1fr; gap: 8px; min-height: 24px; align-items: baseline; padding: 3px 0; border-bottom: 1px solid #e2eaed; }}\n        .hardware-row:nth-last-child(-n+2) {{ border-bottom: 0; }}\n        .hardware-row .label {{ margin: 0; font-size: 9px; }}\n        .hardware-row .value {{ font-size: 11px; font-weight: 700; line-height: 1.25; }}\n        .section-title {{ margin: 15px 0 7px; color: #18333d; font-size: 13px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }}\n        table {{ width: 100%; border-collapse: collapse; table-layout: fixed; }}\n        .qa-table th {{ padding: 8px; color: #ffffff; background: #244f5c; border: 1px solid #244f5c; font-size: 10px; letter-spacing: 0.06em; text-align: left; text-transform: uppercase; }}\n        .qa-table td {{ padding: 9px 8px; border: 1px solid #d7e1e5; vertical-align: middle; }}\n        .qa-table tr:nth-child(even) td {{ background: #f6f9fa; }}\n        .task {{ color: #13252d; font-weight: 800; }}\n        .status {{ display: inline-block; min-width: 0.82in; padding: 4px 7px; border-radius: 999px; font-size: 10px; font-weight: 900; text-align: center; text-transform: uppercase; }}\n        .status.pass {{ color: #0f5132; background: #d9f5e6; border: 1px solid #a9e6c1; }}\n        .status.fail {{ color: #842029; background: #fde2e4; border: 1px solid #f3b4bb; }}\n        .status.warning {{ color: #6b4d00; background: #fff2c2; border: 1px solid #f2d36b; }}\n        .status.progress {{ color: #614a00; background: #fff2c2; border: 1px solid #f2d36b; }}\n        .status.not-run {{ color: #465a62; background: #eef3f5; border: 1px solid #ccd8de; }}\n        .notes {{ display: grid; gap: 8px; margin-top: 8px; }}\n        .note-box {{ padding: 8px 9px; background: #fbfcfd; }}\n        .note-value {{ min-height: 52px; padding: 4px 0 2px; color: #13252d; font-size: 12px; font-weight: 650; white-space: pre-wrap; overflow-wrap: anywhere; outline: none; }}\n        .note-value.tall {{ min-height: 78px; }}\n        .footer {{ display: flex; justify-content: space-between; margin-top: 12px; padding-top: 8px; border-top: 1px solid #d7e1e5; color: #60757e; font-size: 9.5px; }}\n        @media print {{ body {{ background: #ffffff; }} .print-action {{ display: none; }} .sheet {{ width: auto; min-height: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }} .content {{ padding-bottom: 0; }} .qa-table tr, .field, .note-box {{ break-inside: avoid; }} }}\n    </style>\n</head>\n<body>\n    <main class=\"sheet\">\n        <header class=\"titlebar\">\n            <div><h1>Laptop QA Testing</h1></div>\n            <div class=\"overall\"><span class=\"label\">Overall</span><span class=\"value {value}\">{H(text7)}</span></div>\n        </header>\n        <section class=\"content\">\n            <div class=\"meta-grid\">\n                <div class=\"field\"><span class=\"label\">Computer</span><span class=\"value\">{H(Environment.MachineName)}</span></div>\n                <div class=\"field\"><span class=\"label\">Technician</span><span class=\"value\">{H(_config.TechnicianName)}</span></div>\n                <div class=\"field\"><span class=\"label\">Date</span><span class=\"value\">{H(now.ToString("yyyy-MM-dd HH:mm"))}</span></div>\n                <div class=\"field\"><span class=\"label\">Manufacturer</span><span class=\"value\">{H(_hardware.Manufacturer)}</span></div>\n                <div class=\"field\"><span class=\"label\">Model</span><span class=\"value\">{H(_hardware.Model)}</span></div>\n                <div class=\"field\"><span class=\"label\">Service Tag</span><span class=\"value\">{H(_serviceTag)}</span></div>\n                <div class=\"field\"><span class=\"label\">Asset Number</span><span class=\"value\">{H(_assetTag)}</span></div>\n                <div class=\"field\"><span class=\"label\">Warranty</span><span class=\"value\">{H(value3)}</span></div>\n            </div>\n            <div class=\"section-title\">Hardware Specs</div>\n            <div class=\"hardware-grid\">\n                <div class=\"hardware-row\"><span class=\"label\">CPU</span><span class=\"value\">{H(_hardware.Cpu)}</span></div>\n                <div class=\"hardware-row\"><span class=\"label\">Memory</span><span class=\"value\">{H(ValueOrFallback(_hardware.Memory, _hardware.PhysicalMemory))}</span></div>\n                <div class=\"hardware-row\"><span class=\"label\">GPU</span><span class=\"value\">{H(_hardware.Gpu)}</span></div>\n                <div class=\"hardware-row\"><span class=\"label\">Storage</span><span class=\"value\">{H(_hardware.Storage)}</span></div>\n            </div>\n            <div class=\"section-title\">QA Results</div>\n            <table class=\"qa-table\">\n                <colgroup><col style=\"width: 3.24in;\"><col style=\"width: 1.02in;\"><col></colgroup>\n                <thead><tr><th>Task</th><th>Status</th><th>Detail</th></tr></thead>\n                <tbody>\n{value2}\n                </tbody>\n            </table>\n            <div class=\"section-title\">Notes</div>\n            <div class=\"notes\">\n                <div class=\"note-box\"><span class=\"label\">RMA Issues</span><div class=\"note-value\" contenteditable=\"true\">{H(RmaIssueBox.Text.Trim())}</div></div>\n                <div class=\"note-box\"><span class=\"label\">Repair Notes</span><div class=\"note-value tall\" contenteditable=\"true\">{H(RepairNotesBox.Text.Trim())}</div></div>\n            </div>\n            <div class=\"footer\">\n                <span>Generated: {H(now.ToString("yyyy-MM-dd HH:mm:ss"))}</span>\n            </div>\n        </section>\n    </main>\n    <script>\n        const serviceNowRequestUrl = {value5};\n        const serviceNowRequestDescription = {value4};\n\n        function copyTextToClipboard(text) {{\n            const textarea = document.createElement('textarea');\n            textarea.value = text;\n            textarea.setAttribute('readonly', '');\n            textarea.style.position = 'fixed';\n            textarea.style.left = '-9999px';\n            textarea.style.top = '0';\n            document.body.appendChild(textarea);\n            textarea.focus();\n            textarea.select();\n\n            let copied = false;\n            try {{\n                copied = document.execCommand('copy');\n            }} finally {{\n                document.body.removeChild(textarea);\n            }}\n\n            return copied;\n        }}\n\n        function openServiceNowRequest() {{\n            copyTextToClipboard(serviceNowRequestDescription);\n            window.open(serviceNowRequestUrl, \"_blank\", \"noopener\");\n        }}\n    </script>\n</body>\n</html>";

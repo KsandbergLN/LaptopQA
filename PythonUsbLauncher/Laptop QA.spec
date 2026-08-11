@@ -1,8 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
 
 a = Analysis(
-    ['D:\\V2\\V4\\PythonUsbLauncher\\laptop_qa_usb_launcher.py'],
+    [os.path.join(SPECPATH, 'laptop_qa_usb_launcher.py')],
     pathex=[],
     binaries=[],
     datas=[],
@@ -35,5 +36,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['D:\\V2\\V4\\assets\\app-icon.ico'],
+    icon=[os.path.join(SPECPATH, '..', 'assets', 'app-icon.ico')],
 )

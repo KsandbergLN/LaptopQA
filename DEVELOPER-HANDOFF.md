@@ -2,23 +2,23 @@
 
 Last reviewed: 2026-08-11
 
-> **Canonical-source marker:** `CANONICAL-SOURCE.md` and `D:\LaptopQA\SOURCE-OF-TRUTH.md` are authoritative. Historical version numbers do not override them.
+> **Canonical-source marker:** `CANONICAL-SOURCE.md` is authoritative. Historical version numbers do not override it.
 
 ## Source of truth
 
-Use `D:\LaptopQA\V4` for current development. It contains the newest maintained C# and XAML files and builds as `LaptopQATestingV4`.
+Use this repository root for current development. It contains the newest maintained C# and XAML files and builds as `LaptopQATestingV4`.
 
 Do not edit these as source:
 
 - `bin`, `obj`, and `dist`: generated build/package output.
-- `C:\V2`: historical PowerShell V2 files, recovery copies, and verification artifacts.
-- `D:\LaptopQA\V5`: an older branch despite its higher version number. The shared maintenance guide predates the latest V4 work.
+- Separately stored V2 workspaces: historical PowerShell files, recovery copies, and verification artifacts.
+- The archived V5 folder outside this repository: an older branch despite its higher version number.
 
-The canonical source and its shared/root dependencies are maintained in the private repository rooted at `D:\LaptopQA`. Generated output and historical alternatives are excluded. Use reviewed branches; do not edit historical folders directly.
+The canonical source and its shared dependencies are maintained in this repository. Generated output and historical alternatives are excluded. Use reviewed branches; do not edit historical folders directly.
 
 ## Build and smoke check
 
-Run from `D:\LaptopQA\V4`:
+Run from the repository root:
 
 ```powershell
 dotnet build .\LaptopQATestingV4.csproj -c Release
@@ -41,8 +41,19 @@ The application is Windows-only (`net10.0-windows`, WPF) and several workflows r
 | Hardware models/UI | `HardwareSnapshot.cs`, `HardwareWindow.cs` | Collected device data and hardware drawer/window. |
 | Diagnostics/report UI | `DiagnosticsResult.cs`, `QaSheetFiles.cs`, `QaSheetImageWindow.cs` | Diagnostics results and QA sheet display/output. |
 | Keyboard test | `KeyboardTesterWindow.cs` | Standalone keyboard tester window. |
-| Localization | `LanguageCatalog.cs`, `WpfLocalization.cs`, `..\Shared\UiLocalization.cs`, `..\Shared\ui-translations.json` | Culture selection and translated UI strings. Shared files are linked by the project file. |
+| Localization | `LanguageCatalog.cs`, `WpfLocalization.cs`, `Shared\UiLocalization.cs`, `Shared\ui-translations.json` | Culture selection and translated UI strings. Shared files are linked by the project file. |
 | Packaging | `Build-LaptopQAIteration.ps1`, `Launcher` | Produces portable output and launcher behavior. |
+
+## Warranty Date Behavior
+
+Warranty lookup remains separate from warranty status display. Keep the stored warranty value as the plain expiration date, such as `2029-06-18`; do not persist the visual status marker with the date.
+
+When rendering the app header or QA sheet, `MainWindow.xaml.cs` adds:
+
+- `✓` when the expiration date is today or later.
+- `X` when the expiration date is before today or unavailable.
+
+The comparison date is pulled from network HTTP `Date` headers first, using Microsoft/Bing/Dell endpoints. If network date lookup fails, the app falls back to the local Windows system clock. This matters in OOBE because the Windows clock is available but can be wrong before time sync.
 
 ## MainWindow navigation labels
 
