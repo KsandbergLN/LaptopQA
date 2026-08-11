@@ -31,6 +31,21 @@ dotnet build .\macos\LaptopQATestingMac.csproj -c Release --no-incremental
 
 The Windows project explicitly excludes `macos\**\*.cs`; do not remove that boundary or add macOS files to the Windows project. The current Windows validation target is 0 warnings and 0 errors. The macOS project currently has 24 Avalonia/Skia deprecation warnings and 0 errors.
 
+## Quick start
+
+Clone the private repository, then run the Windows app after building:
+
+```powershell
+git clone https://github.com/KsandbergLN/LaptopQA.git
+Set-Location .\LaptopQA
+dotnet build .\LaptopQATestingV4.csproj -c Release
+Start-Process .\bin\Release\net10.0-windows\LaptopQATestingV4.exe
+```
+
+For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.
+
+Technicians should use [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). Developers and maintainers should start with [`DEVELOPER-HANDOFF.md`](DEVELOPER-HANDOFF.md).
+
 ## Where to make changes
 
 - `MainWindow.xaml` and `MainWindow.xaml.cs` — Windows shell and core workflow.
