@@ -46,18 +46,14 @@ if (-not $isWindowsPlatform) {
     exit 0
 }
 
-$isInsideAppFolder = (Test-Path -LiteralPath (Join-Path $scriptFolder 'LaptopQATestingV4.exe') -PathType Leaf) -or
-    (Test-Path -LiteralPath (Join-Path $scriptFolder 'LaptopQATestingV5.exe') -PathType Leaf)
+$isInsideAppFolder = Test-Path -LiteralPath (Join-Path $scriptFolder 'LaptopQATestingV4.exe') -PathType Leaf
 $nestedAppFolder = Join-Path $scriptFolder 'App'
-$isContainerFolder = (Test-Path -LiteralPath (Join-Path $nestedAppFolder 'LaptopQATestingV4.exe') -PathType Leaf) -or
-    (Test-Path -LiteralPath (Join-Path $nestedAppFolder 'LaptopQATestingV5.exe') -PathType Leaf)
+$isContainerFolder = Test-Path -LiteralPath (Join-Path $nestedAppFolder 'LaptopQATestingV4.exe') -PathType Leaf
 $packageRoot = if ($isInsideAppFolder) { Split-Path -Parent $scriptFolder } else { $scriptFolder }
 $sourceApp = if ($isInsideAppFolder) {
     $scriptFolder
 } elseif ($isContainerFolder) {
     $nestedAppFolder
-} elseif (Test-Path -LiteralPath (Join-Path $packageRoot 'LAPTOP QA\App\LaptopQATestingV5.exe') -PathType Leaf) {
-    Join-Path $packageRoot 'LAPTOP QA\App'
 } elseif (Test-Path -LiteralPath (Join-Path $packageRoot 'LAPTOP QA\App\LaptopQATestingV4.exe') -PathType Leaf) {
     Join-Path $packageRoot 'LAPTOP QA\App'
 } else {
@@ -117,8 +113,7 @@ function Copy-AppFolder {
     )
 
     $localExeCandidates = @(
-        (Join-Path $Destination 'LaptopQATestingV4.exe'),
-        (Join-Path $Destination 'LaptopQATestingV5.exe')
+        (Join-Path $Destination 'LaptopQATestingV4.exe')
     )
     $existingLocalExe = $localExeCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     if ($existingLocalExe) {
@@ -275,17 +270,10 @@ try {
         throw "The LAPTOP QA folder was not found next to this start script.`n`nExpected:`n$sourceApp"
     }
 
-    $version = if (Test-Path -LiteralPath (Join-Path $sourceApp 'LaptopQATestingV5.exe')) {
-        'V5'
+    $exeName = 'LaptopQATestingV4.exe'
+    if (-not (Test-Path -LiteralPath (Join-Path $sourceApp $exeName) -PathType Leaf)) {
+        throw "Could not find $exeName inside:`n$sourceApp"
     }
-    elseif (Test-Path -LiteralPath (Join-Path $sourceApp 'LaptopQATestingV4.exe')) {
-        'V4'
-    }
-    else {
-        throw "Could not find LaptopQATestingV4.exe or LaptopQATestingV5.exe inside:`n$sourceApp"
-    }
-
-    $exeName = if ($version -eq 'V5') { 'LaptopQATestingV5.exe' } else { 'LaptopQATestingV4.exe' }
     $sourceExe = Join-Path $sourceApp $exeName
     $sourceStampFile = Join-Path $sourceApp ($exeName -replace '\.exe$', '.dll')
     if (-not (Test-Path -LiteralPath $sourceStampFile)) {

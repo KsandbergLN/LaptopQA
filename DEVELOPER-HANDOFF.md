@@ -12,7 +12,6 @@ Do not edit these as source:
 
 - `bin`, `obj`, and `dist`: generated build/package output.
 - Separately stored V2 workspaces: historical PowerShell files, recovery copies, and verification artifacts.
-- The archived V5 folder outside this repository: an older branch despite its higher version number.
 
 The canonical source and its shared dependencies are maintained in this repository. Generated output and historical alternatives are excluded. Use reviewed branches; do not edit historical folders directly.
 

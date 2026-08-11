@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <Title>Laptop QA</Title>
+    <Product>Laptop QA</Product>
+    <Description>Laptop QA</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.0" />
+    <PackageReference Include="SkiaSharp" Version="3.119.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/**" />
+    <EmbeddedResource Include="..\Shared\loading-jokes.txt" LogicalName="LaptopQATestingMac.Assets.loading-jokes.txt" />
+    <EmbeddedResource Include="..\Shared\ui-translations.json" LogicalName="LaptopQA.ui-translations.json" Condition="Exists('..\Shared\ui-translations.json')" />
+    <Compile Include="..\Shared\UiLocalization.cs" Link="UiLocalization.cs" />
+  </ItemGroup>
+</Project>

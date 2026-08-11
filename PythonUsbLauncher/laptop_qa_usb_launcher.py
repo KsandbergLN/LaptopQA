@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 
-APP_EXES = ("LaptopQATestingV5.exe", "LaptopQATestingV4.exe")
+APP_EXES = ("LaptopQATestingV4.exe",)
 MUTABLE_ITEMS = ("Laptop-QA-Config.json", ".runtime", "hardware", "hash", "logs", "QA sheets")
 
 
@@ -48,10 +48,7 @@ def find_app_exe(app_dir: Path) -> Path:
 
 
 def version_from_exe(exe: Path) -> str:
-    name = exe.name.lower()
-    if "v5" in name:
-        return "V5"
-    return "V4"
+    return "LaptopQA"
 
 
 def safe_stamp(exe: Path) -> str:
