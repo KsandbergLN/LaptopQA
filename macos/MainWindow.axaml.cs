@@ -10,9 +10,9 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using LaptopQA.Shared;
-using LaptopQATestingMac.Services;
+using LaptopQA.Mac.Services;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public sealed partial class MainWindow : Window
 {

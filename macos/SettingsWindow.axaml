@@ -1,6 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="LaptopQATestingMac.SettingsWindow"
+        x:Class="LaptopQA.Mac.SettingsWindow"
         Title="Config" Width="780" Height="760" MinWidth="700" MinHeight="620"
         WindowStartupLocation="CenterOwner">
   <Window.Resources>
@@ -28,7 +28,7 @@
     <Style Selector="ToolTip"><Setter Property="Background" Value="{DynamicResource ConfigToolTipBrush}"/><Setter Property="Foreground" Value="{DynamicResource ConfigTextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigStrokeBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="8"/><Setter Property="Padding" Value="10,6"/></Style>
   </Window.Styles>
   <Grid x:Name="ConfigShell" Background="{DynamicResource ConfigShellBrush}" RowDefinitions="Auto,*,Auto">
-    <StackPanel Margin="28,22,28,12"><TextBlock Text="Config" FontSize="26" FontWeight="Bold"/><TextBlock Text="Settings are shared with Laptop QA V4 so both apps use the same saved configuration." Foreground="{DynamicResource ConfigMutedBrush}" TextWrapping="Wrap"/></StackPanel>
+    <StackPanel Margin="28,22,28,12"><TextBlock Text="Config" FontSize="26" FontWeight="Bold"/><TextBlock Text="Settings are shared with Laptop QA so both apps use the same saved configuration." Foreground="{DynamicResource ConfigMutedBrush}" TextWrapping="Wrap"/></StackPanel>
     <ScrollViewer Grid.Row="1" Margin="28,0">
       <StackPanel>
         <Grid ColumnDefinitions="2*,16,1.35*,16,1*">

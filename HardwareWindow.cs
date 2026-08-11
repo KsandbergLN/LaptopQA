@@ -8,7 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed class HardwareWindow : Window
 {
@@ -231,7 +231,7 @@ public sealed class HardwareWindow : Window
 			FontWeight = FontWeights.Bold,
 			Cursor = Cursors.Hand,
 			Padding = new Thickness(0.0),
-			Template = V4ButtonChrome.RoundedTemplate()
+			Template = ButtonChrome.RoundedTemplate()
 		};
 	}
 

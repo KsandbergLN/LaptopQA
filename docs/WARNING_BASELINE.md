@@ -11,5 +11,5 @@ The corrected warnings were nullable-flow findings across hardware UI, keyboard 
 Verification command:
 
 ```powershell
-dotnet build .\LaptopQATestingV4.csproj -c Release --no-incremental
+dotnet build .\LaptopQA.Windows.csproj -c Release --no-incremental
 ```

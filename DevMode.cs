@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 public struct DevMode

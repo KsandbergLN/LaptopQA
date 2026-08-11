@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed record AppLanguage(string Code, string Name)
 {

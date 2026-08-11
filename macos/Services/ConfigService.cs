@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace LaptopQATestingMac.Services;
+namespace LaptopQA.Mac.Services;
 
 public sealed class ConfigService
 {

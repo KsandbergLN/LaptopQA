@@ -4,7 +4,7 @@ This guide is for technicians using the supported Windows app and macOS companio
 
 ## Windows workflow
 
-1. Start `LaptopQATestingV4.exe` from the approved package or use the provided launcher.
+1. Start `LaptopQA.Windows.exe` from the approved package or use the provided launcher.
 2. Enter or confirm the technician name and review the device identity.
 3. Run the displayed QA steps: battery, BIOS, diagnostics, camera/audio, display, keyboard, USB ports, storage, and other device-specific checks.
 4. For USB testing, follow the on-screen port indicators and move a readable test drive between the requested physical ports. Do not count a dock as a laptop port unless the workflow says to do so.

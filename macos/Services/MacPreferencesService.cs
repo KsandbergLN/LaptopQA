@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace LaptopQATestingMac.Services;
+namespace LaptopQA.Mac.Services;
 
 public static class MacPreferencesService
 {

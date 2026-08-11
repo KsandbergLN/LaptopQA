@@ -34,7 +34,7 @@ foreach ($entry in $manifest.Files) {
 
 $handoffRoot = $PSScriptRoot
 $appFolder = Join-Path $package 'LAPTOP QA\App'
-$sourceExe = Join-Path $appFolder 'LaptopQATestingV4.exe'
+$sourceExe = Join-Path $appFolder 'LaptopQA.Windows.exe'
 $silentLauncher = Join-Path $package 'Windows Laptop QA Launcher.vbs'
 $driveMarker = Join-Path $package 'Laptop-QA-Drive.json'
 $results = @()
@@ -61,7 +61,7 @@ if ($RemovableDrives) {
         ForEach-Object {
             $targetRoot = Join-Path $_.RootDirectory.FullName 'LAPTOP QA'
             $targetApp = Join-Path $targetRoot 'App'
-            $targetExe = Join-Path $targetApp 'LaptopQATestingV4.exe'
+            $targetExe = Join-Path $targetApp 'LaptopQA.Windows.exe'
             if (Test-Path -LiteralPath $targetExe -PathType Leaf) {
                 [pscustomobject]@{
                     DriveRoot = $_.RootDirectory.FullName

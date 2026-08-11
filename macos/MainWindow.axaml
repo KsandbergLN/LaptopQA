@@ -1,8 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="LaptopQATestingMac.MainWindow" Title="Laptop QA Testing" Width="1280" Height="720"
+        x:Class="LaptopQA.Mac.MainWindow" Title="Laptop QA Testing" Width="1280" Height="720"
         MinWidth="960" MinHeight="540" CanResize="False" WindowDecorations="None" WindowStartupLocation="CenterScreen"
         Background="Transparent" TransparencyLevelHint="Transparent"
-        Icon="avares://LaptopQATestingMac/Assets/app-icon.png">
+        Icon="avares://LaptopQA.Mac/Assets/app-icon.png">
   <Window.Resources>
     <SolidColorBrush x:Key="TextBrush" Color="#06141B"/><SolidColorBrush x:Key="MutedBrush" Color="#1D323C"/>
     <SolidColorBrush x:Key="AccentBrush" Color="#004F4A"/><SolidColorBrush x:Key="PanelBrush" Color="#FFFFFFFF"/>

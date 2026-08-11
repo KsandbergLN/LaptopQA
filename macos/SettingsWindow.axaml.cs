@@ -6,7 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public sealed record SettingsResult(AppConfig Config, bool FactoryReset);
 

@@ -1,10 +1,10 @@
 using Avalonia;
 using LaptopQA.Shared;
-using LaptopQATestingMac.Services;
+using LaptopQA.Mac.Services;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 internal static class Program
 {

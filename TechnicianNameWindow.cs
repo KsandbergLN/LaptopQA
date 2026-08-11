@@ -4,7 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed class TechnicianNameWindow : Window
 {
@@ -67,7 +67,7 @@ public sealed class TechnicianNameWindow : Window
 			Height = 34.0,
 			FontWeight = FontWeights.Bold,
 			IsDefault = true,
-			Template = V4ButtonChrome.RoundedTemplate()
+			Template = ButtonChrome.RoundedTemplate()
 		};
 		button.Click += delegate
 		{

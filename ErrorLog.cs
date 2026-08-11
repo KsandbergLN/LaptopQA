@@ -1,7 +1,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 internal static class ErrorLog
 {

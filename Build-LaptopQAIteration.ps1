@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$project = Join-Path $projectDir 'LaptopQATestingV4.csproj'
+$project = Join-Path $projectDir 'LaptopQA.Windows.csproj'
 $dist = Join-Path $projectDir 'dist'
 $packageName = "LaptopQA-Iteration-$Stamp"
 $stagingRoot = Join-Path $dist '.staging'
@@ -86,7 +86,7 @@ try {
     }
 
     $requiredFiles = @(
-        (Join-Path $appFolder 'LaptopQATestingV4.exe'),
+        (Join-Path $appFolder 'LaptopQA.Windows.exe'),
         $packageConfig,
         $startScriptTarget,
         $silentLauncherTarget,
@@ -121,7 +121,7 @@ try {
     $manifest = [ordered]@{
         SchemaVersion = 1
         PackageName = $packageName
-        Product = 'LaptopQATestingV4'
+        Product = 'LaptopQA.Windows'
         Runtime = 'win-x64'
         CreatedUtc = (Get-Date).ToUniversalTime().ToString('o')
         SourceCommit = $sourceCommit

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public sealed class AppConfig
 {

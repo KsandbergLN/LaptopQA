@@ -13,13 +13,13 @@ $results = @()
 foreach ($folder in Get-ChildItem -LiteralPath $dist -Directory |
     Where-Object { $_.Name -notin @('quarantine', '.staging') } |
     Sort-Object LastWriteTime -Descending) {
-    $appExe = Join-Path $folder.FullName 'LAPTOP QA\App\LaptopQATestingV4.exe'
+    $appExe = Join-Path $folder.FullName 'LAPTOP QA\App\LaptopQA.Windows.exe'
     $hasConfig = (Test-Path -LiteralPath (Join-Path $folder.FullName 'LAPTOP QA\Laptop-QA-Config.json') -PathType Leaf) -or
         (Test-Path -LiteralPath (Join-Path $folder.FullName 'LAPTOP QA\App\Laptop-QA-Config.json') -PathType Leaf)
     $hasLauncher = (Test-Path -LiteralPath (Join-Path $folder.FullName 'Windows Laptop QA Launcher.vbs') -PathType Leaf) -or
         (Test-Path -LiteralPath (Join-Path $folder.FullName 'Laptop QA.vbs') -PathType Leaf)
     $missing = @()
-    if (-not (Test-Path -LiteralPath $appExe -PathType Leaf)) { $missing += 'LaptopQATestingV4.exe' }
+    if (-not (Test-Path -LiteralPath $appExe -PathType Leaf)) { $missing += 'LaptopQA.Windows.exe' }
     if (-not $hasConfig) { $missing += 'Laptop-QA-Config.json' }
     if (-not $hasLauncher) { $missing += 'launcher' }
     $manifestPath = Join-Path $folder.FullName 'package-manifest.json'

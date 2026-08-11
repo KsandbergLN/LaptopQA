@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed record ExternalDisplaySnapshot(int ActiveDisplayCount, IReadOnlyList<ExternalDisplayInfo> Displays)
 {

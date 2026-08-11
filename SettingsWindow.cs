@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using Microsoft.Win32;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed class SettingsWindow : Window
 {
@@ -504,7 +504,7 @@ public sealed class SettingsWindow : Window
 			FontWeight = FontWeights.Bold,
 			BorderThickness = new Thickness(0.0),
 			Cursor = Cursors.Hand,
-			Template = V4ButtonChrome.RoundedTemplate()
+			Template = ButtonChrome.RoundedTemplate()
 		};
 	}
 

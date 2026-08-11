@@ -31,7 +31,7 @@ using System.Windows.Threading;
 using LaptopQA.Shared;
 using Microsoft.Win32;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public partial class MainWindow : Window, IComponentConnector
 {
@@ -359,7 +359,7 @@ public partial class MainWindow : Window, IComponentConnector
 		await SetStartupSplashStatusAsync(NextStartupJokeForLaunch());
 		PromptForTechnicianNameIfNeeded();
 		HeaderTechnician.Text = L(string.IsNullOrWhiteSpace(_config.TechnicianName) ? "Technician: not set" : ("Technician: " + _config.TechnicianName));
-		AddActivity("System", "Laptop QA Testing V4 started.");
+		AddActivity("System", "Laptop QA Testing  started.");
 		AddActivity("System", "App folder ready: " + _appRoot);
 		AddActivity("System", "Data folder ready: " + _dataRoot);
 		CleanupOldFiles(HashDir, 90, "Hash", "hash file(s)");
@@ -1691,7 +1691,7 @@ public partial class MainWindow : Window, IComponentConnector
 		try
 		{
 			string text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Laptop QA");
-			string path = Path.Combine(text, "V4");
+			string path = Path.Combine(text, "");
 			string currentLocalStageRoot = GetCurrentLocalStageRoot(text);
 			if (!string.IsNullOrWhiteSpace(currentLocalStageRoot))
 			{
@@ -2560,7 +2560,7 @@ public partial class MainWindow : Window, IComponentConnector
 			BorderThickness = new Thickness(1.0),
 			FontWeight = FontWeights.SemiBold,
 			Padding = new Thickness(10.0, 6.0, 10.0, 6.0),
-			Template = V4ButtonChrome.RoundedTemplate(),
+			Template = ButtonChrome.RoundedTemplate(),
 			IsCancel = true,
 			Margin = new Thickness(0.0, 0.0, 10.0, 0.0)
 		};
@@ -2574,7 +2574,7 @@ public partial class MainWindow : Window, IComponentConnector
 			BorderThickness = new Thickness(0.0),
 			FontWeight = FontWeights.SemiBold,
 			Padding = new Thickness(10.0, 6.0, 10.0, 6.0),
-			Template = V4ButtonChrome.RoundedTemplate(),
+			Template = ButtonChrome.RoundedTemplate(),
 			IsDefault = true
 		};
 		button.Click += delegate

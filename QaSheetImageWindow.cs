@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Xps;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed class QaSheetImageWindow : Window
 {
@@ -165,7 +165,7 @@ public sealed class QaSheetImageWindow : Window
 			Foreground = BrushFromHex(flag ? "#102633" : (flag2 ? "#F4F4F4" : "#F3F7F8")),
 			Cursor = Cursors.Hand,
 			ToolTip = "Close QA sheet preview",
-			Template = V4ButtonChrome.RoundedTemplate()
+			Template = ButtonChrome.RoundedTemplate()
 		};
 		button2.Click += delegate
 		{
