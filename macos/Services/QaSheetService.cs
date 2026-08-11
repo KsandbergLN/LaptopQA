@@ -70,7 +70,7 @@ public static class QaSheetService
         {
             (T("Device Name"), Identifier(d)), (T("Technician"), d.Config.TechnicianName), (T("Date"), DateTime.Now.ToString("g")),
             (T("Manufacturer"), d.Hardware.Manufacturer), (T("Model"), d.Hardware.Model), (T("Service Tag"), d.Hardware.SerialNumber),
-            (T("Asset Number"), d.Hardware.AssetTag), (T("Warranty"), d.Hardware.Warranty)
+            (T("Asset Number"), d.Hardware.AssetTag), (T("Warranty"), WarrantyDisplayText(d.Hardware.Warranty))
         };
         var cellWidth = 360f;
         for (var i = 0; i < meta.Length; i++)
@@ -164,6 +164,21 @@ public static class QaSheetService
 
     private static string BatteryState(string? value) =>
         string.IsNullOrWhiteSpace(value) || value.Contains("unavailable", StringComparison.OrdinalIgnoreCase) ? "Waiting" : "Ok";
+
+    private static string WarrantyDisplayText(string? warrantyText)
+    {
+        if (string.IsNullOrWhiteSpace(warrantyText)) return "unavailable X";
+        var trimmed = warrantyText.Trim();
+        return trimmed + (IsWarrantyCurrent(trimmed) ? " \u2713" : " X");
+    }
+
+    private static bool IsWarrantyCurrent(string warrantyText)
+    {
+        var formats = new[] { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "M/d/yy", "MM/dd/yy" };
+        return DateTime.TryParseExact(warrantyText.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
+               ? date.Date >= DateTime.Today
+               : DateTime.TryParse(warrantyText, out date) && date.Date >= DateTime.Today;
+    }
 
     private static RowData Check(string number, string task, bool value, string languageCode) =>
         new(number, UiLocalization.Text(languageCode, task), value ? "Ok" : "Waiting",

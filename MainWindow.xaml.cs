@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -791,12 +791,12 @@ public partial class MainWindow : Window, IComponentConnector
 	{
 		return state switch
 		{
-			"Ok" => BrushFromHex((_currentTheme == "Light") ? "#12633D" : ((_currentTheme == "AMOLED") ? "#E0E0E0" : "#A7F3D0")), 
-			"Bad" => BrushFromHex((_currentTheme == "Light") ? "#9B3036" : ((_currentTheme == "AMOLED") ? "#A8A8A8" : "#FCA5A5")), 
-			"Ignored" => BrushFromHex((_currentTheme == "Light") ? "#52666F" : ((_currentTheme == "AMOLED") ? "#BDBDBD" : "#B9C7CB")), 
-			"Warning" => BrushFromHex((_currentTheme == "Light") ? "#8A5B00" : ((_currentTheme == "AMOLED") ? "#C8C8C8" : "#F2C75B")), 
-			"Working" => BrushFromHex((_currentTheme == "Light") ? "#102D39" : ((_currentTheme == "AMOLED") ? "#D0D0D0" : "#5EEAD4")), 
-			_ => (Brush)FindResource("MutedBrush"), 
+			"Ok" => BrushFromHex((_currentTheme == "Light") ? "#12633D" : ((_currentTheme == "AMOLED") ? "#E0E0E0" : "#A7F3D0")),
+			"Bad" => BrushFromHex((_currentTheme == "Light") ? "#9B3036" : ((_currentTheme == "AMOLED") ? "#A8A8A8" : "#FCA5A5")),
+			"Ignored" => BrushFromHex((_currentTheme == "Light") ? "#52666F" : ((_currentTheme == "AMOLED") ? "#BDBDBD" : "#B9C7CB")),
+			"Warning" => BrushFromHex((_currentTheme == "Light") ? "#8A5B00" : ((_currentTheme == "AMOLED") ? "#C8C8C8" : "#F2C75B")),
+			"Working" => BrushFromHex((_currentTheme == "Light") ? "#102D39" : ((_currentTheme == "AMOLED") ? "#D0D0D0" : "#5EEAD4")),
+			_ => (Brush)FindResource("MutedBrush"),
 		};
 	}
 
@@ -804,10 +804,10 @@ public partial class MainWindow : Window, IComponentConnector
 	{
 		return state switch
 		{
-			"Ok" => BrushFromHex("#12633D"), 
-			"Bad" => BrushFromHex("#9B3036"), 
-			"Working" => BrushFromHex((_currentTheme == "Light") ? "#2F6F68" : ((_currentTheme == "AMOLED") ? "#707070" : "#5EEAD4")), 
-			_ => (Brush)FindResource("PrimaryButtonBrush"), 
+			"Ok" => BrushFromHex("#12633D"),
+			"Bad" => BrushFromHex("#9B3036"),
+			"Working" => BrushFromHex((_currentTheme == "Light") ? "#2F6F68" : ((_currentTheme == "AMOLED") ? "#707070" : "#5EEAD4")),
+			_ => (Brush)FindResource("PrimaryButtonBrush"),
 		};
 	}
 
@@ -1089,14 +1089,14 @@ public partial class MainWindow : Window, IComponentConnector
 		HeaderBattery.Text = L(_batterySummary);
 		var (filled, text) = _batteryHealthRating switch
 		{
-			"Excellent" => (4, "#22C55E"), 
-			"Good" => (3, "#EAB308"), 
-			"Fair" => (2, "#F97316"), 
-			"Poor" => (1, "#EF4444"), 
-			_ => (0, ""), 
+			"Excellent" => (4, "#22C55E"),
+			"Good" => (3, "#EAB308"),
+			"Fair" => (2, "#F97316"),
+			"Poor" => (1, "#EF4444"),
+			_ => (0, ""),
 		};
 		HeaderBatteryDots.Text = string.Concat(from index in Enumerable.Range(0, 4)
-			select (index >= filled) ? "○" : "●");
+			select (index >= filled) ? "\u25CB" : "\u25CF");
 		HeaderBatteryDots.Foreground = (string.IsNullOrWhiteSpace(text) ? ((Brush)FindResource("MutedBrush")) : BrushFromHex(text));
 		Match match = Regex.Match(_batterySummary, "(?<percent>\\d{1,3})\\s*%");
 		string text2 = (match.Success ? (" Windows capacity health: " + match.Groups["percent"].Value + "%.") : "");
@@ -1979,11 +1979,17 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private string WarrantyDisplayText()
 	{
-		if (string.IsNullOrWhiteSpace(_warranty))
+		return WarrantyDisplayText(_warranty);
+	}
+
+	private string WarrantyDisplayText(string? warrantyText)
+	{
+		if (string.IsNullOrWhiteSpace(warrantyText))
 		{
-			return "X unavailable";
+			return "unavailable X";
 		}
-		return (IsWarrantyCurrent(_warranty) ? "✓ " : "X ") + _warranty;
+		string trimmed = warrantyText.Trim();
+		return trimmed + (IsWarrantyCurrent(trimmed) ? " \u2713" : " X");
 	}
 
 	private string WarrantyToolTipText()
@@ -3026,11 +3032,11 @@ $summaries = @(
 		TextBlock biosSecureBootIcon = BiosSecureBootIcon;
 		biosSecureBootIcon.Text = state switch
 		{
-			"Ok" => "✓", 
-			"Bad" => "✕", 
-			"Warning" => "⚠", 
-			"Working" => "...", 
-			_ => "-", 
+			"Ok" => "\u2713",
+			"Bad" => "\u2715",
+			"Warning" => "\u26A0",
+			"Working" => "...",
+			_ => "-",
 		};
 		BiosSecureBootIcon.Foreground = StepBrush(state);
 	}
@@ -3069,12 +3075,12 @@ $summaries = @(
 		_details[key] = detailText;
 		icon.Text = state switch
 		{
-			"Ok" => "✓", 
-			"Bad" => "✕", 
-			"Ignored" => "⊘", 
-			"Warning" => "⚠", 
-			"Working" => "...", 
-			_ => "-", 
+			"Ok" => "\u2713",
+			"Bad" => "\u2715",
+			"Ignored" => "\u2298",
+			"Warning" => "\u26A0",
+			"Working" => "...",
+			_ => "-",
 		};
 		icon.Foreground = StepBrush(state);
 		main.Text = mainText;
@@ -3710,7 +3716,7 @@ $items = @(
 				(L("Model"), hardware.Model),
 				(L("Service Tag"), cache.ServiceTag),
 				(L("Asset Number"), cache.AssetTag),
-				(L("Warranty"), cache.Warranty ?? "")
+				(L("Warranty"), WarrantyDisplayText(cache.Warranty))
 			};
 			for (int num5 = 0; num5 < array2.Length; num5++)
 			{
@@ -3858,12 +3864,12 @@ $items = @(
 	{
 		var (text, hex, hex2, hex3) = state switch
 		{
-			"Ok" => ("PASS", "#0F5132", "#D9F5E6", "#A9E6C1"), 
-			"Bad" => ("FAIL", "#842029", "#FDE2E4", "#F3B4BB"), 
-			"Ignored" => ("IGNORED", "#465A62", "#EEF3F5", "#CCD8DE"), 
-			"Warning" => ("CAUTION", "#6B4D00", "#FFF2C2", "#F2D36B"), 
-			"Working" => ("IN PROGRESS", "#614A00", "#FFF2C2", "#F2D36B"), 
-			_ => ("NOT RUN", "#465A62", "#EEF3F5", "#CCD8DE"), 
+			"Ok" => ("PASS", "#0F5132", "#D9F5E6", "#A9E6C1"),
+			"Bad" => ("FAIL", "#842029", "#FDE2E4", "#F3B4BB"),
+			"Ignored" => ("IGNORED", "#465A62", "#EEF3F5", "#CCD8DE"),
+			"Warning" => ("CAUTION", "#6B4D00", "#FFF2C2", "#F2D36B"),
+			"Working" => ("IN PROGRESS", "#614A00", "#FFF2C2", "#F2D36B"),
+			_ => ("NOT RUN", "#465A62", "#EEF3F5", "#CCD8DE"),
 		};
 		dc.DrawRoundedRectangle(BrushFromHex(hex2), new Pen(BrushFromHex(hex3), 1.0), new Rect(x, y, width, height), 12.0, 12.0);
 		DrawQaText(dc, L(text), x, y + 5.0, width, 11.0, 9.5, BrushFromHex(hex), FontWeights.ExtraBold, TextAlignment.Center);
@@ -4471,15 +4477,7 @@ $items = @(
 		UsbPortIndicatorsPanel.Children.Clear();
 		if (_usbPorts.Count == 0)
 		{
-			UsbPortIndicatorsPanel.Children.Add(new TextBlock
-			{
-				Text = _qaLiveMonitoringActive ? "USB port count unavailable" : "Starts after Start New QA",
-				Foreground = (Brush)base.Resources["MutedBrush"],
-				FontSize = 11.5,
-				FontWeight = FontWeights.SemiBold,
-				VerticalAlignment = VerticalAlignment.Center,
-				Margin = new Thickness(4.0, 18.0, 0.0, 0.0)
-			});
+			UsbPortIndicatorsPanel.Children.Add(CreateUsbPortPromptCard());
 			return;
 		}
 		if (_usbPorts.Count != 0)
@@ -4508,7 +4506,7 @@ $items = @(
 				};
 				border.Child = new TextBlock
 				{
-					Text = usbPortCache.Label + " " + (usbPortCache.Passed ? "✓" : (usbPortCache.Failed ? "✕" : "—")),
+					Text = usbPortCache.Label + " " + (usbPortCache.Passed ? "\u2713" : (usbPortCache.Failed ? "\u2715" : "\u2014")),
 					Foreground = foreground,
 					FontSize = fontSize,
 					FontWeight = FontWeights.Bold,
@@ -4518,6 +4516,88 @@ $items = @(
 				UsbPortIndicatorsPanel.Children.Add(border);
 			}
 		}
+	}
+
+	private Border CreateUsbPortPromptCard()
+	{
+		bool liveMonitoringActive = _qaLiveMonitoringActive;
+		string title = liveMonitoringActive ? "USB ports unavailable" : "Ready after reset";
+		string detail = liveMonitoringActive
+			? "Port count was not detected. Use QA Sheet to finalize if needed."
+			: "Start New QA, then move a readable USB drive through each port.";
+		string status = liveMonitoringActive ? "Review" : "Waiting";
+		Brush accentBrush = liveMonitoringActive ? BrushFromHex("#FF9A9A") : (Brush)base.Resources["FinalCheckCheckedBoxBrush"];
+
+		Border card = new Border
+		{
+			Width = 348.0,
+			Height = 58.0,
+			CornerRadius = new CornerRadius(12.0),
+			BorderThickness = new Thickness(1.0),
+			BorderBrush = accentBrush,
+			Background = liveMonitoringActive ? BrushFromHex("#228A4646") : (Brush)base.Resources["FinalCheckUncheckedBrush"],
+			Padding = new Thickness(12.0, 7.0, 12.0, 7.0),
+			ToolTip = detail
+		};
+
+		Grid grid = new Grid();
+		grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) });
+		grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(62.0) });
+		grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+		grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+		TextBlock titleBlock = new TextBlock
+		{
+			Text = title,
+			Foreground = (Brush)base.Resources["TextBrush"],
+			FontSize = 12.0,
+			FontWeight = FontWeights.Bold,
+			VerticalAlignment = VerticalAlignment.Center,
+			TextTrimming = TextTrimming.CharacterEllipsis
+		};
+		Grid.SetColumn(titleBlock, 0);
+		Grid.SetRow(titleBlock, 0);
+		grid.Children.Add(titleBlock);
+
+		Border pill = new Border
+		{
+			CornerRadius = new CornerRadius(9.0),
+			Background = accentBrush,
+			Width = 54.0,
+			Padding = new Thickness(4.0, 2.0, 4.0, 2.0),
+			Margin = new Thickness(8.0, 0.0, 0.0, 0.0),
+			HorizontalAlignment = HorizontalAlignment.Right,
+			VerticalAlignment = VerticalAlignment.Center
+		};
+		pill.Child = new TextBlock
+		{
+			Text = status,
+			Foreground = liveMonitoringActive ? Brushes.White : BrushFromHex("#102A2D"),
+			FontSize = 9.0,
+			FontWeight = FontWeights.Bold,
+			TextAlignment = TextAlignment.Center,
+			TextTrimming = TextTrimming.CharacterEllipsis
+		};
+		Grid.SetColumn(pill, 1);
+		Grid.SetRow(pill, 0);
+		grid.Children.Add(pill);
+
+		TextBlock detailBlock = new TextBlock
+		{
+			Text = detail,
+			Foreground = (Brush)base.Resources["MutedBrush"],
+			FontSize = 9.6,
+			FontWeight = FontWeights.SemiBold,
+			TextWrapping = TextWrapping.Wrap,
+			Margin = new Thickness(0.0, 4.0, 0.0, 0.0)
+		};
+		Grid.SetColumn(detailBlock, 0);
+		Grid.SetColumnSpan(detailBlock, 2);
+		Grid.SetRow(detailBlock, 1);
+		grid.Children.Add(detailBlock);
+
+		card.Child = grid;
+		return card;
 	}
 
 	#endregion
@@ -4646,7 +4726,7 @@ $items = @(
 				Child = new StackPanel
 				{
 					VerticalAlignment = VerticalAlignment.Center,
-					Children = 
+					Children =
 					{
 						(UIElement)new TextBlock
 						{
@@ -5061,11 +5141,11 @@ $items = @(
 	{
 		return drawer switch
 		{
-			"Notes" => SheetNotesPanel, 
-			"Activity" => ActivityPanel, 
-			"Hardware" => HardwarePanel, 
-			"Folders" => FoldersPanel, 
-			_ => throw new ArgumentOutOfRangeException("drawer", drawer, null), 
+			"Notes" => SheetNotesPanel,
+			"Activity" => ActivityPanel,
+			"Hardware" => HardwarePanel,
+			"Folders" => FoldersPanel,
+			_ => throw new ArgumentOutOfRangeException("drawer", drawer, null),
 		};
 	}
 
@@ -5073,11 +5153,11 @@ $items = @(
 	{
 		return drawer switch
 		{
-			"Notes" => _notesOpen, 
-			"Activity" => _activityOpen, 
-			"Hardware" => _hardwareOpen, 
-			"Folders" => _foldersOpen, 
-			_ => false, 
+			"Notes" => _notesOpen,
+			"Activity" => _activityOpen,
+			"Hardware" => _hardwareOpen,
+			"Folders" => _foldersOpen,
+			_ => false,
 		};
 	}
 
@@ -5582,7 +5662,7 @@ $items = @(
 		HeaderWarranty.Text = L("Warranty: loading...");
 		HeaderWarranty.ToolTip = "Warranty lookup will run after the Service Tag loads.";
 		HeaderBattery.Text = L("Battery Health: loading...");
-		HeaderBatteryDots.Text = "○○○○";
+		HeaderBatteryDots.Text = "\u25CB\u25CB\u25CB\u25CB";
 		HeaderBatteryDots.Foreground = (Brush)FindResource("MutedBrush");
 		CurrentBatteryPercent.Text = "--%";
 		CurrentBatteryFill.Width = 0.0;
@@ -6225,11 +6305,11 @@ $items = @(
 		{
 			return state switch
 			{
-				"Ok" => "pass", 
-				"Bad" => "fail", 
-				"Warning" => "warning", 
-				"Working" => "progress", 
-				_ => "not-run", 
+				"Ok" => "pass",
+				"Bad" => "fail",
+				"Warning" => "warning",
+				"Working" => "progress",
+				_ => "not-run",
 			};
 		}
 		string Detail(string key, string fallback)
@@ -6251,11 +6331,11 @@ $items = @(
 		{
 			return state switch
 			{
-				"Ok" => "Pass", 
-				"Bad" => "Fail", 
-				"Warning" => "Warning", 
-				"Working" => "In Progress", 
-				_ => "Not Run", 
+				"Ok" => "Pass",
+				"Bad" => "Fail",
+				"Warning" => "Warning",
+				"Working" => "In Progress",
+				_ => "Not Run",
 			};
 		}
 	}

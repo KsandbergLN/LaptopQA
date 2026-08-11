@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -108,7 +108,7 @@ public sealed partial class MainWindow : Window
         UpdateDeviceNameHeader();
         HeaderSerial.Text = T(string.IsNullOrWhiteSpace(_hardware.SerialNumber) ? "Service Tag:" : $"Service Tag: {_hardware.SerialNumber}");
         HeaderAsset.Text = T(string.IsNullOrWhiteSpace(_hardware.AssetTag) ? "Asset:" : $"Asset: {_hardware.AssetTag}");
-        HeaderWarranty.Text = T(string.IsNullOrWhiteSpace(_hardware.Warranty) ? "Warranty:" : $"Warranty: {_hardware.Warranty}");
+        HeaderWarranty.Text = T(string.IsNullOrWhiteSpace(_hardware.Warranty) ? "Warranty:" : $"Warranty: {WarrantyDisplayText(_hardware.Warranty)}");
         UpdateBatteryHealthDisplay();
         HardwareBox.Text = _hardware.Summary;
         RmaIssuesBox.Text = _cache.RmaIssues;
@@ -505,7 +505,7 @@ public sealed partial class MainWindow : Window
             "Poor" => (1, "#EF4444"),
             _ => (0, "#B9C7CB")
         };
-        HeaderBatteryDots.Text = string.Concat(Enumerable.Range(0, 4).Select(index => index < filled ? "●" : "○"));
+        HeaderBatteryDots.Text = string.Concat(Enumerable.Range(0, 4).Select(index => index < filled ? "\u25CF" : "\u25CB"));
         HeaderBatteryDots.Foreground = Brush.Parse(color);
         var percentMatch = System.Text.RegularExpressions.Regex.Match(_hardware.Battery, @"(?<percent>\d{1,3})\s*%");
         var percentText = percentMatch.Success ? $" Cached Windows capacity health: {percentMatch.Groups["percent"].Value}%." : "";
@@ -559,15 +559,7 @@ public sealed partial class MainWindow : Window
 
         if (ports.Count == 0)
         {
-            UsbPortIndicatorsPanel.Children.Add(new TextBlock
-            {
-                Text = "Starts after Start New QA",
-                Foreground = muted,
-                FontSize = 11.5,
-                FontWeight = FontWeight.SemiBold,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                Margin = new Thickness(4, 18, 0, 0)
-            });
+            UsbPortIndicatorsPanel.Children.Add(CreateUsbPortPromptCard(isLight, pendingBackground, passBackground, pass));
             return;
         }
 
@@ -598,7 +590,7 @@ public sealed partial class MainWindow : Window
                 : port.Failed ? $"{port.Label} failed." : $"{port.Label} has not been tested.");
             badge.Child = new TextBlock
             {
-                Text = $"{port.Label} {(port.Passed ? "✓" : port.Failed ? "✕" : "—")}",
+                Text = $"{port.Label} {(port.Passed ? "\u2713" : port.Failed ? "\u2715" : "\u2014")}",
                 Foreground = stateBrush,
                 FontSize = badgeFontSize,
                 FontWeight = FontWeight.Bold,
@@ -607,6 +599,94 @@ public sealed partial class MainWindow : Window
             };
             UsbPortIndicatorsPanel.Children.Add(badge);
         }
+    }
+
+    private static Border CreateUsbPortPromptCard(bool isLight, IBrush background, IBrush pillBackground, IBrush accent)
+    {
+        var card = new Border
+        {
+            Width = 348,
+            Height = 58,
+            CornerRadius = new CornerRadius(12),
+            BorderThickness = new Thickness(1),
+            BorderBrush = accent,
+            Background = background,
+            Padding = new Thickness(12, 7)
+        };
+        ToolTip.SetTip(card, "Start New QA in Windows, then move a readable USB drive through each port.");
+
+        var grid = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,62"),
+            RowDefinitions = new RowDefinitions("Auto,Auto")
+        };
+        var title = new TextBlock
+        {
+            Text = "Ready after reset",
+            Foreground = Brush.Parse(isLight ? "#06141B" : "#F2F8FA"),
+            FontSize = 12,
+            FontWeight = FontWeight.Bold,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+        };
+        Grid.SetColumn(title, 0);
+        Grid.SetRow(title, 0);
+        grid.Children.Add(title);
+
+        var pill = new Border
+        {
+            Width = 54,
+            CornerRadius = new CornerRadius(9),
+            Background = pillBackground,
+            Padding = new Thickness(4, 2),
+            Margin = new Thickness(8, 0, 0, 0),
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+        };
+        pill.Child = new TextBlock
+        {
+            Text = "Waiting",
+            Foreground = Brush.Parse("#102A2D"),
+            FontSize = 9,
+            FontWeight = FontWeight.Bold,
+            TextAlignment = TextAlignment.Center,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        };
+        Grid.SetColumn(pill, 1);
+        Grid.SetRow(pill, 0);
+        grid.Children.Add(pill);
+
+        var detail = new TextBlock
+        {
+            Text = "Start New QA in Windows, then move a readable USB drive through each port.",
+            Foreground = Brush.Parse(isLight ? "#60757E" : "#B9C7CB"),
+            FontSize = 9.6,
+            FontWeight = FontWeight.SemiBold,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(0, 4, 0, 0)
+        };
+        Grid.SetColumn(detail, 0);
+        Grid.SetColumnSpan(detail, 2);
+        Grid.SetRow(detail, 1);
+        grid.Children.Add(detail);
+
+        card.Child = grid;
+        return card;
+    }
+
+    private static string WarrantyDisplayText(string? warrantyText)
+    {
+        if (string.IsNullOrWhiteSpace(warrantyText)) return "unavailable X";
+        var trimmed = warrantyText.Trim();
+        return trimmed + (IsWarrantyCurrent(trimmed) ? " \u2713" : " X");
+    }
+
+    private static bool IsWarrantyCurrent(string warrantyText)
+    {
+        var formats = new[] { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "M/d/yy", "MM/dd/yy" };
+        return DateTime.TryParseExact(warrantyText.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
+               ? date.Date >= DateTime.Today
+               : DateTime.TryParse(warrantyText, out date) && date.Date >= DateTime.Today;
     }
 
     private async void DiagnosticsBrowseButton_Click(object? sender, RoutedEventArgs e)
@@ -669,7 +749,7 @@ public sealed partial class MainWindow : Window
 
     private static void ApplyState(TextBlock icon, string state)
     {
-        icon.Text = state switch { "Ok" => "✓", "Bad" => "✕", "Warning" => "⚠", "Ignored" => "⊘", _ => "—" };
+        icon.Text = state switch { "Ok" => "\u2713", "Bad" => "\u2715", "Warning" => "\u26A0", "Ignored" => "\u2298", _ => "\u2014" };
         icon.Foreground = Brush.Parse(state switch { "Ok" => "#7FE0A9", "Bad" => "#FF9D9D", "Warning" => "#F3C46B", "Ignored" => "#B9C7CB", _ => "#B9C7CB" });
     }
 
@@ -680,7 +760,7 @@ public sealed partial class MainWindow : Window
             await ShowNoticeAsync("Diagnostics Log", "No diagnostics log is loaded. Use Browse to select a log first.");
             return;
         }
-        var search = new TextBox { PlaceholderText = "Search diagnostics log…", Margin = new Thickness(0, 0, 8, 8) };
+        var search = new TextBox { PlaceholderText = "Search diagnostics log...", Margin = new Thickness(0, 0, 8, 8) };
         var searchLabel = new TextBlock
         {
             Text = "Search log:",

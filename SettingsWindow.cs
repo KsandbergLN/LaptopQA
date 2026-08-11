@@ -462,9 +462,8 @@ public sealed class SettingsWindow : Window
 				passwordBox.SelectionBrush = BrushFromHex(flag ? "#2F6F68" : (flag2 ? "#666666" : "#A2E6DD"));
 			}
 		}
-		_themeChoice.Background = BrushFromHex(flag ? "#FFFAFAF6" : "#E0E0E0");
-		_themeChoice.Foreground = BrushFromHex(flag ? "#06141B" : "#050505");
-		_themeChoice.BorderBrush = borderBrush;
+		ApplyComboBoxTheme(_languageChoice, flag, flag2, borderBrush);
+		ApplyComboBoxTheme(_themeChoice, flag, flag2, borderBrush);
 		foreach (TextBlock item in _textBlocks.Where((TextBlock b) => !_labels.Contains(b)))
 		{
 			item.Foreground = ((item.FontSize >= 18.0) ? brush : brush2);
@@ -476,6 +475,43 @@ public sealed class SettingsWindow : Window
 		}
 		_saveButton.Background = BrushFromHex(flag2 ? "#E0E0E0" : "#A2E6DD");
 		_saveButton.Foreground = BrushFromHex(flag2 ? "#050505" : "#073F55");
+	}
+
+	private static void ApplyComboBoxTheme(ComboBox comboBox, bool isLight, bool isAmoled, Brush borderBrush)
+	{
+		Brush comboBackground = BrushFromHex(isLight ? "#FFFAFAF6" : (isAmoled ? "#FFE8E8E8" : "#FFE0E0E0"));
+		Brush comboForeground = BrushFromHex("#050505");
+		Brush selectedBackground = BrushFromHex(isLight ? "#D8E1DF" : (isAmoled ? "#FFCFCFCF" : "#FFC9D4D8"));
+
+		comboBox.Background = comboBackground;
+		comboBox.Foreground = comboForeground;
+		comboBox.BorderBrush = borderBrush;
+
+		Style itemStyle = new Style(typeof(ComboBoxItem));
+		itemStyle.Setters.Add(new Setter(Control.BackgroundProperty, comboBackground));
+		itemStyle.Setters.Add(new Setter(Control.ForegroundProperty, comboForeground));
+		itemStyle.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8.0, 4.0, 8.0, 4.0)));
+		itemStyle.Triggers.Add(new Trigger
+		{
+			Property = ComboBoxItem.IsHighlightedProperty,
+			Value = true,
+			Setters =
+			{
+				new Setter(Control.BackgroundProperty, selectedBackground),
+				new Setter(Control.ForegroundProperty, comboForeground)
+			}
+		});
+		itemStyle.Triggers.Add(new Trigger
+		{
+			Property = ComboBoxItem.IsSelectedProperty,
+			Value = true,
+			Setters =
+			{
+				new Setter(Control.BackgroundProperty, selectedBackground),
+				new Setter(Control.ForegroundProperty, comboForeground)
+			}
+		});
+		comboBox.ItemContainerStyle = itemStyle;
 	}
 
 	private TextBlock Text(string text, double left, double top, double width, double height, double fontSize, FontWeight weight)
