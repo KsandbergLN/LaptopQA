@@ -1,0 +1,89 @@
+# Laptop QA V4 Developer Handoff
+
+Last reviewed: 2026-08-11
+
+> **Canonical-source marker:** `CANONICAL-SOURCE.md` and `D:\LaptopQA\SOURCE-OF-TRUTH.md` are authoritative. Historical version numbers do not override them.
+
+## Source of truth
+
+Use `D:\LaptopQA\V4` for current development. It contains the newest maintained C# and XAML files and builds as `LaptopQATestingV4`.
+
+Do not edit these as source:
+
+- `bin`, `obj`, and `dist`: generated build/package output.
+- `C:\V2`: historical PowerShell V2 files, recovery copies, and verification artifacts.
+- `D:\LaptopQA\V5`: an older branch despite its higher version number. The shared maintenance guide predates the latest V4 work.
+
+The canonical source and its shared/root dependencies are maintained in the private repository rooted at `D:\LaptopQA`. Generated output and historical alternatives are excluded. Use reviewed branches; do not edit historical folders directly.
+
+## Build and smoke check
+
+Run from `D:\LaptopQA\V4`:
+
+```powershell
+dotnet build .\LaptopQATestingV4.csproj -c Release
+```
+
+For a packaged iteration, run `Build-LaptopQAIteration.ps1 -NoDeploy`. It creates a validated candidate and SHA-256 manifest but never deploys. Record test evidence with `Approve-LaptopQAPackage.ps1`, then use the separate `Deploy-LaptopQAPackage.ps1` with an explicit `-OneDrive` and/or `-RemovableDrives` target. All scripts support `-WhatIf` where state can change. Do not edit packaged copies under `dist`.
+
+The application is Windows-only (`net10.0-windows`, WPF) and several workflows require Dell hardware, administrator rights, removable media, or Windows applications. A successful build does not replace an on-device smoke test.
+
+## Code map
+
+| Area | Primary file | Notes |
+| --- | --- | --- |
+| Application startup | `App.xaml`, `App.xaml.cs` | WPF entry point and top-level exception handling. |
+| Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, and styles. |
+| Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, and external process calls. Foldable `#region` labels divide these responsibilities. |
+| Configuration | `AppConfig.cs`, `Laptop-QA-Config.json`, `SettingsWindow.cs` | Defaults, persisted settings, and settings UI. |
+| Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | Runtime QA state saved under `.runtime`. |
+| Logging | `ErrorLog.cs` | Activity/error log paths, migration, redaction, and session filenames. |
+| Hardware models/UI | `HardwareSnapshot.cs`, `HardwareWindow.cs` | Collected device data and hardware drawer/window. |
+| Diagnostics/report UI | `DiagnosticsResult.cs`, `QaSheetFiles.cs`, `QaSheetImageWindow.cs` | Diagnostics results and QA sheet display/output. |
+| Keyboard test | `KeyboardTesterWindow.cs` | Standalone keyboard tester window. |
+| Localization | `LanguageCatalog.cs`, `WpfLocalization.cs`, `..\Shared\UiLocalization.cs`, `..\Shared\ui-translations.json` | Culture selection and translated UI strings. Shared files are linked by the project file. |
+| Packaging | `Build-LaptopQAIteration.ps1`, `Launcher` | Produces portable output and launcher behavior. |
+
+## MainWindow navigation labels
+
+`MainWindow.xaml.cs` is organized into these IDE-foldable regions:
+
+1. Shared types, constants, and runtime state
+2. Window lifecycle, configuration, theming, and startup
+3. Live device monitoring, storage cleanup, and startup data collection
+4. QA test actions and output
+5. USB port detection and scoring
+6. Completion, power actions, drawers, and managed folders
+7. Drawer layout, QA session persistence, settings, and window commands
+8. Logging, process execution, reports, and integration helpers
+
+Search for a region name first, then search for the visible button/control name from `MainWindow.xaml`. WPF event handlers normally end in `_Click`, `_Changed`, `_Loaded`, or `_Closing`.
+
+## Review findings and recommended cleanup order
+
+1. Split `MainWindow.xaml.cs` into partial class files by the regions above. It is roughly 300 KB and is the largest maintenance risk. Keep the first split mechanical: move methods without changing behavior.
+2. Add unit-testable services for process execution, data-root selection, diagnostics parsing, and filename cleanup. These contain useful logic but are currently coupled to the window.
+3. Keep the compiler baseline at zero. Nullable warnings were corrected on 2026-08-11 and warnings are treated as errors.
+4. Replace repeated raw string state values (`Waiting`, `Working`, `Ok`, `Bad`, `Warning`, `Ignored`) with an enum or a single constants type. Update persistence compatibility deliberately.
+5. Centralize defaults currently repeated between `AppConfig` and `MainWindow` (especially ServiceNow settings and retention periods).
+6. Move long embedded PowerShell scripts out of C# string constants into versioned script resources. This will make both languages testable and easier to review.
+7. Add automated tests before changing diagnostics parsing, USB scoring, QA completion, or cache migration. Those paths affect pass/fail results and should not be refactored from build verification alone.
+
+## Changes from the 2026-08-10 cleanup
+
+- Added region labels to `MainWindow.xaml.cs` for fast navigation.
+- Changed the completion animation helper from non-event `async void` to a fire-and-forget `Task` whose body already catches and logs failures.
+- Removed two no-op decompiler artifacts (`_ = 2;`).
+- Made `SafeFile` return its fallback when sanitizing leaves an empty filename.
+- Marked intentional background refresh calls explicitly with `_ =`.
+
+## Minimum manual smoke test after UI/workflow changes
+
+- Launch as administrator and confirm startup/splash completes.
+- Confirm the selected data root and log locations.
+- Open Settings and verify theme/language changes.
+- Exercise Wi-Fi/Ethernet, camera, keyboard, external display, and USB rows on suitable hardware.
+- Load or browse to a Dell diagnostics log and verify its result.
+- Save/open a QA sheet and confirm the output image.
+- Reset the QA session, close/reopen the app, and confirm cache behavior.
+- Test shutdown/reboot/BIOS actions only on a disposable QA device.

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\assets\app-icon.ico</ApplicationIcon>
+    <AssemblyName>Laptop QA</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\assets\app-icon.ico" Link="app-icon.ico" />
+  </ItemGroup>
+</Project>

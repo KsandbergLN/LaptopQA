@@ -1,0 +1,29 @@
+# Canonical source is V4. Other product experiments are retained outside source control.
+/V5/
+/Mac/
+/PySide6Prototype/
+/WebUI-Test/
+/.onedrive-sync/
+
+# Generated application and release output
+**/bin/
+**/obj/
+**/dist/
+**/.runtime/
+**/QA sheets/
+**/hardware/
+**/hash/
+**/__pycache__/
+/V4/PythonUsbLauncher/build/
+/V4/PythonUsbLauncher/build-vbs/
+/V4/PythonUsbLauncher/dist-vbs/
+/V4/Launcher/publish/
+/V4/Launcher/publish-vbs/
+/V4/Launcher/publish-vbs-framework/
+*.user
+.vs/
+
+# Local logs and temporary files
+*.log
+*.tmp
+*.bak

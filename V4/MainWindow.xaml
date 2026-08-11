@@ -1,0 +1,611 @@
+<Window x:Class="LaptopQATestingV4.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Laptop QA Testing V4"
+        Width="1280"
+        Height="720"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Icon="assets/app-icon.ico"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextHintingMode="Fixed"
+        Loaded="Window_Loaded">
+    <Window.Resources>
+        <SolidColorBrush x:Key="TextBrush" Color="#F3F7F8"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#B9C7CB"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#A2E6DD"/>
+        <SolidColorBrush x:Key="PanelStroke" Color="#6682949B"/>
+        <SolidColorBrush x:Key="InputStrokeBrush" Color="#3FAED5DF"/>
+        <SolidColorBrush x:Key="PrimaryButtonBrush" Color="#60757E"/>
+        <SolidColorBrush x:Key="ResetButtonBrush" Color="#263D46"/>
+        <SolidColorBrush x:Key="DangerButtonBrush" Color="#8A4646"/>
+        <SolidColorBrush x:Key="OkButtonBrush" Color="#12633D"/>
+        <SolidColorBrush x:Key="PowerButtonBrush" Color="#263D46"/>
+        <SolidColorBrush x:Key="PowerButtonBorderBrush" Color="#6682949B"/>
+        <SolidColorBrush x:Key="ActivityPanelBrush" Color="#FF2A414A"/>
+        <SolidColorBrush x:Key="SplashOverlayBrush" Color="#F0253640"/>
+        <SolidColorBrush x:Key="NoteInputBrush" Color="#A01D3038"/>
+        <SolidColorBrush x:Key="FinalCheckCheckedBrush" Color="#3317C9BD"/>
+        <SolidColorBrush x:Key="FinalCheckCheckedBoxBrush" Color="#A2E6DD"/>
+        <SolidColorBrush x:Key="FinalCheckCheckMarkBrush" Color="#102A2D"/>
+        <SolidColorBrush x:Key="FinalCheckUncheckedBrush" Color="#241D3038"/>
+        <SolidColorBrush x:Key="FinalCheckHoverBrush" Color="#34173D43"/>
+        <SolidColorBrush x:Key="FinalCheckBorderBrush" Color="#6682949B"/>
+
+        <LinearGradientBrush x:Key="ShellBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#253640" Offset="0"/>
+            <GradientStop Color="#314A55" Offset="0.58"/>
+            <GradientStop Color="#526A70" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="GlassPanelBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#5B536B72" Offset="0"/>
+            <GradientStop Color="#463F5962" Offset="0.52"/>
+            <GradientStop Color="#3831444D" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="DarkGlassBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#A01D3038" Offset="0"/>
+            <GradientStop Color="#7F142730" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="UtilityPanelBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#8A142933" Offset="0"/>
+            <GradientStop Color="#74213842" Offset="0.55"/>
+            <GradientStop Color="#662D4D55" Offset="1"/>
+        </LinearGradientBrush>
+
+        <Style x:Key="GlassCard" TargetType="{x:Type Border}">
+            <Setter Property="Background" Value="{DynamicResource GlassPanelBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelStroke}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="26"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="18" ShadowDepth="8" Opacity="0.20" Color="#142128"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.36"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FolderFlyoutButton" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Background" Value="#60757E"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.90"/></Trigger>
+                            <Trigger Property="IsPressed" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.76"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ResetButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{DynamicResource ResetButtonBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelStroke}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style x:Key="PassButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{DynamicResource OkButtonBrush}"/>
+        </Style>
+        <Style x:Key="DangerButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="{DynamicResource DangerButtonBrush}"/>
+        </Style>
+        <Style x:Key="HeaderShadowButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.24" Color="#0B2028"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="HeaderIconButton" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Bd" Background="Transparent" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.48"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PowerRoundButton" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PowerButtonBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PowerButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.12" Color="#0B2028"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="28" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SelectableHeaderText" TargetType="{x:Type TextBox}">
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="IsReadOnlyCaretVisible" Value="False"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ContextMenu">
+                <Setter.Value>
+                    <ContextMenu>
+                        <MenuItem Command="ApplicationCommands.Copy"/>
+                    </ContextMenu>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SelectableMainText" BasedOn="{StaticResource SelectableHeaderText}" TargetType="{x:Type TextBox}">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style x:Key="SelectableDetailText" BasedOn="{StaticResource SelectableHeaderText}" TargetType="{x:Type TextBox}">
+            <Setter Property="Foreground" Value="{DynamicResource MutedBrush}"/>
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+        <Style x:Key="FolderTabButton" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="TabRoot">
+                            <Path x:Name="TabShape"
+                                  Data="M 10,0 L42,0 L42,112 L10,112 C4,112 0,108 0,102 L0,10 C0,4 4,0 10,0 Z"
+                                  Fill="{TemplateBinding Background}"
+                                  Stroke="{TemplateBinding BorderBrush}"
+                                  StrokeThickness="{TemplateBinding BorderThickness}"
+                                  Stretch="Fill"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabRoot" Property="Opacity" Value="0.90"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="TabRoot" Property="Opacity" Value="0.76"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="FinalCheckToggle" TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="9,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Border x:Name="Outer" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="CheckBoxBox" Width="18" Height="18" CornerRadius="4" BorderBrush="{DynamicResource MutedBrush}" BorderThickness="1.2" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Path x:Name="CheckMark" Data="M 1.5,5.2 L 4.5,8.2 L 9.5,1.4" Visibility="Collapsed" Width="11" Height="10" Stretch="Fill" Stroke="{DynamicResource FinalCheckCheckMarkBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ContentPresenter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Outer" Property="Background" Value="#1AA2E6DD"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Outer" Property="Background" Value="Transparent"/>
+                                <Setter TargetName="CheckBoxBox" Property="Background" Value="{DynamicResource FinalCheckCheckedBoxBrush}"/>
+                                <Setter TargetName="CheckBoxBox" Property="BorderBrush" Value="{DynamicResource FinalCheckCheckedBoxBrush}"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Viewbox x:Name="WindowFitViewbox" Stretch="Uniform" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Grid x:Name="WindowScaleRoot" Width="1280" Height="720" Background="Transparent" UseLayoutRounding="True" SnapsToDevicePixels="True">
+        <Border x:Name="Shell" CornerRadius="22" Background="{DynamicResource ShellBrush}" MouseLeftButtonDown="Shell_MouseLeftButtonDown">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="84" ShadowDepth="8" Direction="315" Opacity="0.26" Color="#000000"/>
+            </Border.Effect>
+            <Grid ClipToBounds="True">
+                <Grid.Clip>
+                    <RectangleGeometry Rect="0,0,1280,720" RadiusX="22" RadiusY="22"/>
+                </Grid.Clip>
+                <Path x:Name="WavePathBack" Data="M -20,440 C 190,370 380,550 580,470 C 760,400 980,555 1300,465 L1300,740 L-20,740 Z" Fill="#2B17495C" Opacity="0.75"/>
+                <Path x:Name="WavePathFront" Data="M -20,500 C 230,430 420,615 680,525 C 880,455 1080,600 1300,515 L1300,740 L-20,740 Z" Fill="#3510394A" Opacity="0.70"/>
+
+                <Canvas>
+                    <Button x:Name="SettingsButton" Canvas.Left="14" Canvas.Top="29" Width="34" Height="32" Style="{StaticResource HeaderIconButton}" ToolTip="Open settings." Click="SettingsButton_Click">
+                        <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="17" FontWeight="Normal"/>
+                    </Button>
+                    <TextBlock x:Name="HeaderTitle" Text="Laptop QA Testing" Canvas.Left="54" Canvas.Top="26" Width="360" Height="42" Foreground="{DynamicResource TextBrush}" FontSize="28" FontWeight="Light" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown"/>
+                    <TextBox x:Name="HeaderDeviceName" Text="Device Name: loading..." Canvas.Left="56" Canvas.Top="62" Width="175" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <TextBox x:Name="HeaderSerial" Text="Service Tag: loading..." Canvas.Left="235" Canvas.Top="62" Width="145" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <Border x:Name="HeaderAssetBubble" Canvas.Left="384" Canvas.Top="58" Width="145" Height="25" CornerRadius="10" Padding="6,2" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
+                        <TextBox x:Name="HeaderAsset" Text="Asset: loading..." Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    </Border>
+                    <TextBox x:Name="HeaderWarranty" Text="Warranty: loading..." Canvas.Left="56" Canvas.Top="80" Width="170" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <TextBlock x:Name="HeaderTechnician" Text="Technician: loading..." Canvas.Left="230" Canvas.Top="80" Width="190" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <Border x:Name="SummaryStatusBubble" Canvas.Left="545" Canvas.Top="31" Width="190" Height="32" CornerRadius="16" Background="#D9F5E6" BorderBrush="#7CCBA0" BorderThickness="1" Padding="12,4">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Direction="270" Opacity="0.20" Color="#000000"/>
+                        </Border.Effect>
+                        <TextBlock x:Name="SummaryStatus" Text="Ready" Foreground="#12633D" FontSize="14" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock x:Name="HeaderBatteryDots" Text="&#x25CB;&#x25CB;&#x25CB;&#x25CB;" Canvas.Left="424" Canvas.Top="78" Width="62" Height="24" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="15" FontWeight="Bold" ToolTip="The rating and circles come from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
+                    <TextBlock x:Name="HeaderBattery" Text="Battery Health: loading..." Canvas.Left="490" Canvas.Top="82" Width="340" Height="20" Foreground="{DynamicResource MutedBrush}" FontSize="12" FontWeight="SemiBold" ToolTip="The rating comes from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
+
+                    <Button x:Name="MinimizeButton" Canvas.Left="1168" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Minimize" Click="MinimizeButton_Click">
+                        <Grid Width="34" Height="30">
+                            <Rectangle Width="12" Height="2" RadiusX="1" RadiusY="1" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                        </Grid>
+                    </Button>
+                    <Button x:Name="CloseButton" Canvas.Left="1210" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Close" Click="CloseButton_Click">
+                        <Grid Width="34" Height="30">
+                            <Rectangle Width="13" Height="2" RadiusX="1" RadiusY="1" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" RenderTransformOrigin="0.5,0.5">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="45"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                            <Rectangle Width="13" Height="2" RadiusX="1" RadiusY="1" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" RenderTransformOrigin="0.5,0.5">
+                                <Rectangle.RenderTransform>
+                                    <RotateTransform Angle="-45"/>
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+                        </Grid>
+                    </Button>
+
+                    <Popup x:Name="PowerMenuPopup" PlacementTarget="{Binding ElementName=PowerButton}" Placement="Top" HorizontalOffset="-150" VerticalOffset="-4" AllowsTransparency="True" StaysOpen="False">
+                        <Border x:Name="PowerMenuPanel" Background="{DynamicResource ActivityPanelBrush}" BorderBrush="{DynamicResource PanelStroke}" BorderThickness="1" CornerRadius="16" Padding="8" Width="190" SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="4" Opacity="0.24" Color="#0B2028"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <Button Style="{StaticResource HeaderIconButton}" HorizontalContentAlignment="Left" Padding="10,0" Height="34" ToolTip="Shut down this laptop now." Click="ShutdownMenu_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE7E8;" FontFamily="Segoe MDL2 Assets" FontSize="13" Width="28" Foreground="{DynamicResource AccentBrush}" TextAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Shutdown" Foreground="{DynamicResource TextBrush}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource HeaderIconButton}" HorizontalContentAlignment="Left" Padding="10,0" Height="34" ToolTip="Restart this laptop now." Click="RebootMenu_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE895;" FontFamily="Segoe MDL2 Assets" FontSize="13" Width="28" Foreground="{DynamicResource AccentBrush}" TextAlignment="Center" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Restart" Foreground="{DynamicResource TextBrush}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="104" Width="740" Height="74">
+                        <Canvas>
+                            <TextBlock Text="1. Start New QA" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Text="Begin a fresh QA session for the next laptop." Canvas.Left="70" Canvas.Top="44" Width="390" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold"/>
+                            <Button x:Name="ResetQaButton" Content="Start New QA" Canvas.Left="560" Canvas.Top="20" Width="150" Height="34" Style="{StaticResource DangerButton}" FontSize="12" FontWeight="Bold" ToolTip="Clear the current QA results, notes, diagnostics status, and final checks." Click="ResetQaButton_Click"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="186" Width="740" Height="112">
+                        <Canvas>
+                            <TextBlock Text="2. Network Check" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="NetworkButton" Content="Start" Canvas.Left="648" Canvas.Top="14" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous Wi-Fi and Ethernet results, then run the network check again." Click="NetworkButton_Click"/>
+                            <TextBlock x:Name="WifiIcon" Text="-" Canvas.Left="28" Canvas.Top="44" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="WifiMain" Text="Wi-Fi not checked yet" Canvas.Left="70" Canvas.Top="42" Width="470" Height="18" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="WifiDetail" Text="Looking for a connected Wi-Fi IP or visible SSIDs." Canvas.Left="70" Canvas.Top="61" Width="470" Height="14" Style="{StaticResource SelectableDetailText}"/>
+                            <TextBlock x:Name="EthernetIcon" Text="-" Canvas.Left="28" Canvas.Top="78" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="EthernetMain" Text="Ethernet not checked yet" Canvas.Left="70" Canvas.Top="76" Width="530" Height="18" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="EthernetDetail" Text="Looking for at least one physical Ethernet adapter that is Up." Canvas.Left="70" Canvas.Top="95" Width="640" Height="14" Style="{StaticResource SelectableDetailText}"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="306" Width="740" Height="82">
+                        <Canvas>
+                            <TextBlock Text="3. Camera Test" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button Content="Start" Canvas.Left="566" Canvas.Top="10" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous camera result and start the camera test again." Click="CameraStartButton_Click"/>
+                            <Button Content="Pass" Canvas.Left="648" Canvas.Top="10" Width="72" Height="28" Style="{StaticResource PassButton}" Padding="6,3" FontSize="11" ToolTip="Mark the camera test as passed." Click="CameraPassButton_Click"/>
+                            <Button Content="Fail" Canvas.Left="648" Canvas.Top="44" Width="72" Height="28" Style="{StaticResource DangerButton}" Padding="6,3" FontSize="11" ToolTip="Mark the camera test as failed." Click="CameraFailButton_Click"/>
+                            <TextBlock x:Name="CameraIcon" Text="-" Canvas.Left="28" Canvas.Top="40" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="CameraMain" Text="Camera not checked yet" Canvas.Left="70" Canvas.Top="36" Width="484" Height="20" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="CameraDetail" Text="Start Camera, then choose Pass or Fail." Canvas.Left="70" Canvas.Top="54" Width="484" Height="16" Style="{StaticResource SelectableDetailText}"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="396" Width="740" Height="88">
+                        <Canvas>
+                            <TextBlock Text="4. External Video" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="ExternalTestButton" Content="Start" Canvas.Left="566" Canvas.Top="10" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous external-video result and scan again." Click="ExternalTestButton_Click"/>
+                            <Button Content="Ignore" Canvas.Left="648" Canvas.Top="10" Width="72" Height="28" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="11" ToolTip="Ignore is for devices that do not have an external video port." Click="ExternalIgnoreButton_Click"/>
+                            <Button Content="Fail" Canvas.Left="648" Canvas.Top="44" Width="72" Height="28" Style="{StaticResource DangerButton}" Padding="6,3" FontSize="11" ToolTip="Mark external video as failed." Click="ExternalFailButton_Click"/>
+                            <TextBlock x:Name="ExternalIcon" Text="-" Canvas.Left="28" Canvas.Top="39" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="ExternalMain" Text="External video not checked yet" Canvas.Left="70" Canvas.Top="35" Width="402" Height="20" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="ExternalDetail" Text="Verify video output on the external display." Canvas.Left="70" Canvas.Top="53" Width="402" Height="16" Style="{StaticResource SelectableDetailText}"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="490" Width="740" Height="88">
+                        <Canvas>
+                            <TextBlock Text="5. Keyboard Test" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button Content="Start" Canvas.Left="566" Canvas.Top="10" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous keyboard result and open the keyboard tester again." Click="KeyboardLaunchButton_Click"/>
+                            <Button Content="Pass" Canvas.Left="648" Canvas.Top="10" Width="72" Height="28" Style="{StaticResource PassButton}" Padding="6,3" FontSize="11" ToolTip="Mark the keyboard test as passed." Click="KeyboardPassButton_Click"/>
+                            <Button Content="Fail" Canvas.Left="648" Canvas.Top="44" Width="72" Height="28" Style="{StaticResource DangerButton}" Padding="6,3" FontSize="11" ToolTip="Mark the keyboard test as failed." Click="KeyboardFailButton_Click"/>
+                            <TextBlock x:Name="KeyboardIcon" Text="-" Canvas.Left="28" Canvas.Top="38" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="KeyboardMain" Text="Keyboard not checked yet" Canvas.Left="70" Canvas.Top="34" Width="484" Height="20" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="KeyboardDetail" Text="Start tester, then choose Pass or Fail." Canvas.Left="70" Canvas.Top="52" Width="484" Height="16" Style="{StaticResource SelectableDetailText}"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border x:Name="DiagnosticsPanel" Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="586" Width="740" Height="106">
+                        <Canvas>
+                            <TextBlock Text="6. Diagnostics" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="DiagnosticsBrowseButton" Content="Browse" Canvas.Left="566" Canvas.Top="10" Width="72" Height="28" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="11" ToolTip="Select a Dell preboot diagnostics log manually." Click="DiagnosticsBrowseButton_Click"/>
+                            <Button x:Name="DiagnosticsRawButton" Content="Raw Log" Canvas.Left="648" Canvas.Top="10" Width="72" Height="28" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="11" ToolTip="View the raw diagnostics log text." IsEnabled="False" Click="DiagnosticsRawButton_Click"/>
+                            <TextBlock x:Name="DiagnosticsIcon" Text="-" Canvas.Left="28" Canvas.Top="47" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="DiagnosticsMain" Text="Diagnostics log not found" Canvas.Left="70" Canvas.Top="45" Width="560" Height="18" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="DiagnosticsDetail" Text="DellPrebootDiagnosticsLog.txt was not found in the configured folder or on a small FAT32 removable drive." Canvas.Left="70" Canvas.Top="63" Width="650" Height="36" Style="{StaticResource SelectableDetailText}" FontSize="10.8" TextWrapping="Wrap"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border x:Name="UsbPortTestPanel" Style="{StaticResource GlassCard}" Canvas.Left="830" Canvas.Top="104" Width="396" Height="112" Background="{DynamicResource GlassPanelBrush}">
+                        <Canvas>
+                            <TextBlock Text="7. USB Port Test" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <WrapPanel x:Name="UsbPortIndicatorsPanel" Canvas.Left="24" Canvas.Top="42" Width="348" Height="62" Orientation="Horizontal"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border x:Name="FinalChecksPanel" Style="{StaticResource GlassCard}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="263" Background="{DynamicResource GlassPanelBrush}">
+                        <Canvas>
+                            <TextBlock Text="8. Final Checks" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <CheckBox x:Name="FinalTrackpadWorkingCheck" Content="Trackpad Working" Canvas.Left="24" Canvas.Top="46" Width="348" Height="28" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the trackpad is working." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalHashGroupTagCheck" Content="Checked Hash and Group Tag" Canvas.Left="24" Canvas.Top="79" Width="348" Height="28" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the hardware hash was collected and the group tag was checked." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalDeletedUserCheck" Content="Removed User from Laptop in Intune" Canvas.Left="24" Canvas.Top="112" Width="348" Height="28" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the user was removed from the laptop in Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalUpdateStockroomsCheck" Content="Updated Stockrooms" Canvas.Left="24" Canvas.Top="145" Width="348" Height="28" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm stockroom inventory was updated." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalCleanedLaptopCheck" Content="Cleaned Laptop" Canvas.Left="24" Canvas.Top="178" Width="348" Height="28" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the laptop was physically cleaned." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalConditionSuitableCheck" Canvas.Left="24" Canvas.Top="211" Width="348" Height="28" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the laptop's overall physical condition is suitable for its intended use." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed">
+                                <Viewbox Width="300" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <TextBlock Text="Physical Condition Suitable for Use" FontSize="12.5" FontWeight="SemiBold"/>
+                                </Viewbox>
+                            </CheckBox>
+                        </Canvas>
+                    </Border>
+
+                    <Border x:Name="QaOutputPanel" Style="{StaticResource GlassCard}" Canvas.Left="830" Canvas.Top="503" Width="396" Height="64" Background="{DynamicResource GlassPanelBrush}">
+                        <Canvas>
+                            <TextBlock Text="9. QA Output" Canvas.Left="24" Canvas.Top="22" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="QaSheetButton" Content="QA Sheet" Canvas.Left="190" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Generate and open the QA sheet PNG." Click="QaSheetButton_Click"/>
+                            <Button x:Name="ServiceNowButton" Content="ServiceNow" Canvas.Left="284" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="10.2" ToolTip="Copy the ServiceNow request details and open the request page." Click="ServiceNowButton_Click"/>
+                        </Canvas>
+                    </Border>
+
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="830" Canvas.Top="579" Width="396" Height="64">
+                        <Canvas>
+                            <TextBlock Text="BIOS Settings" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="BiosLoadDefaultsButton" Content="Factory Settings" Canvas.Left="168" Canvas.Top="13" Width="96" Height="32" Style="{StaticResource PrimaryButton}" Padding="5,5" FontSize="9.8" ToolTip="Load factory BIOS defaults." Click="BiosLoadDefaultsButton_Click"/>
+                            <Button x:Name="BiosSecureBootButton" Content="Secure Boot" Canvas.Left="276" Canvas.Top="13" Width="96" Height="32" Style="{StaticResource PrimaryButton}" Padding="5,5" FontSize="10.3" ToolTip="Turn Secure Boot on and refresh the BIOS status." Click="BiosSecureBootButton_Click"/>
+                            <TextBlock x:Name="BiosSecureBootIcon" Text="-" Visibility="Collapsed"/>
+                            <TextBox x:Name="BiosStatusText" Text="Reading BIOS settings..." Visibility="Collapsed"/>
+                        </Canvas>
+                    </Border>
+
+                    <Button x:Name="HashButton" Content="Get Hash" Canvas.Left="913" Canvas.Top="659" Width="230" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
+
+                    <Border x:Name="SheetNotesPanel" Style="{StaticResource GlassCard}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
+                        <Canvas>
+                            <TextBlock Text="QA Notes" Canvas.Left="22" Canvas.Top="14" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="NotesCloseButton" Content="X" Canvas.Left="350" Canvas.Top="10" Width="28" Height="28" Style="{StaticResource HeaderIconButton}" FontSize="12" FontWeight="Bold" ToolTip="Close notes" Click="NotesCloseButton_Click"/>
+                            <TextBlock Text="RMA Issues" Canvas.Left="22" Canvas.Top="48" Width="116" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold"/>
+                            <Border x:Name="RmaIssueInputBorder" Canvas.Left="22" Canvas.Top="68" Width="352" Height="150" CornerRadius="10" Background="{DynamicResource NoteInputBrush}" BorderBrush="{DynamicResource InputStrokeBrush}" BorderThickness="1">
+                                <TextBox x:Name="RmaIssueBox" Margin="9,4" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" FontSize="12" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextChanged="QaSessionInput_Changed"/>
+                            </Border>
+                            <TextBlock Text="Repair Notes" Canvas.Left="22" Canvas.Top="232" Width="116" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold"/>
+                            <Border x:Name="RepairNotesInputBorder" Canvas.Left="22" Canvas.Top="252" Width="352" Height="312" CornerRadius="10" Background="{DynamicResource NoteInputBrush}" BorderBrush="{DynamicResource InputStrokeBrush}" BorderThickness="1">
+                                <TextBox x:Name="RepairNotesBox" Margin="9,4" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" FontSize="12" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextChanged="QaSessionInput_Changed"/>
+                            </Border>
+                        </Canvas>
+                    </Border>
+                    <Button x:Name="NotesDrawerButton" Canvas.Left="1238" Canvas.Top="288" Panel.ZIndex="2" Width="42" Height="112" Padding="0" Style="{StaticResource FolderTabButton}" Click="NotesDrawerButton_Click" ToolTip="Show notes">
+                        <Grid>
+                            <TextBlock Text="Notes" FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.LayoutTransform>
+                                    <RotateTransform Angle="-90"/>
+                                </TextBlock.LayoutTransform>
+                            </TextBlock>
+                        </Grid>
+                    </Button>
+
+                    <Border x:Name="ActivityPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource ActivityPanelBrush}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
+                        <Canvas>
+                            <TextBlock Text="Activity" Canvas.Left="22" Canvas.Top="14" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="ActivityCloseButton" Content="X" Canvas.Left="350" Canvas.Top="10" Width="28" Height="28" Style="{StaticResource HeaderIconButton}" FontSize="12" FontWeight="Bold" ToolTip="Close activity" Click="ActivityCloseButton_Click"/>
+                            <Button Content="Copy" Canvas.Left="186" Canvas.Top="10" Width="74" Height="30" Style="{StaticResource PrimaryButton}" ToolTip="Copy the activity log to the clipboard." Click="ActivityCopyButton_Click"/>
+                            <Button Content="Save" Canvas.Left="266" Canvas.Top="10" Width="74" Height="30" Style="{StaticResource PrimaryButton}" ToolTip="Save the activity log as a text file." Click="ActivitySaveButton_Click"/>
+                            <Border x:Name="ActivityLogBorder" Canvas.Left="22" Canvas.Top="48" Width="352" Height="514" CornerRadius="16" Background="{DynamicResource NoteInputBrush}" BorderBrush="{DynamicResource InputStrokeBrush}" BorderThickness="1">
+                                <TextBox x:Name="ActivityBox" Margin="14,5" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" FontFamily="Consolas" FontSize="12" IsReadOnly="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"/>
+                            </Border>
+                        </Canvas>
+                    </Border>
+                    <Button x:Name="ActivityDrawerButton" Canvas.Left="1238" Canvas.Top="384" Panel.ZIndex="1" Width="42" Height="112" Padding="0" Style="{StaticResource FolderTabButton}" Click="ActivityDrawerButton_Click" ToolTip="Show activity">
+                        <Grid>
+                            <TextBlock Text="Activity" FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.LayoutTransform>
+                                    <RotateTransform Angle="-90"/>
+                                </TextBlock.LayoutTransform>
+                            </TextBlock>
+                        </Grid>
+                    </Button>
+                    <Border x:Name="HardwarePanel" Style="{StaticResource GlassCard}" Background="{DynamicResource ActivityPanelBrush}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
+                        <Canvas>
+                            <TextBlock Text="Hardware" Canvas.Left="22" Canvas.Top="14" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="HardwareCloseButton" Content="X" Canvas.Left="350" Canvas.Top="10" Width="28" Height="28" Style="{StaticResource HeaderIconButton}" FontSize="12" FontWeight="Bold" ToolTip="Close hardware" Click="HardwareCloseButton_Click"/>
+                            <Border x:Name="HardwareDetailsBorder" Canvas.Left="22" Canvas.Top="48" Width="352" Height="514" CornerRadius="16" Background="{DynamicResource NoteInputBrush}" BorderBrush="{DynamicResource InputStrokeBrush}" BorderThickness="1">
+                                <TextBox x:Name="HardwareDetailsBox" Margin="14,5" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" FontFamily="Consolas" FontSize="12" IsReadOnly="True" IsReadOnlyCaretVisible="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" ToolTip="Select hardware text to copy it."/>
+                            </Border>
+                        </Canvas>
+                    </Border>
+                    <Button x:Name="HardwareButton" Canvas.Left="1238" Canvas.Top="480" Panel.ZIndex="0" Width="42" Height="112" Padding="0" Style="{StaticResource FolderTabButton}" Click="HardwareButton_Click" ToolTip="Show hardware snapshot">
+                        <Grid>
+                            <TextBlock Text="Hardware" FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.LayoutTransform>
+                                    <RotateTransform Angle="-90"/>
+                                </TextBlock.LayoutTransform>
+                            </TextBlock>
+                        </Grid>
+                    </Button>
+                    <Border x:Name="FoldersPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource ActivityPanelBrush}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
+                        <Canvas>
+                            <TextBlock Text="Folders" Canvas.Left="28" Canvas.Top="22" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Text="Open saved QA files and supporting records." Canvas.Left="28" Canvas.Top="48" Width="330" Foreground="{DynamicResource MutedBrush}" FontSize="10.5"/>
+                            <Button x:Name="FoldersCloseButton" Content="X" Canvas.Left="340" Canvas.Top="17" Width="28" Height="28" Style="{StaticResource HeaderIconButton}" FontSize="12" FontWeight="Bold" ToolTip="Close folders" Click="FoldersCloseButton_Click"/>
+                            <Button Content="QA Sheets" Canvas.Left="52" Canvas.Top="96" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the QA sheets folder." Click="OpenQaSheetsFolderButton_Click"/>
+                            <Button Content="Activity" Canvas.Left="52" Canvas.Top="152" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the activity records folder." Click="OpenActivityFolderButton_Click"/>
+                            <Button Content="Logs" Canvas.Left="52" Canvas.Top="208" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the application and error logs folder." Click="OpenLogsFolderButton_Click"/>
+                            <Button Content="Hash" Canvas.Left="52" Canvas.Top="264" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the hash folder." Click="OpenHashFolderButton_Click"/>
+                            <Button Content="Hardware" Canvas.Left="52" Canvas.Top="320" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the hardware snapshots folder." Click="OpenHardwareFolderButton_Click"/>
+                            <Button Content="Diagnostics" Canvas.Left="52" Canvas.Top="376" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the FAT32 diagnostics drive." Click="OpenDiagnosticsFolderButton_Click"/>
+                            <Button Content="Camera Roll" Canvas.Left="52" Canvas.Top="432" Width="292" Height="44" Style="{StaticResource FolderFlyoutButton}" FontSize="12.5" ToolTip="Open the configured Camera Roll folder." Click="OpenCameraRollFolderButton_Click"/>
+                        </Canvas>
+                    </Border>
+                    <Button x:Name="FoldersDrawerButton" Canvas.Left="1238" Canvas.Top="192" Panel.ZIndex="3" Width="42" Height="112" Padding="0" Style="{StaticResource FolderTabButton}" Click="FoldersDrawerButton_Click" ToolTip="Show folders">
+                        <Grid>
+                            <TextBlock Text="Folders" FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.LayoutTransform>
+                                    <RotateTransform Angle="-90"/>
+                                </TextBlock.LayoutTransform>
+                            </TextBlock>
+                        </Grid>
+                    </Button>
+                    <Border x:Name="CurrentBatteryPanel" Canvas.Left="1165" Canvas.Top="47" Width="78" Height="24" Background="Transparent" BorderThickness="0" ToolTip="Current battery state">
+                        <Canvas>
+                            <Canvas x:Name="CurrentBatteryIconCanvas" Canvas.Left="0" Canvas.Top="3" Width="38" Height="20">
+                                <Border x:Name="CurrentBatteryShell" Canvas.Left="0" Canvas.Top="3" Width="31" Height="15" CornerRadius="5" Background="{DynamicResource AccentBrush}"/>
+                                <Border x:Name="CurrentBatteryCap" Canvas.Left="29" Canvas.Top="8" Width="5" Height="5" CornerRadius="1.5" Background="{DynamicResource AccentBrush}"/>
+                                <Border x:Name="CurrentBatteryChamber" Canvas.Left="4" Canvas.Top="6.5" Width="23" Height="9" CornerRadius="2.5" Background="#666873"/>
+                                <Rectangle x:Name="CurrentBatteryFill" Canvas.Left="6" Canvas.Top="8" Width="0" Height="6" RadiusX="1.5" RadiusY="1.5" Fill="{DynamicResource AccentBrush}"/>
+                                <Path x:Name="CurrentBatteryChargeBolt" Data="M 17,3 L 12,11 H 15 L 13.5,18 L 22,8.5 H 18 Z" Fill="#1E2930" Visibility="Collapsed"/>
+                            </Canvas>
+                            <TextBlock x:Name="CurrentBatteryPercent" Text="--%" Canvas.Left="38" Canvas.Top="5" Width="34" Height="14" Foreground="{DynamicResource TextBrush}" FontSize="11" FontWeight="Bold"/>
+                            <TextBlock x:Name="CurrentBatteryStatusText" Text="" Visibility="Collapsed"/>
+                        </Canvas>
+                    </Border>
+                    <Button x:Name="PowerButton" Canvas.Left="1208" Canvas.Top="640" Width="56" Height="56" Style="{StaticResource PowerRoundButton}" ToolTip="Power menu" Click="PowerButton_Click">
+                        <Canvas Width="32" Height="32">
+                            <TextBlock Text="&#xE7E8;" Canvas.Left="3" Canvas.Top="2" Width="26" Height="28" FontFamily="Segoe MDL2 Assets" FontSize="25" TextAlignment="Center"/>
+                        </Canvas>
+                    </Button>
+                </Canvas>
+
+                <Border x:Name="StartupSplashOverlay" Panel.ZIndex="50" Background="{DynamicResource SplashOverlayBrush}" Visibility="Visible">
+                    <Grid>
+                        <Border x:Name="StartupSplashCard" Width="470" Height="244" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                CornerRadius="24" Background="{DynamicResource ActivityPanelBrush}" BorderBrush="{DynamicResource PanelStroke}" BorderThickness="1">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="28" ShadowDepth="10" Opacity="0.30" Color="#142128"/>
+                            </Border.Effect>
+                            <Canvas>
+                                <TextBlock x:Name="StartupSplashTitle" Text="Laptop QA Testing" Canvas.Left="36" Canvas.Top="34" Width="398" Height="42"
+                                           Foreground="{DynamicResource TextBrush}" FontSize="28" FontWeight="SemiBold" TextAlignment="Center"/>
+                                <TextBlock x:Name="StartupSplashDots" Text="&#x25CF; &#x25CF; &#x25CF;" Canvas.Left="36" Canvas.Top="86" Width="398" Height="28"
+                                           Foreground="{DynamicResource AccentBrush}" FontFamily="Segoe UI Symbol" FontSize="18" FontWeight="Bold" TextAlignment="Center"/>
+                                <TextBlock x:Name="StartupSplashStatus" Text="Loading..." Canvas.Left="44" Canvas.Top="122" Width="382" Height="52"
+                                           Foreground="{DynamicResource MutedBrush}" FontSize="14" FontWeight="SemiBold" TextAlignment="Center"
+                                           TextWrapping="Wrap"/>
+                                <ProgressBar x:Name="StartupSplashProgress" Canvas.Left="88" Canvas.Top="192" Width="294" Height="8"
+                                             IsIndeterminate="True" Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource DarkGlassBrush}"/>
+                            </Canvas>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+    </Viewbox>
+</Window>
