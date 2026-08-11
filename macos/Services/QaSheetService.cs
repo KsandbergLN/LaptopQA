@@ -56,14 +56,14 @@ public static class QaSheetService
 
         using (var headerPaint = new SKPaint { Shader = SKShader.CreateLinearGradient(new SKPoint(0, 0), new SKPoint(Width, 180), [Color("#18333D"), Color("#5F858D")], null, SKShaderTileMode.Clamp) })
             canvas.DrawRect(0, 0, Width, 180, headerPaint);
-        canvas.DrawText(T("Laptop QA Testing"), 62, 83, title);
+        DrawText(canvas, T("Laptop QA Testing"), 62, 83, title);
         using (var subtitle = Paint(23, Color("#D8E8EC"), regular))
-            canvas.DrawText(T("Quality assurance summary"), 65, 125, subtitle);
+            DrawText(canvas, T("Quality assurance summary"), 65, 125, subtitle);
 
         var rows = BuildRows(d);
         var overall = rows.Any(r => r.State == "Bad") ? "Needs Attention" : rows.Any(r => r.State == "Warning") ? "Warning" : rows.All(r => r.State is "Ok" or "Ignored") ? "Passed" : "Incomplete";
         FillRound(canvas, new SKRect(1250, 38, 1538, 142), Color("#3D6974"), 18);
-        using (var overallLabel = Paint(17, Color("#D8E8EC"), bold)) canvas.DrawText(T("OVERALL"), 1328, 77, overallLabel);
+        using (var overallLabel = Paint(17, Color("#D8E8EC"), bold)) DrawText(canvas, T("OVERALL"), 1328, 77, overallLabel);
         using (var overallValue = Paint(27, SKColors.White, bold)) DrawCentered(canvas, T(overall), new SKRect(1260, 80, 1528, 132), overallValue);
 
         var meta = new[]
@@ -80,26 +80,26 @@ public static class QaSheetService
             Field(canvas, new SKRect(x, y, x + cellWidth, y + 92), meta[i].Item1, meta[i].Item2, label, value);
         }
 
-        canvas.DrawText(T("Hardware Specs").ToUpperInvariant(), 58, 486, heading);
+        DrawText(canvas, T("Hardware Specs").ToUpperInvariant(), 58, 486, heading);
         var hardware = new[] { ("CPU", d.Hardware.Cpu), (T("Memory").ToUpperInvariant(), d.Hardware.Memory), ("GPU", d.Hardware.Gpu), (T("Storage").ToUpperInvariant(), d.Hardware.Storage) };
         FillRound(canvas, new SKRect(55, 510, 1545, 690), Color("#FBFCFD"), 15, Color("#CBD9DF"));
         for (var i = 0; i < hardware.Length; i++)
         {
             var x = 82 + ((i % 2) * 744);
             var y = 548 + ((i / 2) * 72);
-            canvas.DrawText(hardware[i].Item1, x, y, label);
+            DrawText(canvas, hardware[i].Item1, x, y, label);
             DrawClipped(canvas, hardware[i].Item2, x + 138, y, 560, value);
         }
 
-        canvas.DrawText(T("QA Results").ToUpperInvariant(), 58, 752, heading);
+        DrawText(canvas, T("QA Results").ToUpperInvariant(), 58, 752, heading);
         var tableLeft = 55f;
         var tableTop = 778f;
         FillRound(canvas, new SKRect(tableLeft, tableTop, 1545, tableTop + 60), Color("#244F5C"), 10);
         using (var th = Paint(18, SKColors.White, bold))
         {
-            canvas.DrawText(T("TASK"), 78, tableTop + 39, th);
-            canvas.DrawText(T("STATUS"), 654, tableTop + 39, th);
-            canvas.DrawText(T("DETAIL"), 858, tableTop + 39, th);
+            DrawText(canvas, T("TASK"), 78, tableTop + 39, th);
+            DrawText(canvas, T("STATUS"), 654, tableTop + 39, th);
+            DrawText(canvas, T("DETAIL"), 858, tableTop + 39, th);
         }
 
         var rowTop = tableTop + 60;
@@ -117,7 +117,7 @@ public static class QaSheetService
         }
 
         var notesTop = rowTop + (rows.Count * 78) + 54;
-        canvas.DrawText(T("Notes").ToUpperInvariant(), 58, notesTop, heading);
+        DrawText(canvas, T("Notes").ToUpperInvariant(), 58, notesTop, heading);
         var rmaTop = notesTop + 24;
         NoteBox(canvas, new SKRect(55, rmaTop, 1545, rmaTop + 148), T("RMA Issues").ToUpperInvariant(), d.RmaIssues, label, body);
         var repairTop = rmaTop + 164;
@@ -125,7 +125,7 @@ public static class QaSheetService
         var footerTop = repairTop + 228;
         using var footerLine = new SKPaint { Color = Color("#D7E1E5"), StrokeWidth = 2 };
         canvas.DrawLine(55, footerTop, 1545, footerTop, footerLine);
-        canvas.DrawText($"{T("Generated")}: {DateTime.Now:G}", 58, footerTop + 31, small);
+        DrawText(canvas, $"{T("Generated")}: {DateTime.Now:G}", 58, footerTop + 31, small);
 
         using var image = surface.Snapshot();
         using var png = image.Encode(SKEncodedImageFormat.Png, 95);
@@ -169,8 +169,23 @@ public static class QaSheetService
         new(number, UiLocalization.Text(languageCode, task), value ? "Ok" : "Waiting",
             UiLocalization.Text(languageCode, value ? $"{task} checked off." : "Not checked off."));
     private static SKTypeface Typeface(string family, SKFontStyle? style = null) => SKTypeface.FromFamilyName(family, style ?? SKFontStyle.Normal) ?? SKTypeface.Default;
-    private static SKPaint Paint(float size, SKColor color, SKTypeface face) => new() { IsAntialias = true, TextSize = size, Color = color, Typeface = face };
+    private sealed class TextStyle(float size, SKColor color, SKTypeface face) : IDisposable
+    {
+        public SKPaint Paint { get; } = new() { IsAntialias = true, Color = color };
+        public SKFont Font { get; } = new(face, size);
+
+        public void Dispose()
+        {
+            Font.Dispose();
+            Paint.Dispose();
+        }
+    }
+
+    private static TextStyle Paint(float size, SKColor color, SKTypeface face) => new(size, color, face);
     private static SKColor Color(string hex) => SKColor.Parse(hex);
+
+    private static void DrawText(SKCanvas canvas, string text, float x, float y, TextStyle style) =>
+        canvas.DrawText(text, x, y, SKTextAlign.Left, style.Font, style.Paint);
 
     private static void FillRound(SKCanvas canvas, SKRect rect, SKColor fill, float radius, SKColor? stroke = null)
     {
@@ -181,17 +196,17 @@ public static class QaSheetService
         canvas.DrawRoundRect(rect, radius, radius, border);
     }
 
-    private static void Field(SKCanvas canvas, SKRect rect, string name, string? text, SKPaint label, SKPaint value)
+    private static void Field(SKCanvas canvas, SKRect rect, string name, string? text, TextStyle label, TextStyle value)
     {
         FillRound(canvas, rect, Color("#F7FAFB"), 13, Color("#CBD9DF"));
-        canvas.DrawText(name.ToUpperInvariant(), rect.Left + 17, rect.Top + 29, label);
+        DrawText(canvas, name.ToUpperInvariant(), rect.Left + 17, rect.Top + 29, label);
         DrawClipped(canvas, text, rect.Left + 17, rect.Top + 64, rect.Width - 34, value);
     }
 
-    private static void NoteBox(SKCanvas canvas, SKRect rect, string name, string? text, SKPaint label, SKPaint body)
+    private static void NoteBox(SKCanvas canvas, SKRect rect, string name, string? text, TextStyle label, TextStyle body)
     {
         FillRound(canvas, rect, Color("#FBFCFD"), 13, Color("#CBD9DF"));
-        canvas.DrawText(name, rect.Left + 17, rect.Top + 30, label);
+        DrawText(canvas, name, rect.Left + 17, rect.Top + 30, label);
         var maxLines = Math.Max(1, (int)Math.Floor((rect.Height - 65) / 25) + 1);
         DrawWrapped(canvas, text?.Trim() ?? "", rect.Left + 17, rect.Top + 65, rect.Width - 34, body, maxLines, 25, "");
     }
@@ -212,22 +227,23 @@ public static class QaSheetService
         DrawCentered(canvas, UiLocalization.Text(languageCode, text), rect, paint);
     }
 
-    private static void DrawCentered(SKCanvas canvas, string text, SKRect rect, SKPaint paint)
+    private static void DrawCentered(SKCanvas canvas, string text, SKRect rect, TextStyle style)
     {
-        var width = paint.MeasureText(text);
-        canvas.DrawText(text, rect.MidX - (width / 2), rect.MidY - ((paint.FontMetrics.Ascent + paint.FontMetrics.Descent) / 2), paint);
+        var width = style.Font.MeasureText(text);
+        var metrics = style.Font.Metrics;
+        DrawText(canvas, text, rect.MidX - (width / 2), rect.MidY - ((metrics.Ascent + metrics.Descent) / 2), style);
     }
 
-    private static void DrawClipped(SKCanvas canvas, string? text, float x, float baseline, float maxWidth, SKPaint paint)
+    private static void DrawClipped(SKCanvas canvas, string? text, float x, float baseline, float maxWidth, TextStyle style)
     {
         var value = string.IsNullOrWhiteSpace(text) ? "Not available" : text.Trim();
         var original = value;
-        while (value.Length > 1 && paint.MeasureText(value) > maxWidth) value = value[..^1];
+        while (value.Length > 1 && style.Font.MeasureText(value) > maxWidth) value = value[..^1];
         if (!string.Equals(value, original, StringComparison.Ordinal) && value.Length > 2) value = value[..^1] + "…";
-        canvas.DrawText(value, x, baseline, paint);
+        DrawText(canvas, value, x, baseline, style);
     }
 
-    private static void DrawWrapped(SKCanvas canvas, string? text, float x, float firstBaseline, float maxWidth, SKPaint paint, int maxLines, float lineHeight, string emptyFallback = "Not available")
+    private static void DrawWrapped(SKCanvas canvas, string? text, float x, float firstBaseline, float maxWidth, TextStyle style, int maxLines, float lineHeight, string emptyFallback = "Not available")
     {
         var words = (string.IsNullOrWhiteSpace(text) ? emptyFallback : text.Replace('\r', ' ').Replace('\n', ' ')).Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var lines = new List<string>();
@@ -235,7 +251,7 @@ public static class QaSheetService
         foreach (var word in words)
         {
             var candidate = string.IsNullOrEmpty(current) ? word : $"{current} {word}";
-            if (paint.MeasureText(candidate) <= maxWidth) { current = candidate; continue; }
+            if (style.Font.MeasureText(candidate) <= maxWidth) { current = candidate; continue; }
             if (!string.IsNullOrEmpty(current)) lines.Add(current);
             current = word;
             if (lines.Count == maxLines) break;
@@ -246,10 +262,10 @@ public static class QaSheetService
         if (consumed.Length < string.Join(" ", words).Length && lines.Count > 0)
         {
             var last = lines[^1];
-            while (last.Length > 1 && paint.MeasureText(last + "…") > maxWidth) last = last[..^1];
+            while (last.Length > 1 && style.Font.MeasureText(last + "…") > maxWidth) last = last[..^1];
             lines[^1] = last + "…";
         }
-        for (var i = 0; i < lines.Count; i++) canvas.DrawText(lines[i], x, firstBaseline + (i * lineHeight), paint);
+        for (var i = 0; i < lines.Count; i++) DrawText(canvas, lines[i], x, firstBaseline + (i * lineHeight), style);
     }
 
     private static string Safe(string value) => string.IsNullOrWhiteSpace(value) ? "unknown" : string.Concat(value.Where(char.IsLetterOrDigit));
