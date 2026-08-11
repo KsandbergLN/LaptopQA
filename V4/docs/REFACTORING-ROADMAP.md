@@ -2,6 +2,8 @@
 
 `MainWindow.xaml.cs` remains the largest maintenance risk. Refactoring must preserve behavior and be performed in reviewed, independently buildable steps.
 
+The first extraction is complete: browser launch, URL validation, and clipboard fallback for ServiceNow now live in `ServiceNowRequestLauncher.cs`.
+
 1. **Mechanical partial-class split:** move existing regions into `MainWindow.Startup.cs`, `MainWindow.Hardware.cs`, `MainWindow.Diagnostics.cs`, `MainWindow.Usb.cs`, `MainWindow.Output.cs`, and `MainWindow.Session.cs` without logic changes.
 2. **Process runner:** introduce an injectable process/PowerShell runner and characterize exit-code, timeout, cancellation, and logging behavior.
 3. **Configuration/data root:** extract config serialization, atomic writes, shared-data-root selection, and migration tests.

@@ -3467,11 +3467,7 @@ $items = @(
 		try
 		{
 			string requestDescription = BuildServiceNowRequestDescription();
-			Clipboard.SetText(requestDescription);
-			Process.Start(new ProcessStartInfo(GetServiceNowRequestUrl())
-			{
-				UseShellExecute = true
-			});
+			ServiceNowRequestLauncher.OpenWithClipboardFallback(GetServiceNowRequestUrl(), requestDescription);
 			AddActivity("ServiceNow", "ServiceNow request opened; request details copied for manual paste.");
 			MessageBox.Show(this, "The ServiceNow request page was opened and the request details were copied to the clipboard. Paste them into the description field and review every field before submitting.", "ServiceNow manual fallback", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
