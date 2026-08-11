@@ -1,0 +1,15 @@
+﻿{
+    "TechnicianName":  "Kris Sandberg",
+    "AppTheme":  "Light",
+    "CameraRoll":  "C:\\Users\\defaultuser0\\Pictures\\Camera Roll",
+    "CameraRollCleanupTimeoutSeconds":  30,
+    "CameraRollCleanupRetryDelaySeconds":  2,
+    "WifiRescanEthernetDisableDelaySeconds":  3,
+    "EthernetRestoreDelaySeconds":  2,
+    "DellWarrantyCliPath":  "",
+    "ServiceNowRequestUrl":  "https://reedelsevier.service-now.com/reed?id=sc_cat_item&sys_id=23302f892bed96006f7581afe8da1547&sysparm_category=c69e7347db824740d2cbf2f9af961982",
+    "ServiceNowTypeOfRequest":  "Other",
+    "ServiceNowAssignmentGroupName":  "Desktop Support (Miamisburg) - L2",
+    "ServiceNowAssignmentGroupSysId":  "9d144e37bdef1000e25cbf141e60d715",
+    "ServiceNowAutomationDelayMilliseconds":  500
+}

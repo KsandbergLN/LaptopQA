@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="LaptopQATestingMac.SettingsWindow"
+        Title="Config" Width="780" Height="760" MinWidth="700" MinHeight="620"
+        WindowStartupLocation="CenterOwner">
+  <Window.Resources>
+    <SolidColorBrush x:Key="ConfigTextBrush" Color="#06141B"/><SolidColorBrush x:Key="ConfigMutedBrush" Color="#1D323C"/>
+    <SolidColorBrush x:Key="ConfigAccentBrush" Color="#004F4A"/><SolidColorBrush x:Key="ConfigShellBrush" Color="#FAFAF6"/>
+    <SolidColorBrush x:Key="ConfigInputBrush" Color="#FFFFFF"/><SolidColorBrush x:Key="ConfigStrokeBrush" Color="#7F969F"/>
+    <SolidColorBrush x:Key="ConfigSelectionBrush" Color="#2F6F68"/><SolidColorBrush x:Key="ConfigSelectionTextBrush" Color="#FFFFFF"/><SolidColorBrush x:Key="ConfigToolTipBrush" Color="#F2F6F4"/>
+    <SolidColorBrush x:Key="ConfigButtonBrush" Color="#D8E1DF"/><SolidColorBrush x:Key="ConfigButtonHoverBrush" Color="#C5D5D2"/><SolidColorBrush x:Key="ConfigButtonPressedBrush" Color="#AFC4C0"/>
+    <SolidColorBrush x:Key="ConfigDangerBrush" Color="#9B3036"/><SolidColorBrush x:Key="ConfigDangerHoverBrush" Color="#BA4147"/><SolidColorBrush x:Key="ConfigDangerPressedBrush" Color="#782229"/>
+    <SolidColorBrush x:Key="ConfigSaveBrush" Color="#2F855A"/><SolidColorBrush x:Key="ConfigSaveHoverBrush" Color="#3EA96F"/><SolidColorBrush x:Key="ConfigSavePressedBrush" Color="#246A48"/>
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="TextBlock"><Setter Property="Foreground" Value="{DynamicResource ConfigTextBrush}"/></Style>
+    <Style Selector="TextBlock.label"><Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource ConfigMutedBrush}"/><Setter Property="Margin" Value="0,8,0,3"/></Style>
+    <Style Selector="TextBlock.section"><Setter Property="Foreground" Value="{DynamicResource ConfigAccentBrush}"/><Setter Property="FontSize" Value="16"/><Setter Property="FontWeight" Value="Bold"/><Setter Property="Margin" Value="0,20,0,2"/></Style>
+    <Style Selector="TextBox"><Setter Property="MinHeight" Value="32"/><Setter Property="CornerRadius" Value="8"/><Setter Property="Background" Value="{DynamicResource ConfigInputBrush}"/><Setter Property="Foreground" Value="{DynamicResource ConfigTextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigStrokeBrush}"/><Setter Property="SelectionBrush" Value="{DynamicResource ConfigSelectionBrush}"/><Setter Property="SelectionForegroundBrush" Value="{DynamicResource ConfigSelectionTextBrush}"/></Style>
+    <Style Selector="ComboBox"><Setter Property="MinHeight" Value="32"/><Setter Property="Background" Value="{DynamicResource ConfigInputBrush}"/><Setter Property="Foreground" Value="{DynamicResource ConfigTextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigStrokeBrush}"/></Style>
+    <Style Selector="Button"><Setter Property="Padding" Value="14,8"/><Setter Property="CornerRadius" Value="14"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Background" Value="{DynamicResource ConfigButtonBrush}"/><Setter Property="Foreground" Value="{DynamicResource ConfigTextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigStrokeBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Template"><ControlTemplate><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}"><ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter></Style>
+    <Style Selector="Button:pointerover"><Setter Property="Background" Value="{DynamicResource ConfigButtonHoverBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigAccentBrush}"/></Style>
+    <Style Selector="Button:pressed"><Setter Property="Background" Value="{DynamicResource ConfigButtonPressedBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigAccentBrush}"/></Style>
+    <Style Selector="Button.danger"><Setter Property="Background" Value="{DynamicResource ConfigDangerBrush}"/><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.danger:pointerover"><Setter Property="Background" Value="{DynamicResource ConfigDangerHoverBrush}"/></Style><Style Selector="Button.danger:pressed"><Setter Property="Background" Value="{DynamicResource ConfigDangerPressedBrush}"/></Style>
+    <Style Selector="Button.save"><Setter Property="Background" Value="{DynamicResource ConfigSaveBrush}"/><Setter Property="Foreground" Value="White"/></Style>
+    <Style Selector="Button.save:pointerover"><Setter Property="Background" Value="{DynamicResource ConfigSaveHoverBrush}"/></Style><Style Selector="Button.save:pressed"><Setter Property="Background" Value="{DynamicResource ConfigSavePressedBrush}"/></Style>
+    <Style Selector="ToolTip"><Setter Property="Background" Value="{DynamicResource ConfigToolTipBrush}"/><Setter Property="Foreground" Value="{DynamicResource ConfigTextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource ConfigStrokeBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="8"/><Setter Property="Padding" Value="10,6"/></Style>
+  </Window.Styles>
+  <Grid x:Name="ConfigShell" Background="{DynamicResource ConfigShellBrush}" RowDefinitions="Auto,*,Auto">
+    <StackPanel Margin="28,22,28,12"><TextBlock Text="Config" FontSize="26" FontWeight="Bold"/><TextBlock Text="Settings are shared with Laptop QA V4 so both apps use the same saved configuration." Foreground="{DynamicResource ConfigMutedBrush}" TextWrapping="Wrap"/></StackPanel>
+    <ScrollViewer Grid.Row="1" Margin="28,0">
+      <StackPanel>
+        <Grid ColumnDefinitions="2*,16,1.35*,16,1*">
+          <StackPanel><TextBlock Classes="label" Text="Technician name"/><TextBox x:Name="TechnicianNameBox"/></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Classes="label" Text="Language"/><ComboBox x:Name="LanguageBox"/></StackPanel>
+          <StackPanel Grid.Column="4"><TextBlock Classes="label" Text="Theme"/><ComboBox x:Name="ThemeBox"><ComboBoxItem Content="Dark"/><ComboBoxItem Content="Light"/><ComboBoxItem Content="AMOLED"/></ComboBox></StackPanel>
+        </Grid>
+        <TextBlock Classes="section" Text="Diagnostics and local folders"/>
+        <Grid ColumnDefinitions="1*,16,1*">
+          <StackPanel><TextBlock Classes="label" Text="Autopilot group tag"/><TextBox x:Name="AutopilotGroupTagBox"/></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Classes="label" Text="Device name format"/><TextBox x:Name="QaComputerNameFormatBox" ToolTip.Tip="Controls the device name used in the app, on QA sheets, and in saved files. Available values: {serial}, {computer}, and {asset}."/></StackPanel>
+        </Grid>
+        <TextBlock Classes="label" Text="Camera Roll folder"/>
+        <Grid ColumnDefinitions="*,10,Auto"><TextBox x:Name="CameraRollBox"/><Button Grid.Column="2" Content="Browse" Click="BrowseCameraRollButton_Click" ToolTip.Tip="Choose the Camera Roll folder."/></Grid>
+        <TextBlock Classes="label" Text="Dell diagnostics log folder (optional)"/>
+        <Grid ColumnDefinitions="*,10,Auto"><TextBox x:Name="DiagnosticsFolderBox"/><Button Grid.Column="2" Content="Browse" Click="BrowseDiagnosticsFolderButton_Click" ToolTip.Tip="Choose the folder containing Dell diagnostic logs."/></Grid>
+        <Grid ColumnDefinitions="1*,16,1*">
+          <StackPanel><TextBlock Classes="label" Text="Camera cleanup timeout seconds"/><TextBox x:Name="CleanupTimeoutBox"/></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Classes="label" Text="Cleanup retry delay seconds"/><TextBox x:Name="CleanupRetryBox"/></StackPanel>
+        </Grid>
+        <Grid ColumnDefinitions="1*,16,1*">
+          <StackPanel><TextBlock Classes="label" Text="Wi-Fi rescan wait seconds"/><TextBox x:Name="WifiDelayBox"/></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Classes="label" Text="Ethernet restore wait seconds"/><TextBox x:Name="EthernetDelayBox"/></StackPanel>
+        </Grid>
+
+        <TextBlock Classes="section" Text="ServiceNow"/>
+        <TextBlock Classes="label" Text="Request URL"/><TextBox x:Name="ServiceNowUrlBox"/>
+        <Grid ColumnDefinitions="1*,16,1*">
+          <StackPanel><TextBlock Classes="label" Text="Type of request"/><TextBox x:Name="ServiceNowTypeBox"/></StackPanel>
+          <StackPanel Grid.Column="2"><TextBlock Classes="label" Text="Automation wait milliseconds"/><TextBox x:Name="ServiceNowDelayBox"/></StackPanel>
+        </Grid>
+        <TextBlock Classes="label" Text="Assignment group name"/><TextBox x:Name="ServiceNowGroupBox"/>
+        <TextBlock Classes="label" Text="Assignment group sys ID"/><TextBox x:Name="ServiceNowGroupIdBox" Margin="0,0,0,22"/>
+      </StackPanel>
+    </ScrollViewer>
+    <Grid Grid.Row="2" Margin="28,14,28,22" ColumnDefinitions="Auto,*,Auto,10,Auto">
+      <Button Classes="danger" Content="Reset Settings" Click="FactorySettingsButton_Click" ToolTip.Tip="Reset all defaults and remove the technician name. Saved QA output is kept."/>
+      <Button Grid.Column="2" Content="Cancel" Width="92" Click="CancelButton_Click" ToolTip.Tip="Close Config without saving changes."/>
+      <Button Grid.Column="4" Classes="save" Content="Save" Width="92" Click="SaveButton_Click" ToolTip.Tip="Save the current macOS configuration and theme."/>
+    </Grid>
+  </Grid>
+</Window>
