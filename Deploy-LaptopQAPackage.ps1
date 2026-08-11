@@ -44,8 +44,14 @@ if ($OneDrive) {
     if (-not (Test-Path -LiteralPath $syncScript -PathType Leaf)) {
         throw "OneDrive deployment helper not found: $syncScript"
     }
+    $versionPrefix = if ($manifest.PackageName -match '^(?<Prefix>.+)-Iteration-\d{8}-\d{6}$') {
+        $Matches.Prefix
+    }
+    else {
+        $manifest.PackageName
+    }
     if ($PSCmdlet.ShouldProcess('OneDrive release location', "Deploy accepted package $package")) {
-        $results += & $syncScript -SourceFolder $package -VersionPrefix 'LaptopQA' -DelayMinutes 30
+        $results += & $syncScript -SourceFolder $package -VersionPrefix $versionPrefix -DelayMinutes 30
     }
 }
 

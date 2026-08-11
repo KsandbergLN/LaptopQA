@@ -39,7 +39,12 @@ $sourceCommit = [string]$manifest.SourceCommit
 if ([string]::IsNullOrWhiteSpace($sourceCommit)) {
     throw 'The candidate has no source commit. Rebuild it from a committed canonical-source baseline.'
 }
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = $PSScriptRoot
+$detectedRepoRoot = [string](& git -C $repoRoot rev-parse --show-toplevel 2>$null)
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($detectedRepoRoot)) {
+    throw 'The approval script is not running from a Git repository.'
+}
+$repoRoot = (Resolve-Path -LiteralPath $detectedRepoRoot.Trim()).Path
 & git -C $repoRoot cat-file -e "$sourceCommit^{commit}" 2>$null
 if ($LASTEXITCODE -ne 0) {
     throw "The package source commit is not present in the canonical repository: $sourceCommit"
