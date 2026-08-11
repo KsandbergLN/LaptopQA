@@ -2,11 +2,11 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-namespace LaptopQATestingMac.Services;
+namespace LaptopQA.Mac.Services;
 
 internal static class StartupJokeService
 {
-    private const string JokeResourceName = "LaptopQATestingMac.Assets.loading-jokes.txt";
+    private const string JokeResourceName = "LaptopQA.Mac.Assets.loading-jokes.txt";
     private static readonly string[] Jokes = LoadJokes();
 
     public static int Count => Jokes.Length;

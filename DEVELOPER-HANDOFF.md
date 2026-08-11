@@ -1,4 +1,4 @@
-# Laptop QA V4 Developer Handoff
+# Laptop QA  Developer Handoff
 
 Last reviewed: 2026-08-11
 
@@ -6,7 +6,7 @@ Last reviewed: 2026-08-11
 
 ## Source of truth
 
-Use this repository root for current development. It contains the newest maintained C# and XAML files and builds as `LaptopQATestingV4`.
+Use this repository root for current development. It contains the newest maintained C# and XAML files and builds as `LaptopQA.Windows`.
 
 Do not edit these as source:
 
@@ -20,7 +20,7 @@ The canonical source and its shared dependencies are maintained in this reposito
 Run from the repository root:
 
 ```powershell
-dotnet build .\LaptopQATestingV4.csproj -c Release
+dotnet build .\LaptopQA.Windows.csproj -c Release
 ```
 
 For a packaged iteration, run `Build-LaptopQAIteration.ps1 -NoDeploy`. It creates a validated candidate and SHA-256 manifest but never deploys. Record test evidence with `Approve-LaptopQAPackage.ps1`, then use the separate `Deploy-LaptopQAPackage.ps1` with an explicit `-OneDrive` and/or `-RemovableDrives` target. All scripts support `-WhatIf` where state can change. Do not edit packaged copies under `dist`.

@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 internal sealed class StartupSplashWindow : Window
 {
@@ -27,7 +27,7 @@ internal sealed class StartupSplashWindow : Window
         WindowStartupLocation = WindowStartupLocation.CenterScreen;
         Background = Brushes.Transparent;
         TransparencyLevelHint = [WindowTransparencyLevel.Transparent];
-        Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://LaptopQATestingMac/Assets/app-icon.png")));
+        Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://LaptopQA.Mac/Assets/app-icon.png")));
 
         var title = new TextBlock
         {

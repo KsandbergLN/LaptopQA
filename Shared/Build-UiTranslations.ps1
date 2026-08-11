@@ -61,7 +61,7 @@ foreach ($file in $sourceFiles) {
     'Reset all configuration defaults and remove the saved technician name. Saved QA sheets and logs are kept.',
     'Reset all defaults and remove the technician name. Saved QA output is kept.',
     'Close Config without saving changes.','Save the current macOS configuration and theme.',
-    'Settings are shared with Laptop QA V4 so both apps use the same saved configuration.',
+    'Settings are shared with Laptop QA  so both apps use the same saved configuration.',
     'Diagnostics and local folders','Request URL','Type of request','Automation wait milliseconds',
     'Assignment group name','Assignment group sys ID','Camera cleanup timeout seconds',
     'Excellent','Good','Fair','Poor','Battery Health'

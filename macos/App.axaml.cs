@@ -1,9 +1,9 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using LaptopQATestingMac.Services;
+using LaptopQA.Mac.Services;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public sealed partial class App : Application
 {

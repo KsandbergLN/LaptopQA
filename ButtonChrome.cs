@@ -1,9 +1,9 @@
 using System.Windows.Controls;
 using System.Windows.Markup;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
-internal static class V4ButtonChrome
+internal static class ButtonChrome
 {
 	public static ControlTemplate RoundedTemplate()
 	{

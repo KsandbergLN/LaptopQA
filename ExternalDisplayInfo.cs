@@ -1,4 +1,4 @@
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed record ExternalDisplayInfo(string DisplayName, string MonitorName, int Width, int Height, int X, int Y, bool IsPrimary)
 {

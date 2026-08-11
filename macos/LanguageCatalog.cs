@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public sealed record AppLanguage(string Code, string Name)
 {

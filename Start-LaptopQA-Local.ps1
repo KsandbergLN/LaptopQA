@@ -30,7 +30,7 @@ if (-not $isWindowsPlatform) {
         throw "The Apple Silicon Laptop QA app was not found:`n$sourceMacApp"
     }
 
-    $sourceMacExe = Join-Path $sourceMacApp 'Contents/MacOS/LaptopQATestingMac'
+    $sourceMacExe = Join-Path $sourceMacApp 'Contents/MacOS/LaptopQA.Mac'
     $sourceMacInfo = Get-Item -LiteralPath $sourceMacExe
     $macStamp = "{0}-{1}" -f $sourceMacInfo.LastWriteTimeUtc.ToString('yyyyMMddHHmmss'), $sourceMacInfo.Length
     $macRuntimeRoot = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::ApplicationData)) "Laptop QA/Runtime/$macStamp"
@@ -40,21 +40,21 @@ if (-not $isWindowsPlatform) {
         & /usr/bin/ditto $sourceMacApp $localMacApp
         if ($LASTEXITCODE -ne 0) { throw "Could not stage the macOS app locally. ditto exit code: $LASTEXITCODE" }
     }
-    & /bin/chmod +x (Join-Path $localMacApp 'Contents/MacOS/LaptopQATestingMac')
+    & /bin/chmod +x (Join-Path $localMacApp 'Contents/MacOS/LaptopQA.Mac')
     & /usr/bin/open $localMacApp --args --data-root $macPackageRoot
     if ($LASTEXITCODE -ne 0) { throw "macOS could not open Laptop QA. open exit code: $LASTEXITCODE" }
     exit 0
 }
 
-$isInsideAppFolder = Test-Path -LiteralPath (Join-Path $scriptFolder 'LaptopQATestingV4.exe') -PathType Leaf
+$isInsideAppFolder = Test-Path -LiteralPath (Join-Path $scriptFolder 'LaptopQA.Windows.exe') -PathType Leaf
 $nestedAppFolder = Join-Path $scriptFolder 'App'
-$isContainerFolder = Test-Path -LiteralPath (Join-Path $nestedAppFolder 'LaptopQATestingV4.exe') -PathType Leaf
+$isContainerFolder = Test-Path -LiteralPath (Join-Path $nestedAppFolder 'LaptopQA.Windows.exe') -PathType Leaf
 $packageRoot = if ($isInsideAppFolder) { Split-Path -Parent $scriptFolder } else { $scriptFolder }
 $sourceApp = if ($isInsideAppFolder) {
     $scriptFolder
 } elseif ($isContainerFolder) {
     $nestedAppFolder
-} elseif (Test-Path -LiteralPath (Join-Path $packageRoot 'LAPTOP QA\App\LaptopQATestingV4.exe') -PathType Leaf) {
+} elseif (Test-Path -LiteralPath (Join-Path $packageRoot 'LAPTOP QA\App\LaptopQA.Windows.exe') -PathType Leaf) {
     Join-Path $packageRoot 'LAPTOP QA\App'
 } else {
     Join-Path $packageRoot 'LAPTOP QA'
@@ -113,7 +113,7 @@ function Copy-AppFolder {
     )
 
     $localExeCandidates = @(
-        (Join-Path $Destination 'LaptopQATestingV4.exe')
+        (Join-Path $Destination 'LaptopQA.Windows.exe')
     )
     $existingLocalExe = $localExeCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     if ($existingLocalExe) {
@@ -270,7 +270,7 @@ try {
         throw "The LAPTOP QA folder was not found next to this start script.`n`nExpected:`n$sourceApp"
     }
 
-    $exeName = 'LaptopQATestingV4.exe'
+    $exeName = 'LaptopQA.Windows.exe'
     if (-not (Test-Path -LiteralPath (Join-Path $sourceApp $exeName) -PathType Leaf)) {
         throw "Could not find $exeName inside:`n$sourceApp"
     }

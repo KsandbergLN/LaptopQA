@@ -4,7 +4,7 @@ This is the Avalonia/C# macOS port of Laptop QA Testing. WPF is Windows-only, so
 
 ## Workflow consistency
 
-A primary benefit of Laptop QA Testing is consistency. The app gives technicians the same section order, prompts, terminology, final checks, notes, and QA-sheet format for each laptop. The macOS version intentionally mirrors the Windows V4 workflow and presentation so technicians can use the same method and produce comparable records on either platform, even where macOS hardware actions are disabled and cached Windows results are used.
+A primary benefit of Laptop QA Testing is consistency. The app gives technicians the same section order, prompts, terminology, final checks, notes, and QA-sheet format for each laptop. The macOS version intentionally mirrors the Windows  workflow and presentation so technicians can use the same method and produce comparable records on either platform, even where macOS hardware actions are disabled and cached Windows results are used.
 
 Retained functionality:
 

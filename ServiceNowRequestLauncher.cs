@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Windows;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 internal static class ServiceNowRequestLauncher
 {

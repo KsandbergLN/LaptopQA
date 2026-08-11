@@ -4,7 +4,7 @@
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleDisplayName</key><string>Laptop QA</string>
-  <key>CFBundleExecutable</key><string>LaptopQATestingMac</string>
+  <key>CFBundleExecutable</key><string>LaptopQA.Mac</string>
   <key>CFBundleIdentifier</key><string>com.reedelsevier.laptopqa</string>
   <key>CFBundleIconFile</key><string>app-icon.icns</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>

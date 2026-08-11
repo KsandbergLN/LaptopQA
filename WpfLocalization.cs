@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using LaptopQA.Shared;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public static class WpfLocalization
 {

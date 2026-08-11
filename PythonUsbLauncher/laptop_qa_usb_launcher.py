@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 
-APP_EXES = ("LaptopQATestingV4.exe",)
+APP_EXES = ("LaptopQA.Windows.exe",)
 MUTABLE_ITEMS = ("Laptop-QA-Config.json", ".runtime", "hardware", "hash", "logs", "QA sheets")
 
 

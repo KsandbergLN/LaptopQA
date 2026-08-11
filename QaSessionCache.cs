@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed class QaSessionCache
 {

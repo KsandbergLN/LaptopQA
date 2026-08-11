@@ -1,7 +1,7 @@
 using SkiaSharp;
 using LaptopQA.Shared;
 
-namespace LaptopQATestingMac.Services;
+namespace LaptopQA.Mac.Services;
 
 public sealed record QaSheetData(
     AppConfig Config,

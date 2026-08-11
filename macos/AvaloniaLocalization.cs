@@ -3,7 +3,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Media;
 using LaptopQA.Shared;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public static class AvaloniaLocalization
 {

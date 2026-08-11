@@ -1,3 +1,3 @@
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public sealed record QaSheetFiles(string PngPath);

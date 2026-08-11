@@ -1,6 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="LaptopQATestingMac.App"
+             x:Class="LaptopQA.Mac.App"
              Name="Laptop QA"
              RequestedThemeVariant="Light">
   <Application.Styles>

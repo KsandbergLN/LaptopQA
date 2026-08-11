@@ -25,8 +25,8 @@ The repository root is the canonical Windows source. The `main` branch is author
 Run each project independently from the repository root:
 
 ```powershell
-dotnet build .\LaptopQATestingV4.csproj -c Release --no-incremental
-dotnet build .\macos\LaptopQATestingMac.csproj -c Release --no-incremental
+dotnet build .\LaptopQA.Windows.csproj -c Release --no-incremental
+dotnet build .\macos\LaptopQA.Mac.csproj -c Release --no-incremental
 ```
 
 The Windows project explicitly excludes `macos\**\*.cs`; do not remove that boundary or add macOS files to the Windows project. The current Windows validation target is 0 warnings and 0 errors. The macOS project currently has 24 Avalonia/Skia deprecation warnings and 0 errors.
@@ -38,8 +38,8 @@ Clone the private repository, then run the Windows app after building:
 ```powershell
 git clone https://github.com/KsandbergLN/LaptopQA.git
 Set-Location .\LaptopQA
-dotnet build .\LaptopQATestingV4.csproj -c Release
-Start-Process .\bin\Release\net10.0-windows\LaptopQATestingV4.exe
+dotnet build .\LaptopQA.Windows.csproj -c Release
+Start-Process .\bin\Release\net10.0-windows\LaptopQA.Windows.exe
 ```
 
 For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.

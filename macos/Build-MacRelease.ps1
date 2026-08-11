@@ -2,8 +2,8 @@ param([string]$Stamp = (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
 $ErrorActionPreference = 'Stop'
 $projectDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$project = Join-Path $projectDir 'LaptopQATestingMac.csproj'
-$dist = Join-Path $projectDir "dist\LaptopQATestingMac-$Stamp"
+$project = Join-Path $projectDir 'LaptopQA.Mac.csproj'
+$dist = Join-Path $projectDir "dist\LaptopQA.Mac-$Stamp"
 $staging = Join-Path $dist '.publish'
 $rid = 'osx-arm64'
 $appRoot = Join-Path $dist 'macOS Laptop QA Launcher.app'
@@ -25,8 +25,8 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 $app = Join-Path $appRoot 'Contents'
 New-Item -ItemType Directory -Force -Path (Join-Path $app 'MacOS'), (Join-Path $app 'Resources') | Out-Null
-Get-ChildItem -LiteralPath $publish -File | Where-Object { $_.Name -notin @('LaptopQATestingMac', 'LaptopQATestingMac.dSYM') } | Copy-Item -Destination (Join-Path $app 'MacOS') -Force
-if (Test-Path (Join-Path $publish 'LaptopQATestingMac')) { Copy-Item (Join-Path $publish 'LaptopQATestingMac') (Join-Path $app 'MacOS\LaptopQATestingMac') -Force }
+Get-ChildItem -LiteralPath $publish -File | Where-Object { $_.Name -notin @('LaptopQA.Mac', 'LaptopQA.Mac.dSYM') } | Copy-Item -Destination (Join-Path $app 'MacOS') -Force
+if (Test-Path (Join-Path $publish 'LaptopQA.Mac')) { Copy-Item (Join-Path $publish 'LaptopQA.Mac') (Join-Path $app 'MacOS\LaptopQA.Mac') -Force }
 Copy-Item (Join-Path $projectDir 'Assets\app-icon.png') (Join-Path $app 'Resources\app-icon.png') -Force
 Copy-Item (Join-Path $projectDir 'Assets\app-icon.icns') (Join-Path $app 'Resources\app-icon.icns') -Force
 Copy-Item (Join-Path $projectDir 'Info.plist') (Join-Path $app 'Info.plist') -Force
@@ -48,7 +48,7 @@ $removableDriveCopies = @()
 $removableDrives = @([System.IO.DriveInfo]::GetDrives() | Where-Object {
     $_.IsReady -and
     $_.DriveType -eq [System.IO.DriveType]::Removable -and
-    ($_.VolumeLabel -eq 'IT SUPP' -or (Test-Path -LiteralPath (Join-Path $_.RootDirectory.FullName 'LAPTOP QA\App\LaptopQATestingV4.exe') -PathType Leaf))
+    ($_.VolumeLabel -eq 'IT SUPP' -or (Test-Path -LiteralPath (Join-Path $_.RootDirectory.FullName 'LAPTOP QA\App\LaptopQA.Windows.exe') -PathType Leaf))
 })
 foreach ($drive in $removableDrives) {
     $driveRoot = (Resolve-Path -LiteralPath $drive.RootDirectory.FullName).Path.TrimEnd('\')
@@ -65,8 +65,8 @@ foreach ($drive in $removableDrives) {
     }
     Remove-Item -LiteralPath (Join-Path $driveRoot 'Open on macOS.txt') -Force -ErrorAction SilentlyContinue
 
-    $sourceExecutable = Join-Path $appRoot 'Contents\MacOS\LaptopQATestingMac'
-    $targetExecutable = Join-Path $targetApp 'Contents\MacOS\LaptopQATestingMac'
+    $sourceExecutable = Join-Path $appRoot 'Contents\MacOS\LaptopQA.Mac'
+    $targetExecutable = Join-Path $targetApp 'Contents\MacOS\LaptopQA.Mac'
     if ((Get-Item -LiteralPath $sourceExecutable).Length -ne
         (Get-Item -LiteralPath $targetExecutable).Length) {
         throw "The macOS app copy to $driveRoot could not be verified."
@@ -77,6 +77,6 @@ foreach ($drive in $removableDrives) {
 [pscustomobject]@{
     ReleaseFolder = $dist
     App = $appRoot
-    Arm64 = Test-Path (Join-Path $appRoot 'Contents\MacOS\LaptopQATestingMac')
+    Arm64 = Test-Path (Join-Path $appRoot 'Contents\MacOS\LaptopQA.Mac')
     RemovableDriveCopies = $removableDriveCopies
 } | ConvertTo-Json

@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Threading;
 
-namespace LaptopQATestingV4;
+namespace LaptopQA.Windows;
 
 public partial class App : Application
 {

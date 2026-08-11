@@ -6,7 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
-namespace LaptopQATestingMac;
+namespace LaptopQA.Mac;
 
 public sealed class QaSheetPreviewWindow : Window
 {
