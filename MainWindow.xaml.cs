@@ -85,6 +85,24 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private sealed record QaRenderRow(string Number, string Task, string State, string Detail);
 
+	private sealed record CachedSessionOption(string FilePath, QaSessionCache Session, string DisplayName)
+	{
+		public override string ToString() => DisplayName;
+	}
+
+	private sealed class CachedSessionIndexEntry
+	{
+		public string SessionId { get; set; } = "";
+
+		public string FileName { get; set; } = "";
+
+		public string ServiceTag { get; set; } = "";
+
+		public DateTime StartedAt { get; set; }
+
+		public DateTime SavedAt { get; set; }
+	}
+
 	private sealed record UsbPortObservation(string Name, string Path);
 
 	private const string DataDriveMarkerFileName = "Laptop-QA-Drive.json";
@@ -218,6 +236,16 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private DateTime _qaSessionCacheWriteUtc;
 
+	private string _activeQaSessionId = "";
+
+	private DateTime _activeQaSessionStartedAt;
+
+	private readonly List<CachedSessionOption> _cachedSessionOptions = new List<CachedSessionOption>();
+
+	private bool _updatingCachedSessionPicker;
+
+	private DispatcherTimer? _headerClockTimer;
+
 	private DateTime _configWriteUtc;
 
 	private static readonly string[] StartupLoadingJokes = new string[365]
@@ -295,6 +323,10 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private string QaSessionCachePath => Path.Combine(RuntimeDir, "qa-session.json");
 
+	private string QaSessionArchiveDir => Path.Combine(RuntimeDir, "sessions");
+
+	private string QaSessionIndexPath => Path.Combine(RuntimeDir, "sessions-index.json");
+
 	private string ConfigPath => Path.Combine(_dataRoot, "Laptop-QA-Config.json");
 
 	private string CctkExe => Path.Combine(_appRoot, "tools", "cctk", "cctk.exe");
@@ -344,6 +376,13 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private async void Window_Loaded(object sender, RoutedEventArgs e)
 	{
+		_headerClockTimer = new DispatcherTimer
+		{
+			Interval = TimeSpan.FromSeconds(1)
+		};
+		_headerClockTimer.Tick += HeaderClockTimer_Tick;
+		UpdateHeaderDateTime();
+		_headerClockTimer.Start();
 		StartCurrentBatteryPolling();
 		EnsureFolders();
 		_config = LoadConfig();
@@ -367,6 +406,7 @@ public partial class MainWindow : Window, IComponentConnector
 		CleanupOldFiles(LogsDir, 90, "Logs", "log file(s)", recursive: true);
 		CleanupOldFiles(ActivityDir, 90, "Activity", "activity log file(s)", recursive: true);
 		CleanupOldFiles(HardwareDir, 90, "Hardware", "hardware snapshot(s)");
+		CleanupCachedSessions();
 		CleanupDiagnosticsSourceArchives();
 		CleanupQaSheetHtmlFiles();
 		CleanupEdgeQaProfiles();
@@ -378,6 +418,7 @@ public partial class MainWindow : Window, IComponentConnector
 			SaveQaSessionCache();
 			_completionCelebrated = IsQaComplete();
 			_qaSessionReady = true;
+			RefreshCachedSessionPicker();
 			SetSummaryStatus("Ready");
 			AddActivity("System", "Startup data refresh skipped because the saved QA session has not been reset.");
 			await Task.Delay(450);
@@ -403,6 +444,7 @@ public partial class MainWindow : Window, IComponentConnector
 		ErrorLog.StartSession(CachedFileIdentifier());
 		_completionCelebrated = IsQaComplete();
 		_qaSessionReady = true;
+		RefreshCachedSessionPicker();
 		ShowRemovableDriveWarningIfNeeded();
 	}
 
@@ -424,6 +466,7 @@ public partial class MainWindow : Window, IComponentConnector
 		Directory.CreateDirectory(LogsDir);
 		Directory.CreateDirectory(ActivityDir);
 		Directory.CreateDirectory(RuntimeDir);
+		Directory.CreateDirectory(QaSessionArchiveDir);
 	}
 
 	private static string ResolveDataRoot()
@@ -634,10 +677,20 @@ public partial class MainWindow : Window, IComponentConnector
 		SetSolidResource("FinalCheckUncheckedBrush", flag ? "#EAF0EF" : (flag2 ? "#FF050505" : "#241D3038"));
 		SetSolidResource("FinalCheckHoverBrush", flag ? "#DCEBE8" : (flag2 ? "#FF151515" : "#34173D43"));
 		SetSolidResource("FinalCheckBorderBrush", flag ? "#8EA4A8" : (flag2 ? "#FF555555" : "#6682949B"));
+		SetSolidResource("CachedSessionHoverBrush", flag ? "#60757E" : (flag2 ? "#303030" : "#60757E"));
+		SetSolidResource("CachedSessionSelectedBrush", flag ? "#203741" : (flag2 ? "#242424" : "#263D46"));
+		SetSolidResource("CachedSessionTextBrush", themePalette.Text);
+		SetSolidResource("CachedSessionSelectedTextBrush", "#FFFFFF");
+		SetSolidResource("SectionSurfaceBrush", flag ? "#FFF9FAF7" : (flag2 ? "#FF0A0A0A" : "#FF465B63"));
 		SetGradientResource("ShellBrush", themePalette.Shell);
 		SetGradientResource("GlassPanelBrush", themePalette.GlassPanel);
 		SetGradientResource("DarkGlassBrush", themePalette.DarkGlass);
 		SetGradientResource("UtilityPanelBrush", themePalette.UtilityPanel);
+		Brush sharedSectionSurfaceBrush = (Brush)base.Resources["SectionSurfaceBrush"];
+		UsbPortTestPanel.Background = sharedSectionSurfaceBrush;
+		FinalChecksPanel.Background = sharedSectionSurfaceBrush;
+		QaOutputPanel.Background = sharedSectionSurfaceBrush;
+		BiosSettingsPanel.Background = sharedSectionSurfaceBrush;
 		WavePathBack.Fill = BrushFromHex(themePalette.WaveBack);
 		WavePathFront.Fill = BrushFromHex(themePalette.WaveFront);
 		WavePathBack.Data = Geometry.Parse("M -20,440 C 190,370 380,550 580,470 C 760,400 980,555 1300,465 L1300,740 L-20,740 Z");
@@ -664,9 +717,9 @@ public partial class MainWindow : Window, IComponentConnector
 		FoldersDrawerButton.Foreground = foreground;
 		FoldersDrawerButton.Background = BrushFromHex(flag ? "#D1DDD9" : (flag2 ? "#303030" : "#6B858E"));
 		UpdateDrawerTabBorders();
-		if (FinalChecksPanel.Background is LinearGradientBrush || base.Resources["GlassPanelBrush"] is LinearGradientBrush)
+		if (FinalChecksPanel.Background is LinearGradientBrush || base.Resources["SectionSurfaceBrush"] is SolidColorBrush)
 		{
-			FinalChecksPanel.Background = (Brush)base.Resources["GlassPanelBrush"];
+			FinalChecksPanel.Background = (Brush)base.Resources["SectionSurfaceBrush"];
 		}
 		if (Shell.Effect is DropShadowEffect dropShadowEffect)
 		{
@@ -1565,6 +1618,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private void MainWindow_Closing(object? sender, CancelEventArgs e)
 	{
+		_headerClockTimer?.Stop();
+		_headerClockTimer = null;
 		_qaSessionSaveTimer.Stop();
 		_qaLiveMonitoringActive = false;
 		_externalDisplayPollTimer?.Stop();
@@ -3553,17 +3608,28 @@ $items = @(
 
 	private void ServiceNowButton_Click(object sender, RoutedEventArgs e)
 	{
+		string requestDescription = BuildServiceNowRequestDescription();
 		try
 		{
-			string requestDescription = BuildServiceNowRequestDescription();
-			ServiceNowRequestLauncher.OpenWithClipboardFallback(GetServiceNowRequestUrl(), requestDescription);
-			AddActivity("ServiceNow", "ServiceNow request opened; request details copied for manual paste.");
-			MessageBox.Show(this, "The ServiceNow request page was opened and the request details were copied to the clipboard. Paste them into the description field and review every field before submitting.", "ServiceNow manual fallback", MessageBoxButton.OK, MessageBoxImage.Information);
+			string requestUrl = GetServiceNowRequestUrl();
+			string bookmarklet = BuildServiceNowBookmarklet(requestDescription, GetServiceNowTypeOfRequest(), GetServiceNowAssignmentGroupSysId(), GetServiceNowAssignmentGroupName());
+			Clipboard.SetText(bookmarklet);
+			RunServiceNowAutomation(requestUrl, GetServiceNowAutomationDelayMilliseconds(), requestDescription);
+			AddActivity("ServiceNow", "ServiceNow automatic form fill started for the configured request, type, and assignment group.");
 		}
 		catch (Exception ex)
 		{
-			AddActivity("ServiceNow", "ServiceNow request launch failed: " + ex.Message);
-			MessageBox.Show(this, "ServiceNow could not be opened automatically. Open the configured request URL manually.\n\n" + ex.Message, "ServiceNow fallback", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			try
+			{
+				ServiceNowRequestLauncher.OpenRequestWithClipboard(GetServiceNowRequestUrl(), requestDescription);
+				AddActivity("ServiceNow", "Automatic form fill could not start; request opened with QA details copied to the clipboard. " + ex.Message);
+				MessageBox.Show(this, "Automatic ServiceNow form fill could not start. The request page was opened and the QA request details were copied to the clipboard.\n\n" + ex.Message, "ServiceNow Fallback", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			}
+			catch (Exception fallbackEx)
+			{
+				AddActivity("ServiceNow", "ServiceNow request launch failed: " + fallbackEx.Message);
+				MessageBox.Show(this, "ServiceNow could not be opened. Open the configured request URL manually.\n\n" + fallbackEx.Message, "ServiceNow Request", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			}
 		}
 	}
 
@@ -3692,7 +3758,7 @@ $items = @(
 		string overall = (list.Any((QaRenderRow r) => r.State == "Bad") ? "Needs Attention" : (list.Any((QaRenderRow r) => r.State == "Warning") ? "Warning" : (list.All((QaRenderRow r) => r.State == "Ok" || r.State == "Ignored") ? "Passed" : "Incomplete")));
 		double[] array = list.Select((QaRenderRow row) => Math.Max(44.0, Math.Min(78.0, MeasureQaText(row.Detail, 282.0, 11.4, FontWeights.Normal) + 18.0))).ToArray();
 		double num = 31.0 + array.Sum();
-		double num2 = Math.Max(1040.0, 395.0 + num + 18.0 + 190.0 + 38.0);
+		double num2 = Math.Max(1040.0, 345.0 + num + 18.0 + 190.0 + 38.0);
 		DrawingVisual drawingVisual = new DrawingVisual();
 		using (DrawingContext drawingContext = drawingVisual.RenderOpen())
 		{
@@ -3702,11 +3768,11 @@ $items = @(
 			drawingContext.PushClip(clipGeometry);
 			drawingContext.DrawRoundedRectangle(Brushes.White, null, rect, 16.0, 16.0);
 			LinearGradientBrush brush = new LinearGradientBrush(ColorFromHex("#18333D"), ColorFromHex("#5F858D"), new Point(0.0, 0.0), new Point(1.0, 1.0));
-			drawingContext.DrawRectangle(brush, null, new Rect(0.0, 0.0, 768.0, 82.0));
-			DrawQaText(drawingContext, L("Laptop QA Testing"), 26.0, 25.0, 420.0, 32.0, 25.0, Brushes.White, FontWeights.ExtraBold);
-			DrawQaOverall(drawingContext, overall, 612.0, 20.0);
-			double num3 = 100.0;
-			double num4 = 233.33333333333334;
+			drawingContext.DrawRectangle(brush, null, new Rect(0.0, 0.0, 768.0, 76.0));
+			DrawQaText(drawingContext, L("Laptop QA Testing"), 26.0, 22.0, 420.0, 30.0, 24.0, Brushes.White, FontWeights.ExtraBold);
+			DrawQaOverall(drawingContext, overall, 612.0, 15.0);
+			double num3 = 92.0;
+			double num4 = (716.0 - 24.0) / 4.0;
 			(string, string)[] array2 = new(string, string)[8]
 			{
 				(L("Device Name"), CachedQaComputerName(cache)),
@@ -3720,17 +3786,17 @@ $items = @(
 			};
 			for (int num5 = 0; num5 < array2.Length; num5++)
 			{
-				int num6 = num5 % 3;
-				int num7 = num5 / 3;
-				DrawQaField(drawingContext, array2[num5].Item1, array2[num5].Item2, 26.0 + (double)num6 * (num4 + 8.0), num3 + (double)(num7 * 56), num4, 48.0);
+				int num6 = num5 % 4;
+				int num7 = num5 / 4;
+				DrawQaField(drawingContext, array2[num5].Item1, array2[num5].Item2, 26.0 + (double)num6 * (num4 + 8.0), num3 + (double)(num7 * 50), num4, 44.0);
 			}
-			num3 += 181.0;
+			num3 += 119.0;
 			DrawQaSectionTitle(drawingContext, L("Hardware Specs"), 26.0, num3);
-			num3 += 21.0;
+			num3 += 19.0;
 			DrawHardwareSpecs(drawingContext, hardware, 26.0, num3, 716.0);
-			num3 += 106.0;
+			num3 += 86.0;
 			DrawQaSectionTitle(drawingContext, L("QA Results"), 26.0, num3);
-			num3 += 22.0;
+			num3 += 21.0;
 			DrawQaTable(drawingContext, list, array, 26.0, num3, 716.0);
 			num3 += num + 17.0;
 			DrawQaSectionTitle(drawingContext, L("Notes"), 26.0, num3);
@@ -3806,27 +3872,40 @@ $items = @(
 	private void DrawQaField(DrawingContext dc, string label, string value, double x, double y, double width, double height)
 	{
 		dc.DrawRoundedRectangle(BrushFromHex("#F7FAFB"), new Pen(BrushFromHex("#CBD9DF"), 1.0), new Rect(x, y, width, height), 7.0, 7.0);
-		DrawQaText(dc, label.ToUpperInvariant(), x + 9.0, y + 8.0, width - 18.0, 12.0, 9.5, BrushFromHex("#52666F"), FontWeights.ExtraBold);
-		DrawQaText(dc, value, x + 9.0, y + 25.0, width - 18.0, 18.0, 12.0, BrushFromHex("#13252D"), FontWeights.Bold);
+		DrawQaText(dc, label.ToUpperInvariant(), x + 8.0, y + 7.0, width - 16.0, 11.0, 8.8, BrushFromHex("#52666F"), FontWeights.ExtraBold);
+		DrawQaText(dc, value, x + 8.0, y + 23.0, width - 16.0, 16.0, 11.2, BrushFromHex("#13252D"), FontWeights.Bold);
+	}
+
+	private void HeaderClockTimer_Tick(object? sender, EventArgs e)
+	{
+		UpdateHeaderDateTime();
+	}
+
+	private void UpdateHeaderDateTime()
+	{
+		if (HeaderDateTime != null)
+		{
+			HeaderDateTime.Text = DateTime.Now.ToString("g", CultureInfo.CurrentCulture);
+		}
 	}
 
 	private void DrawHardwareSpecs(DrawingContext dc, HardwareSnapshot hardware, double x, double y, double width)
 	{
-		dc.DrawRoundedRectangle(BrushFromHex("#FBFCFD"), new Pen(BrushFromHex("#CBD9DF"), 1.0), new Rect(x, y, width, 92.0), 7.0, 7.0);
+		dc.DrawRoundedRectangle(BrushFromHex("#FBFCFD"), new Pen(BrushFromHex("#CBD9DF"), 1.0), new Rect(x, y, width, 76.0), 7.0, 7.0);
 		double num = (width - 28.0) / 2.0;
 		double num2 = x + 10.0;
 		double num3 = x + 10.0 + num + 18.0;
-		dc.DrawLine(new Pen(BrushFromHex("#E2EAED"), 1.0), new Point(num2, y + 35.0), new Point(num2 + num, y + 35.0));
-		dc.DrawLine(new Pen(BrushFromHex("#E2EAED"), 1.0), new Point(num3, y + 35.0), new Point(num3 + num, y + 35.0));
-		dc.DrawLine(new Pen(BrushFromHex("#E2EAED"), 1.0), new Point(num2, y + 62.0), new Point(x + width - 10.0, y + 62.0));
-		DrawSpec("CPU", hardware.Cpu, num2, y + 9.0, num - 72.0);
-		DrawSpec("Memory", ValueOrFallback(hardware.Memory, hardware.PhysicalMemory), num3, y + 9.0, num - 72.0);
-		DrawSpec("GPU", hardware.Gpu, num2, y + 36.0, num - 72.0);
-		DrawSpec("Storage", hardware.Storage, num2, y + 65.0, width - 92.0, 24.0);
+		dc.DrawLine(new Pen(BrushFromHex("#E2EAED"), 1.0), new Point(num2, y + 29.0), new Point(num2 + num, y + 29.0));
+		dc.DrawLine(new Pen(BrushFromHex("#E2EAED"), 1.0), new Point(num3, y + 29.0), new Point(num3 + num, y + 29.0));
+		dc.DrawLine(new Pen(BrushFromHex("#E2EAED"), 1.0), new Point(num2, y + 52.0), new Point(x + width - 10.0, y + 52.0));
+		DrawSpec("CPU", hardware.Cpu, num2, y + 7.0, num - 72.0);
+		DrawSpec("Memory", ValueOrFallback(hardware.Memory, hardware.PhysicalMemory), num3, y + 7.0, num - 72.0);
+		DrawSpec("GPU", hardware.Gpu, num2, y + 30.0, num - 72.0);
+		DrawSpec("Storage", hardware.Storage, num2, y + 54.0, width - 92.0, 17.0);
 		void DrawSpec(string label, string value, double sx, double sy, double valueWidth, double valueHeight = 17.0)
 		{
-			DrawQaText(dc, label.ToUpperInvariant(), sx, sy, 70.0, 14.0, 9.0, BrushFromHex("#52666F"), FontWeights.ExtraBold);
-			DrawQaText(dc, value, sx + 72.0, sy, valueWidth, valueHeight, 11.0, BrushFromHex("#13252D"), FontWeights.Bold);
+			DrawQaText(dc, label.ToUpperInvariant(), sx, sy, 70.0, 12.0, 8.6, BrushFromHex("#52666F"), FontWeights.ExtraBold);
+			DrawQaText(dc, value, sx + 72.0, sy, valueWidth, valueHeight, 10.3, BrushFromHex("#13252D"), FontWeights.Bold);
 		}
 	}
 
@@ -5234,6 +5313,315 @@ $items = @(
 		}
 	}
 
+	private static void NormalizeQaSessionIdentity(QaSessionCache cache)
+	{
+		if (string.IsNullOrWhiteSpace(cache.SessionId))
+		{
+			cache.SessionId = Guid.NewGuid().ToString("N");
+		}
+		if (cache.StartedAt == default)
+		{
+			cache.StartedAt = cache.SavedAt == default ? DateTime.Now : cache.SavedAt;
+		}
+	}
+
+	private void EnsureQaSessionIdentity(QaSessionCache cache)
+	{
+		NormalizeQaSessionIdentity(cache);
+		_activeQaSessionId = cache.SessionId;
+		_activeQaSessionStartedAt = cache.StartedAt;
+	}
+
+	private void EnsureActiveQaSessionIdentity()
+	{
+		if (string.IsNullOrWhiteSpace(_activeQaSessionId))
+		{
+			_activeQaSessionId = Guid.NewGuid().ToString("N");
+		}
+		if (_activeQaSessionStartedAt == default)
+		{
+			_activeQaSessionStartedAt = DateTime.Now;
+		}
+	}
+
+	private string QaSessionArchivePath(string sessionId)
+	{
+		return Path.Combine(QaSessionArchiveDir, "session-" + sessionId + ".json");
+	}
+
+	private static void WriteJsonAtomic(string path, string contents)
+	{
+		string tempPath = path + $".{Guid.NewGuid():N}.tmp";
+		try
+		{
+			File.WriteAllText(tempPath, contents, Encoding.UTF8);
+			File.Move(tempPath, path, overwrite: true);
+		}
+		finally
+		{
+			try
+			{
+				if (File.Exists(tempPath))
+				{
+					File.Delete(tempPath);
+				}
+			}
+			catch
+			{
+			}
+		}
+	}
+
+	private void CleanupCachedSessions()
+	{
+		if (!Directory.Exists(QaSessionArchiveDir))
+		{
+			return;
+		}
+		DateTime cutoff = DateTime.Now.AddDays(-QaAndDiagnosticsRetentionDays);
+		int removed = 0;
+		foreach (string path in Directory.GetFiles(QaSessionArchiveDir, "session-*.json", SearchOption.TopDirectoryOnly))
+		{
+			try
+			{
+				QaSessionCache? cache = JsonSerializer.Deserialize<QaSessionCache>(File.ReadAllText(path));
+				DateTime sessionDate = cache?.StartedAt != default ? cache!.StartedAt : (cache?.SavedAt != default ? cache!.SavedAt : File.GetLastWriteTime(path));
+				if (sessionDate < cutoff)
+				{
+					File.Delete(path);
+					removed++;
+				}
+			}
+			catch
+			{
+				if (File.GetLastWriteTime(path) < cutoff)
+				{
+					File.Delete(path);
+					removed++;
+				}
+			}
+		}
+		if (removed > 0)
+		{
+			AddActivity("Sessions", $"Removed {removed} cached QA session(s) older than {QaAndDiagnosticsRetentionDays} days.");
+		}
+		WriteCachedSessionIndex();
+	}
+
+	private void WriteCachedSessionIndex()
+	{
+		try
+		{
+			Directory.CreateDirectory(QaSessionArchiveDir);
+			List<CachedSessionIndexEntry> entries = new List<CachedSessionIndexEntry>();
+			foreach (string path in Directory.GetFiles(QaSessionArchiveDir, "session-*.json", SearchOption.TopDirectoryOnly))
+			{
+				try
+				{
+					QaSessionCache? cache = JsonSerializer.Deserialize<QaSessionCache>(File.ReadAllText(path));
+					if (cache == null)
+					{
+						continue;
+					}
+					NormalizeQaSessionIdentity(cache);
+					entries.Add(new CachedSessionIndexEntry
+					{
+						SessionId = cache.SessionId,
+						FileName = Path.GetFileName(path),
+						ServiceTag = CachedSessionSerial(cache),
+						StartedAt = cache.StartedAt,
+						SavedAt = cache.SavedAt
+					});
+				}
+				catch
+				{
+				}
+			}
+			entries = entries.OrderByDescending(entry => entry.StartedAt).ToList();
+			WriteJsonAtomic(QaSessionIndexPath, JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true }));
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Sessions", "Session index update skipped: " + ex.Message);
+		}
+	}
+
+	private void PromoteLegacyQaSessionCache()
+	{
+		if (!File.Exists(QaSessionCachePath))
+		{
+			return;
+		}
+		try
+		{
+			QaSessionCache? cache = JsonSerializer.Deserialize<QaSessionCache>(File.ReadAllText(QaSessionCachePath));
+			if (cache == null)
+			{
+				return;
+			}
+			NormalizeQaSessionIdentity(cache);
+			string archivePath = QaSessionArchivePath(cache.SessionId);
+			if (!File.Exists(archivePath))
+			{
+				WriteJsonAtomic(archivePath, JsonSerializer.Serialize(cache, new JsonSerializerOptions { WriteIndented = true }));
+			}
+			WriteCachedSessionIndex();
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Sessions", "Legacy QA cache promotion skipped: " + ex.Message);
+		}
+	}
+
+	private static string CachedSessionSerial(QaSessionCache cache)
+	{
+		string? serial = new[]
+		{
+			cache.ServiceTag,
+			cache.Hardware?.BiosSerialNumber,
+			cache.Hardware?.ChassisSerial,
+			cache.AssetTag
+		}.FirstOrDefault(IsUsefulFileIdentifier);
+		return string.IsNullOrWhiteSpace(serial) ? "Unknown Serial" : serial.Trim();
+	}
+
+	private void RefreshCachedSessionPicker(string? preferredSessionId = null)
+	{
+		if (CachedSessionPicker == null)
+		{
+			return;
+		}
+		CleanupCachedSessions();
+		Directory.CreateDirectory(QaSessionArchiveDir);
+		PromoteLegacyQaSessionCache();
+		_cachedSessionOptions.Clear();
+		if (Directory.Exists(QaSessionArchiveDir))
+		{
+			foreach (string path in Directory.GetFiles(QaSessionArchiveDir, "session-*.json", SearchOption.TopDirectoryOnly))
+			{
+				try
+				{
+					QaSessionCache? cache = JsonSerializer.Deserialize<QaSessionCache>(File.ReadAllText(path));
+					if (cache == null)
+					{
+						continue;
+					}
+					NormalizeQaSessionIdentity(cache);
+					DateTime sessionDate = cache.StartedAt == default ? cache.SavedAt : cache.StartedAt;
+					string displayName = $"{CachedSessionSerial(cache)} - {sessionDate:g}";
+					_cachedSessionOptions.Add(new CachedSessionOption(path, cache, displayName));
+				}
+				catch
+				{
+				}
+			}
+		}
+		_cachedSessionOptions.Sort((left, right) => right.Session.StartedAt.CompareTo(left.Session.StartedAt));
+		string sessionId = preferredSessionId ?? _activeQaSessionId;
+		_updatingCachedSessionPicker = true;
+		try
+		{
+			CachedSessionPicker.ItemsSource = _cachedSessionOptions.ToList();
+			CachedSessionPicker.SelectedItem = _cachedSessionOptions.FirstOrDefault(option => string.Equals(option.Session.SessionId, sessionId, StringComparison.OrdinalIgnoreCase));
+			CachedSessionPicker.IsEnabled = _cachedSessionOptions.Count > 0;
+			if (_cachedSessionOptions.Count == 0)
+			{
+				CachedSessionPicker.Text = "No cached sessions";
+			}
+		}
+		finally
+		{
+			_updatingCachedSessionPicker = false;
+		}
+	}
+
+	private void FilterCachedSessionPicker(string query)
+	{
+		string search = query.Trim();
+		List<CachedSessionOption> matches = string.IsNullOrWhiteSpace(search)
+			? _cachedSessionOptions.ToList()
+			: _cachedSessionOptions.Where(option => option.DisplayName.Contains(search, StringComparison.CurrentCultureIgnoreCase)).ToList();
+		_updatingCachedSessionPicker = true;
+		try
+		{
+			CachedSessionPicker.ItemsSource = matches;
+			CachedSessionPicker.SelectedItem = null;
+			CachedSessionPicker.Text = query;
+			CachedSessionPicker.IsDropDownOpen = true;
+			if (CachedSessionPicker.Template.FindName("PART_EditableTextBox", CachedSessionPicker) is TextBox editor)
+			{
+				editor.CaretIndex = editor.Text.Length;
+			}
+		}
+		finally
+		{
+			_updatingCachedSessionPicker = false;
+		}
+	}
+
+	private void CachedSessionPicker_KeyUp(object sender, KeyEventArgs e)
+	{
+		if (e.Key == Key.Escape)
+		{
+			CachedSessionPicker.IsDropDownOpen = false;
+			return;
+		}
+		if (e.Key == Key.Enter)
+		{
+			if (CachedSessionPicker.SelectedItem == null && CachedSessionPicker.Items.Count > 0)
+			{
+				CachedSessionPicker.SelectedIndex = 0;
+			}
+			CachedSessionPicker.IsDropDownOpen = false;
+			return;
+		}
+		if (e.Key is Key.Up or Key.Down or Key.PageUp or Key.PageDown or Key.Home or Key.End or Key.Tab)
+		{
+			return;
+		}
+		FilterCachedSessionPicker(CachedSessionPicker.Text ?? "");
+	}
+
+	private void CachedSessionPicker_DropDownOpened(object sender, EventArgs e)
+	{
+		if (_updatingCachedSessionPicker)
+		{
+			return;
+		}
+		CachedSessionPicker.ItemsSource = _cachedSessionOptions.ToList();
+	}
+
+	private void CachedSessionPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+	{
+		if (_updatingCachedSessionPicker || CachedSessionPicker.SelectedItem is not CachedSessionOption option || string.Equals(option.Session.SessionId, _activeQaSessionId, StringComparison.OrdinalIgnoreCase))
+		{
+			return;
+		}
+		SaveQaSessionCache();
+		try
+		{
+			QaSessionCache? cache = JsonSerializer.Deserialize<QaSessionCache>(File.ReadAllText(option.FilePath));
+			if (cache == null)
+			{
+				throw new InvalidDataException("The cached session file is empty.");
+			}
+			EnsureQaSessionIdentity(cache);
+			_startupDataRefreshRequired = false;
+			RestoreQaSessionCache(cache);
+			SaveQaSessionCache();
+			_completionCelebrated = IsQaComplete();
+			SetSummaryStatus(_completionCelebrated ? "QA Complete" : "Ready");
+			RefreshCachedSessionPicker(cache.SessionId);
+			AddActivity("Sessions", "Loaded cached QA session: " + option.DisplayName);
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Sessions", "Cached QA session could not be loaded: " + ex.Message);
+			MessageBox.Show(this, "The selected cached session could not be loaded.\n\n" + ex.Message, "Cached Sessions", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			RefreshCachedSessionPicker();
+		}
+	}
+
 	private static bool ShouldSkipStartupRefresh(QaSessionCache cache)
 	{
 		if (!cache.StartupDataSaved && !HasCachedStartupData(cache))
@@ -5309,6 +5697,7 @@ $items = @(
 		}
 		try
 		{
+			EnsureQaSessionIdentity(cache);
 			if (cache.Steps == null)
 			{
 				Dictionary<string, QaStepCache> dictionary = (cache.Steps = new Dictionary<string, QaStepCache>());
@@ -5484,8 +5873,12 @@ $items = @(
 		try
 		{
 			Directory.CreateDirectory(RuntimeDir);
+			Directory.CreateDirectory(QaSessionArchiveDir);
+			EnsureActiveQaSessionIdentity();
 			QaSessionCache qaSessionCache = new QaSessionCache
 			{
+				SessionId = _activeQaSessionId,
+				StartedAt = _activeQaSessionStartedAt,
 				SavedAt = DateTime.Now,
 				StartupDataSaved = (!_startupDataRefreshRequired && HasCurrentStartupData()),
 				FinalHashGroupTag = FinalHashGroupTagCheck.IsChecked,
@@ -5531,26 +5924,10 @@ $items = @(
 			{
 				WriteIndented = true
 			});
-			string text = QaSessionCachePath + $".{Guid.NewGuid():N}.tmp";
-			try
-			{
-				File.WriteAllText(text, contents, Encoding.UTF8);
-				File.Move(text, QaSessionCachePath, overwrite: true);
-				_qaSessionCacheWriteUtc = File.GetLastWriteTimeUtc(QaSessionCachePath);
-			}
-			finally
-			{
-				try
-				{
-					if (File.Exists(text))
-					{
-						File.Delete(text);
-					}
-				}
-				catch
-				{
-				}
-			}
+		WriteJsonAtomic(QaSessionCachePath, contents);
+			WriteJsonAtomic(QaSessionArchivePath(qaSessionCache.SessionId), contents);
+			WriteCachedSessionIndex();
+			_qaSessionCacheWriteUtc = File.GetLastWriteTimeUtc(QaSessionCachePath);
 		}
 		catch
 		{
@@ -5684,6 +6061,9 @@ $items = @(
 			return;
 		}
 		_qaSessionSaveTimer.Stop();
+		SaveQaSessionCache();
+		_activeQaSessionId = Guid.NewGuid().ToString("N");
+		_activeQaSessionStartedAt = DateTime.Now;
 		_startupDataRefreshRequired = true;
 		_qaSessionReady = false;
 		_suppressQaSessionCache = true;
@@ -5755,6 +6135,7 @@ $items = @(
 			_qaSessionReady = true;
 			ResetQaButton.IsEnabled = true;
 			SaveQaSessionCache();
+			RefreshCachedSessionPicker();
 			EndProcessing("New QA");
 		}
 	}
@@ -6244,9 +6625,9 @@ $items = @(
 		return "javascript:" + text;
 	}
 
-	private static string BuildServiceNowAutomationPowerShell(string serviceNowRequestUrl, int startDelayMilliseconds)
+	private static string BuildServiceNowAutomationPowerShell(string serviceNowRequestUrl, int startDelayMilliseconds, string requestDescription)
 	{
-		return $"$ErrorActionPreference = 'SilentlyContinue'\n$url = {PowerShellLiteral(serviceNowRequestUrl)}\nStart-Process 'msedge.exe' $url\nStart-Sleep -Milliseconds {startDelayMilliseconds}\n$shell = New-Object -ComObject WScript.Shell\n\nAdd-Type @\"\nusing System;\nusing System.Runtime.InteropServices;\npublic static class WinFocus {{\n  [DllImport(\"user32.dll\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n  [DllImport(\"user32.dll\")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);\n  [DllImport(\"user32.dll\")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);\n  public const int KEYEVENTF_KEYUP = 0x0002;\n  public static void PasteClipboard() {{\n    keybd_event(0x11, 0, 0, UIntPtr.Zero);\n    keybd_event(0x56, 0, 0, UIntPtr.Zero);\n    keybd_event(0x56, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);\n    keybd_event(0x11, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);\n  }}\n}}\n\"@\n\n$target = $null\nfor ($attempt = 0; $attempt -lt 18; $attempt++) {{\n  $target = Get-Process msedge | Where-Object {{\n    $_.MainWindowHandle -ne 0 -and (\n      $_.MainWindowTitle -match 'Generic Service Request' -or\n      $_.MainWindowTitle -match 'LN IT Service Portal' -or\n      $_.MainWindowTitle -match 'ServiceNow'\n    )\n  }} | Select-Object -First 1\n  if ($target) {{ break }}\n  Start-Sleep -Milliseconds 300\n}}\n\nif (-not $target) {{\n  $target = Get-Process msedge | Where-Object {{ $_.MainWindowHandle -ne 0 }} | Sort-Object StartTime -Descending | Select-Object -First 1\n}}\n\nif (-not $target) {{ throw 'Could not find an Edge window to automate.' }}\n[WinFocus]::SetForegroundWindow($target.MainWindowHandle) | Out-Null\nStart-Sleep -Milliseconds 350\n$shell.AppActivate($target.Id) | Out-Null\nStart-Sleep -Milliseconds 350\n$shell.SendKeys('^l')\nStart-Sleep -Milliseconds 250\n$shell.SendKeys('javascript:')\nStart-Sleep -Milliseconds 150\n[WinFocus]::PasteClipboard()\nStart-Sleep -Milliseconds 250\n$shell.SendKeys('{{ENTER}}')";
+		return $"$ErrorActionPreference = 'SilentlyContinue'\n$url = {PowerShellLiteral(serviceNowRequestUrl)}\n$requestDescription = {PowerShellLiteral(requestDescription)}\nStart-Process 'msedge.exe' $url\nStart-Sleep -Milliseconds {startDelayMilliseconds}\n$shell = New-Object -ComObject WScript.Shell\n\nAdd-Type @\"\nusing System;\nusing System.Runtime.InteropServices;\npublic static class WinFocus {{\n  [DllImport(\"user32.dll\")] public static extern bool SetForegroundWindow(IntPtr hWnd);\n  [DllImport(\"user32.dll\")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);\n  [DllImport(\"user32.dll\")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);\n  public const int KEYEVENTF_KEYUP = 0x0002;\n  public static void PasteClipboard() {{\n    keybd_event(0x11, 0, 0, UIntPtr.Zero);\n    keybd_event(0x56, 0, 0, UIntPtr.Zero);\n    keybd_event(0x56, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);\n    keybd_event(0x11, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);\n  }}\n}}\n\"@\n\n$target = $null\nfor ($attempt = 0; $attempt -lt 18; $attempt++) {{\n  $target = Get-Process msedge | Where-Object {{\n    $_.MainWindowHandle -ne 0 -and (\n      $_.MainWindowTitle -match 'Generic Service Request' -or\n      $_.MainWindowTitle -match 'LN IT Service Portal' -or\n      $_.MainWindowTitle -match 'ServiceNow'\n    )\n  }} | Select-Object -First 1\n  if ($target) {{ break }}\n  Start-Sleep -Milliseconds 300\n}}\n\nif (-not $target) {{\n  $target = Get-Process msedge | Where-Object {{ $_.MainWindowHandle -ne 0 }} | Sort-Object StartTime -Descending | Select-Object -First 1\n}}\n\nif (-not $target) {{ throw 'Could not find an Edge window to automate.' }}\n[WinFocus]::SetForegroundWindow($target.MainWindowHandle) | Out-Null\nStart-Sleep -Milliseconds 350\n$shell.AppActivate($target.Id) | Out-Null\nStart-Sleep -Milliseconds 350\n$shell.SendKeys('^l')\nStart-Sleep -Milliseconds 250\n$shell.SendKeys('javascript:')\nStart-Sleep -Milliseconds 150\n[WinFocus]::PasteClipboard()\nStart-Sleep -Milliseconds 250\n$shell.SendKeys('{{ENTER}}')\nStart-Sleep -Milliseconds 750\nSet-Clipboard -Value $requestDescription";
 	}
 
 	private static string PowerShellLiteral(string value)
@@ -6254,9 +6635,9 @@ $items = @(
 		return "'" + (value ?? "").Replace("'", "''") + "'";
 	}
 
-	private static void RunServiceNowAutomation(string serviceNowRequestUrl, int startDelayMilliseconds)
+	private static void RunServiceNowAutomation(string serviceNowRequestUrl, int startDelayMilliseconds, string requestDescription)
 	{
-		string item = Convert.ToBase64String(Encoding.Unicode.GetBytes(BuildServiceNowAutomationPowerShell(serviceNowRequestUrl, startDelayMilliseconds)));
+		string item = Convert.ToBase64String(Encoding.Unicode.GetBytes(BuildServiceNowAutomationPowerShell(serviceNowRequestUrl, startDelayMilliseconds, requestDescription)));
 		Process.Start(new ProcessStartInfo("powershell.exe")
 		{
 			UseShellExecute = false,

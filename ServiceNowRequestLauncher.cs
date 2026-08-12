@@ -6,7 +6,7 @@ namespace LaptopQA.Windows;
 
 internal static class ServiceNowRequestLauncher
 {
-	public static void OpenWithClipboardFallback(string requestUrl, string requestDescription)
+	public static void OpenRequestWithClipboard(string requestUrl, string requestDescription)
 	{
 		if (!Uri.TryCreate(requestUrl, UriKind.Absolute, out Uri? uri) || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
 		{

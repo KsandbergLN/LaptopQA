@@ -86,7 +86,7 @@ try {
     }
 
     $requiredFiles = @(
-        (Join-Path $appFolder 'LaptopQA.Windows.exe'),
+        (Join-Path $appFolder 'LaptopQATestingV4.exe'),
         $packageConfig,
         $startScriptTarget,
         $silentLauncherTarget,

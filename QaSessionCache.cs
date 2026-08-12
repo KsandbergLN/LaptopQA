@@ -5,6 +5,10 @@ namespace LaptopQA.Windows;
 
 public sealed class QaSessionCache
 {
+	public string SessionId { get; set; } = "";
+
+	public DateTime StartedAt { get; set; }
+
 	public DateTime SavedAt { get; set; }
 
 	public bool StartupDataSaved { get; set; }

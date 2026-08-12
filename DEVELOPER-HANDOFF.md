@@ -1,6 +1,6 @@
 # Laptop QA  Developer Handoff
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 > **Canonical-source marker:** `CANONICAL-SOURCE.md` is authoritative. Historical version numbers do not override it.
 
@@ -33,9 +33,10 @@ The application is Windows-only (`net10.0-windows`, WPF) and several workflows r
 | --- | --- | --- |
 | Application startup | `App.xaml`, `App.xaml.cs` | WPF entry point and top-level exception handling. |
 | Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, and styles. |
-| Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, and external process calls. Foldable `#region` labels divide these responsibilities. |
+| Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, ServiceNow automation, and external process calls. Foldable `#region` labels divide these responsibilities. |
+| ServiceNow launch | `ServiceNowRequestLauncher.cs`, `MainWindow.xaml.cs` | The primary route opens Edge and sends a page autofill script for the configured request type, assignment group, and QA description. A direct open plus copied description is the startup-failure fallback. |
 | Configuration | `AppConfig.cs`, `Laptop-QA-Config.json`, `SettingsWindow.cs` | Defaults, persisted settings, and settings UI. |
-| Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | Runtime QA state saved under `.runtime`. |
+| Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | The active QA is saved as `.runtime/qa-session.json`; searchable 90-day history is stored as stable session files under `.runtime/sessions`, with an atomic `.runtime/sessions-index.json` metadata index that can be rebuilt from those snapshots. |
 | Logging | `ErrorLog.cs` | Activity/error log paths, migration, redaction, and session filenames. |
 | Hardware models/UI | `HardwareSnapshot.cs`, `HardwareWindow.cs` | Collected device data and hardware drawer/window. |
 | Diagnostics/report UI | `DiagnosticsResult.cs`, `QaSheetFiles.cs`, `QaSheetImageWindow.cs` | Diagnostics results and QA sheet display/output. |
@@ -95,5 +96,6 @@ Search for a region name first, then search for the visible button/control name 
 - Exercise Wi-Fi/Ethernet, camera, keyboard, external display, and USB rows on suitable hardware.
 - Load or browse to a Dell diagnostics log and verify its result.
 - Save/open a QA sheet and confirm the output image.
+- Select ServiceNow and verify the request type, assignment group, and description are populated; confirm the QA description is returned to the clipboard afterward.
 - Reset the QA session, close/reopen the app, and confirm cache behavior.
 - Test shutdown/reboot/BIOS actions only on a disposable QA device.
