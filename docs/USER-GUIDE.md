@@ -1,6 +1,6 @@
 # Laptop QA user guide
 
-This guide is for technicians using the supported Windows app and macOS companion. The Windows app is the source of truth for hardware checks and the QA session; the macOS app works with the cached session and Mac-specific notes.
+This guide is for technicians using the supported Windows app and macOS companion. Both apps support the Windows QA workflow; the macOS companion uses the cached session so the workflow can continue on a MacBook when preferred.
 
 ## Windows workflow
 
@@ -10,16 +10,14 @@ This guide is for technicians using the supported Windows app and macOS companio
 4. For USB testing, follow the on-screen port indicators and move a readable test drive between the requested physical ports. Do not count a dock as a laptop port unless the workflow says to do so.
 5. Mark each step Pass, Fail, or Ignore only when the device matrix or test procedure allows it. Add notes for failures, exceptions, or administrator actions.
 6. Review the summary and generate the QA sheet. Keep the package's `QA sheets`, `logs`, `hardware`, and `activity` folders with the session data.
-7. Use the ServiceNow action as a best-effort helper. If browser automation is unavailable, use the copied request details and complete the form manually.
+7. Select **ServiceNow** to open the configured Generic Service Request. Laptop QA attempts to fill the request type, assignment group, and description automatically. After the attempt, the QA summary is copied to the clipboard for review or manual paste. Confirm all ServiceNow fields before submitting. If the automation cannot start, the app opens the request and leaves the same QA summary on the clipboard for manual completion.
 
 ## macOS companion
 
-The macOS companion can open the cached Windows session, add Mac-specific checks and notes, generate a QA sheet, and prepare ServiceNow details. Windows-only operations such as BIOS changes, hardware hash collection, and USB port scoring must be completed in the Windows app.
+Starting with step 8 (QA Output), the technician may move to their personal Mac and open the macOS companion. Load the cached Windows session and continue the same Windows QA workflow there: complete the final checks, generate the QA sheet, and prepare ServiceNow details. Windows-only operations such as BIOS changes, hardware hash collection, USB port scoring, and steps 1–7 must be completed in the Windows app before switching to the Mac.
 
-## When a check fails
-
-Record the exact symptom, port or device involved, visible error text, and any administrator action. Do not overwrite an accepted package. Escalate hardware or firmware variation using `docs/DEVICE-MATRIX.csv` and follow `docs/OPERATIONS-AND-RECOVERY.md` for recovery.
+The personal Mac should use the same approved package/session data location or removable drive so the cached Windows results are available. The macOS companion is an alternate workstation for the Windows QA workflow; it does not add a separate Mac-specific checklist or replace the required Windows hardware checks.
 
 ## Data and safety
 
-Use an approved package location and keep the package's data folders together. Do not edit files under `bin`, `obj`, or `dist` as source. Do not deploy to OneDrive or a removable drive unless the package has been reviewed and accepted.
+Use an approved package location and keep the package's data folders together.

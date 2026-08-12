@@ -46,15 +46,16 @@ if (-not $isWindowsPlatform) {
     exit 0
 }
 
-$isInsideAppFolder = Test-Path -LiteralPath (Join-Path $scriptFolder 'LaptopQA.Windows.exe') -PathType Leaf
+$exeNames = @('LaptopQATestingV4.exe', 'LaptopQA.Windows.exe')
+$isInsideAppFolder = $exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $scriptFolder $_) -PathType Leaf } | Select-Object -First 1
 $nestedAppFolder = Join-Path $scriptFolder 'App'
-$isContainerFolder = Test-Path -LiteralPath (Join-Path $nestedAppFolder 'LaptopQA.Windows.exe') -PathType Leaf
+$isContainerFolder = $exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $nestedAppFolder $_) -PathType Leaf } | Select-Object -First 1
 $packageRoot = if ($isInsideAppFolder) { Split-Path -Parent $scriptFolder } else { $scriptFolder }
 $sourceApp = if ($isInsideAppFolder) {
     $scriptFolder
 } elseif ($isContainerFolder) {
     $nestedAppFolder
-} elseif (Test-Path -LiteralPath (Join-Path $packageRoot 'LAPTOP QA\App\LaptopQA.Windows.exe') -PathType Leaf) {
+} elseif ($exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $packageRoot (Join-Path 'LAPTOP QA\App' $_)) -PathType Leaf } | Select-Object -First 1) {
     Join-Path $packageRoot 'LAPTOP QA\App'
 } else {
     Join-Path $packageRoot 'LAPTOP QA'
@@ -270,7 +271,10 @@ try {
         throw "The LAPTOP QA folder was not found next to this start script.`n`nExpected:`n$sourceApp"
     }
 
-    $exeName = 'LaptopQA.Windows.exe'
+    $exeName = $exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $sourceApp $_) -PathType Leaf } | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($exeName)) {
+        $exeName = 'LaptopQATestingV4.exe'
+    }
     if (-not (Test-Path -LiteralPath (Join-Path $sourceApp $exeName) -PathType Leaf)) {
         throw "Could not find $exeName inside:`n$sourceApp"
     }

@@ -34,7 +34,7 @@ foreach ($entry in $manifest.Files) {
 
 $handoffRoot = $PSScriptRoot
 $appFolder = Join-Path $package 'LAPTOP QA\App'
-$sourceExe = Join-Path $appFolder 'LaptopQA.Windows.exe'
+$sourceExe = Join-Path $appFolder 'LaptopQATestingV4.exe'
 $silentLauncher = Join-Path $package 'Windows Laptop QA Launcher.vbs'
 $driveMarker = Join-Path $package 'Laptop-QA-Drive.json'
 $results = @()
