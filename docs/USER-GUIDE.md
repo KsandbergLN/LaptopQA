@@ -1,6 +1,6 @@
 # Laptop QA user guide
 
-This guide is for technicians using the supported Windows app and macOS companion. The Windows app is the source of truth for hardware checks and the QA session; the macOS app works with the cached session and Mac-specific notes.
+This guide is for technicians using the supported Windows app and macOS companion. Both apps support the Windows QA workflow; the macOS companion uses the cached session so the workflow can continue on a MacBook when preferred.
 
 ## Windows workflow
 
