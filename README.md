@@ -44,6 +44,8 @@ Start-Process .\bin\Release\net10.0-windows\LaptopQA.Windows.exe
 
 For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.
 
+Technician handoff: complete Windows QA steps 1–7 on the test laptop first. Starting with step 8 (QA Output), the technician may open the macOS companion on their personal Mac and continue the same Windows QA workflow from the cached session, including final checks, QA sheet generation, and ServiceNow preparation.
+
 Technicians should use [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). Developers and maintainers should start with [`DEVELOPER-HANDOFF.md`](DEVELOPER-HANDOFF.md).
 
 ## Where to make changes
