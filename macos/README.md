@@ -1,16 +1,16 @@
 # Laptop QA Testing — macOS
 
-This is the Avalonia/C# macOS port of Laptop QA Testing. WPF is Windows-only, so Avalonia is used to preserve the glass-card layout, themes, colors, and desktop behavior.
+This is the Avalonia/C# macOS companion for Laptop QA. WPF is Windows-only, so Avalonia is used to preserve the glass-card layout, themes, colors, and desktop behavior.
 
 ## Workflow consistency
 
-A primary benefit of Laptop QA Testing is consistency. The app gives technicians the same section order, prompts, terminology, final checks, notes, and QA-sheet format for each laptop. The macOS version intentionally mirrors the Windows  workflow and presentation so technicians can use the same method and produce comparable records on either platform, even where macOS hardware actions are disabled and cached Windows results are used.
+A primary benefit of Laptop QA is consistency. Complete Windows steps 1–7 first; technicians can then use the companion starting with step 8 (QA Output) on their personal Mac. It mirrors the Windows workflow and presentation so cached results, notes, and QA records remain consistent, even where macOS hardware actions are disabled.
 
 Retained functionality:
 
 - Dell preboot diagnostics import, parsing, raw-log search, and unanswered-prompt warnings
 - Battery and macOS hardware information
-- Final Checks (step 7), with Windows-only operations represented as manual checks
+- Cached Final Checks (step 7), reviewed from the Windows session before the Mac handoff
 - QA Output (step 8), including printable/zoomable HTML QA sheets and ServiceNow launch
 - QA notes, activity, hardware snapshots, managed folders, Light/Dark themes, Config, and Factory Settings
 - Full configuration model retained for compatibility
