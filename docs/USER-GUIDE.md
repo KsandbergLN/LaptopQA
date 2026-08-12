@@ -18,10 +18,6 @@ Starting with step 8 (QA Output), the technician may move to their personal Mac 
 
 The personal Mac should use the same approved package/session data location or removable drive so the cached Windows results are available. The macOS companion is an alternate workstation for the Windows QA workflow; it does not add a separate Mac-specific checklist or replace the required Windows hardware checks.
 
-## When a check fails
-
-Record the exact symptom, port or device involved, visible error text, and any administrator action. Do not overwrite an accepted package. Escalate hardware or firmware variation using `docs/DEVICE-MATRIX.csv` and follow `docs/OPERATIONS-AND-RECOVERY.md` for recovery.
-
 ## Data and safety
 
-Use an approved package location and keep the package's data folders together. Do not edit files under `bin`, `obj`, or `dist` as source. Do not deploy to OneDrive or a removable drive unless the package has been reviewed and accepted.
+Use an approved package location and keep the package's data folders together.
