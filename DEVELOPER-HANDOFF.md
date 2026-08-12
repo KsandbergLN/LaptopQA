@@ -31,7 +31,7 @@ The application is Windows-only (`net10.0-windows`, WPF) and several workflows r
 
 V4 publishes as `LaptopQATestingV4.exe`. The package-root `Windows Laptop QA Launcher.vbs` starts `LAPTOP QA\App\Start Laptop QA Local.ps1` silently. The PowerShell launcher stages only the executable/runtime locally, passes the package folder as `--data-root`, and leaves QA data, configuration, reports, logs, hashes, and hardware snapshots on the removable drive.
 
-The launcher accepts both the current V4 executable name and the historical `LaptopQA.Windows.exe` name so existing packages remain launchable. When changing package layout or executable naming, test both entry points:
+The launcher uses the V4 executable name, `LaptopQATestingV4.exe`. When changing package layout or executable naming, test both entry points:
 
 ```text
 <iteration root>\Windows Laptop QA Launcher.vbs

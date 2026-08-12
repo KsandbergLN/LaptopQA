@@ -61,7 +61,7 @@ if ($RemovableDrives) {
         ForEach-Object {
             $targetRoot = Join-Path $_.RootDirectory.FullName 'LAPTOP QA'
             $targetApp = Join-Path $targetRoot 'App'
-            $targetExe = Join-Path $targetApp 'LaptopQA.Windows.exe'
+            $targetExe = Join-Path $targetApp 'LaptopQATestingV4.exe'
             if (Test-Path -LiteralPath $targetExe -PathType Leaf) {
                 [pscustomobject]@{
                     DriveRoot = $_.RootDirectory.FullName

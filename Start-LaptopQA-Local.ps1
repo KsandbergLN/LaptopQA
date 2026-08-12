@@ -46,16 +46,16 @@ if (-not $isWindowsPlatform) {
     exit 0
 }
 
-$exeNames = @('LaptopQATestingV4.exe', 'LaptopQA.Windows.exe')
-$isInsideAppFolder = $exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $scriptFolder $_) -PathType Leaf } | Select-Object -First 1
+$exeName = 'LaptopQATestingV4.exe'
+$isInsideAppFolder = Test-Path -LiteralPath (Join-Path $scriptFolder $exeName) -PathType Leaf
 $nestedAppFolder = Join-Path $scriptFolder 'App'
-$isContainerFolder = $exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $nestedAppFolder $_) -PathType Leaf } | Select-Object -First 1
+$isContainerFolder = Test-Path -LiteralPath (Join-Path $nestedAppFolder $exeName) -PathType Leaf
 $packageRoot = if ($isInsideAppFolder) { Split-Path -Parent $scriptFolder } else { $scriptFolder }
 $sourceApp = if ($isInsideAppFolder) {
     $scriptFolder
 } elseif ($isContainerFolder) {
     $nestedAppFolder
-} elseif ($exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $packageRoot (Join-Path 'LAPTOP QA\App' $_)) -PathType Leaf } | Select-Object -First 1) {
+} elseif (Test-Path -LiteralPath (Join-Path $packageRoot (Join-Path 'LAPTOP QA\App' $exeName)) -PathType Leaf) {
     Join-Path $packageRoot 'LAPTOP QA\App'
 } else {
     Join-Path $packageRoot 'LAPTOP QA'
@@ -113,10 +113,7 @@ function Copy-AppFolder {
         [string]$Destination
     )
 
-    $localExeCandidates = @(
-        (Join-Path $Destination 'LaptopQA.Windows.exe')
-    )
-    $existingLocalExe = $localExeCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+    $existingLocalExe = Join-Path $Destination $exeName
     if ($existingLocalExe) {
         Write-LauncherLog "Using existing local staged copy: $Destination"
         Remove-LocalDataItems -LocalApp $Destination
@@ -271,10 +268,6 @@ try {
         throw "The LAPTOP QA folder was not found next to this start script.`n`nExpected:`n$sourceApp"
     }
 
-    $exeName = $exeNames | Where-Object { Test-Path -LiteralPath (Join-Path $sourceApp $_) -PathType Leaf } | Select-Object -First 1
-    if ([string]::IsNullOrWhiteSpace($exeName)) {
-        $exeName = 'LaptopQATestingV4.exe'
-    }
     if (-not (Test-Path -LiteralPath (Join-Path $sourceApp $exeName) -PathType Leaf)) {
         throw "Could not find $exeName inside:`n$sourceApp"
     }
