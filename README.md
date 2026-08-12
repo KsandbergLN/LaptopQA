@@ -39,7 +39,7 @@ Clone the private repository, then run the Windows app after building:
 git clone https://github.com/KsandbergLN/LaptopQA.git
 Set-Location .\LaptopQA
 dotnet build .\LaptopQA.Windows.csproj -c Release
-Start-Process .\bin\Release\net10.0-windows\LaptopQA.Windows.exe
+Start-Process .\bin\Release\net10.0-windows\LaptopQATestingV4.exe
 ```
 
 For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.

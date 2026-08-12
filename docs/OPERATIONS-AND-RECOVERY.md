@@ -2,7 +2,7 @@
 
 ## Hardware qualification
 
-Record every supported model in `DEVICE-MATRIX.csv`. A model is supported only after startup, battery, BIOS, diagnostics, camera/audio restoration, external display, USB topology, QA output, ServiceNow fallback, and approved power actions have evidence. Re-test after BIOS, Windows, dock firmware, or bundled-tool changes.
+Record every supported model in `DEVICE-MATRIX.csv`. A model is supported only after startup, battery, BIOS, diagnostics, camera/audio restoration, external display, USB topology, QA output, ServiceNow automation and fallback behavior, and approved power actions have evidence. Re-test after BIOS, Windows, dock firmware, or bundled-tool changes.
 
 ## Safe administrator-action procedure
 
@@ -21,6 +21,8 @@ Record every supported model in `DEVICE-MATRIX.csv`. A model is supported only a
 5. Restore the last accepted package only after verifying its manifest hashes.
 6. Mark the device/model combination failed in `DEVICE-MATRIX.csv` and require review before resuming use.
 
-## ServiceNow fallback
+## ServiceNow automation and fallback
 
-The application opens the configured request URL and copies the request description as plain text. The technician must paste it into the description field, review assignment/type fields, and submit manually. Browser focus, window-title matching, timing, clipboard-injected JavaScript, and automatic submission are not part of the supported path.
+The primary ServiceNow action opens the configured request in Edge and attempts to populate the configured request type, assignment group, and QA description. The QA description is restored to the clipboard after the attempt so the technician can review or paste it manually.
+
+The technician must verify every field before submitting. If the automation cannot start, the application opens the configured request and leaves the QA description on the clipboard for manual completion. Do not automate submission.
