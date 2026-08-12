@@ -27,11 +27,24 @@ For a packaged iteration, run `Build-LaptopQAIteration.ps1 -NoDeploy`. It create
 
 The application is Windows-only (`net10.0-windows`, WPF) and several workflows require Dell hardware, administrator rights, removable media, or Windows applications. A successful build does not replace an on-device smoke test.
 
+### Portable package and removable-drive launch
+
+V4 publishes as `LaptopQATestingV4.exe`. The package-root `Windows Laptop QA Launcher.vbs` starts `LAPTOP QA\App\Start Laptop QA Local.ps1` silently. The PowerShell launcher stages only the executable/runtime locally, passes the package folder as `--data-root`, and leaves QA data, configuration, reports, logs, hashes, and hardware snapshots on the removable drive.
+
+The launcher accepts both the current V4 executable name and the historical `LaptopQA.Windows.exe` name so existing packages remain launchable. When changing package layout or executable naming, test both entry points:
+
+```text
+<iteration root>\Windows Laptop QA Launcher.vbs
+<iteration root>\LAPTOP QA\App\Start Laptop QA Local.ps1
+```
+
+For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus the package-root VBS and `Laptop-QA-Drive.json`. Preserve the target drive's `Laptop-QA-Config.json`, `.runtime`, `activity`, `logs`, `QA sheets`, `hardware`, and `hash` folders. Verify the deployed `LaptopQATestingV4.exe` SHA-256 hash against the package before calling the deployment complete.
+
 ## Code map
 
 | Area | Primary file | Notes |
 | --- | --- | --- |
-| Application startup | `App.xaml`, `App.xaml.cs` | WPF entry point and top-level exception handling. |
+| Application startup | `App.xaml`, `App.xaml.cs`, `Start-LaptopQA-Local.ps1`, `Start-LaptopQA-Silent.vbs` | WPF entry point, top-level exception handling, and portable-drive staging/launch behavior. |
 | Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, and styles. |
 | Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, ServiceNow automation, and external process calls. Foldable `#region` labels divide these responsibilities. |
 | ServiceNow launch | `ServiceNowRequestLauncher.cs`, `MainWindow.xaml.cs` | The primary route opens Edge and sends a page autofill script for the configured request type, assignment group, and QA description. A direct open plus copied description is the startup-failure fallback. |
@@ -42,7 +55,7 @@ The application is Windows-only (`net10.0-windows`, WPF) and several workflows r
 | Diagnostics/report UI | `DiagnosticsResult.cs`, `QaSheetFiles.cs`, `QaSheetImageWindow.cs` | Diagnostics results and QA sheet display/output. |
 | Keyboard test | `KeyboardTesterWindow.cs` | Standalone keyboard tester window. |
 | Localization | `LanguageCatalog.cs`, `WpfLocalization.cs`, `Shared\UiLocalization.cs`, `Shared\ui-translations.json` | Culture selection and translated UI strings. Shared files are linked by the project file. |
-| Packaging | `Build-LaptopQAIteration.ps1`, `Launcher` | Produces portable output and launcher behavior. |
+| Packaging | `Build-LaptopQAIteration.ps1`, `Deploy-LaptopQAPackage.ps1`, `Start-LaptopQA-Local.ps1`, `Start-LaptopQA-Silent.vbs` | Produces the self-contained V4 package and validates/deploys its portable launcher. |
 
 ## Warranty Date Behavior
 
@@ -97,5 +110,7 @@ Search for a region name first, then search for the visible button/control name 
 - Load or browse to a Dell diagnostics log and verify its result.
 - Save/open a QA sheet and confirm the output image.
 - Select ServiceNow and verify the request type, assignment group, and description are populated; confirm the QA description is returned to the clipboard afterward.
+- Launch the packaged app from the root VBS and directly from the app-folder PowerShell script; verify both retain the removable package as the data root.
+- When deploying to a removable drive, verify the executable hash and confirm that the existing configuration and QA data folders were preserved.
 - Reset the QA session, close/reopen the app, and confirm cache behavior.
 - Test shutdown/reboot/BIOS actions only on a disposable QA device.
