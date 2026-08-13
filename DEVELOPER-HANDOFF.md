@@ -48,6 +48,7 @@ For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus
 | Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, and styles. |
 | Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, ServiceNow automation, and external process calls. Foldable `#region` labels divide these responsibilities. |
 | ServiceNow launch | `ServiceNowRequestLauncher.cs`, `MainWindow.xaml.cs` | The primary route opens Edge and sends a page autofill script for the configured request type, assignment group, and QA description. A direct open plus copied description is the startup-failure fallback. |
+| Intune device search | `MainWindow.xaml.cs` | The Check Hash and Group Tag action opens Intune Windows Devices and uses Windows UI Automation to place the service tag in a matching device-search field. The service tag remains on the clipboard if the page is slow or its accessible search control changes. |
 | Configuration | `AppConfig.cs`, `Laptop-QA-Config.json`, `SettingsWindow.cs` | Defaults, persisted settings, and settings UI. |
 | Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | The active QA is saved as `.runtime/qa-session.json`; searchable 90-day history is stored as stable session files under `.runtime/sessions`, with an atomic `.runtime/sessions-index.json` metadata index that can be rebuilt from those snapshots. |
 | Logging | `ErrorLog.cs` | Activity/error log paths, migration, redaction, and session filenames. |

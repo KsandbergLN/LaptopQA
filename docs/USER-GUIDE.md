@@ -11,6 +11,7 @@ This guide is for technicians using the supported Windows app and macOS companio
 5. Mark each step Pass, Fail, or Ignore only when the device matrix or test procedure allows it. Add notes for failures, exceptions, or administrator actions.
 6. Review the summary and generate the QA sheet. Keep the package's `QA sheets`, `logs`, `hardware`, and `activity` folders with the session data.
 7. Select **ServiceNow** to open the configured Generic Service Request. Laptop QA attempts to fill the request type, assignment group, and description automatically. After the attempt, the QA summary is copied to the clipboard for review or manual paste. Confirm all ServiceNow fields before submitting. If the automation cannot start, the app opens the request and leaves the same QA summary on the clipboard for manual completion.
+8. Select **Check Hash and Group Tag** to open Intune Windows Devices. Laptop QA sends the service tag to the Intune device-search field when it becomes available and keeps the service tag on the clipboard. Verify the device and group tag in Intune before treating the check as complete.
 
 ## macOS companion
 

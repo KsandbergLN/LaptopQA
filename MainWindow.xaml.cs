@@ -170,6 +170,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private const string DefaultServiceNowTypeOfRequest = "Other";
 
+	private const string IntuneWindowsDevicesUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+
 	private const string DefaultWaveBackData = "M -20,440 C 190,370 380,550 580,470 C 760,400 980,555 1300,465 L1300,740 L-20,740 Z";
 
 	private const string DefaultWaveFrontData = "M -20,500 C 230,430 420,615 680,525 C 880,455 1080,600 1300,515 L1300,740 L-20,740 Z";
@@ -3633,6 +3635,28 @@ $items = @(
 		}
 	}
 
+	private void CheckHashGroupTagButton_Click(object sender, RoutedEventArgs e)
+	{
+		string serial = _serviceTag.Trim();
+		if (!IsUsefulFileIdentifier(serial))
+		{
+			MessageBox.Show(this, "A valid service tag is required before Intune can search for this device.", "Check Hash and Group Tag", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			return;
+		}
+
+		try
+		{
+			Clipboard.SetText(serial);
+			RunIntuneDeviceSearch(IntuneWindowsDevicesUrl, serial);
+			AddActivity("Intune", "Opened Windows Devices and requested a search for service tag " + serial + ".");
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Intune", "Could not open Windows Devices search: " + ex.Message);
+			MessageBox.Show(this, "Intune could not be opened automatically. The service tag is on the clipboard for manual search.\n\n" + ex.Message, "Check Hash and Group Tag", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+		}
+	}
+
 	private QaSheetFiles SaveQaSheet()
 	{
 		CleanupOldFiles(QaDir, 90, "QA Sheet", "QA sheet file(s)");
@@ -3844,7 +3868,7 @@ $items = @(
 			new QaRenderRow("6", L("Dell preboot diagnostics"), StateFor("Diagnostics", "Warning"), L(DetailFor("Diagnostics", "Diagnostics log not found."))),
 			new QaRenderRow("7", L("USB ports verified"), state, detail),
 			new QaRenderRow("", L("Battery health checked"), "Ok", cache.BatterySummary ?? ""),
-			new QaRenderRow("8", L("Hash and group tag checked"), text, L((text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off.")),
+			new QaRenderRow("8", L("Check hash and group tag"), text, L((text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off.")),
 			new QaRenderRow("8", L("Laptop cleaned"), text2, L((text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off.")),
 			new QaRenderRow("8", L("Removed User from Laptop in Intune"), text3, L((text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off.")),
 			new QaRenderRow("8", L("Update Stockrooms"), text4, L((text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated.")),
@@ -6647,6 +6671,19 @@ $items = @(
 		});
 	}
 
+	private static void RunIntuneDeviceSearch(string intuneUrl, string serial)
+	{
+		string script = $"$ErrorActionPreference = 'SilentlyContinue'\n$url = {PowerShellLiteral(intuneUrl)}\n$serial = {PowerShellLiteral(serial)}\nSet-Clipboard -Value $serial\nStart-Process 'msedge.exe' $url\nStart-Sleep -Seconds 4\nAdd-Type -AssemblyName UIAutomationClient\n$target = $null\nfor ($attempt = 0; $attempt -lt 24; $attempt++) {{\n  $target = Get-Process msedge | Where-Object {{ $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -match 'Intune|Windows devices|Microsoft Endpoint' }} | Sort-Object StartTime -Descending | Select-Object -First 1\n  if ($target) {{ break }}\n  Start-Sleep -Milliseconds 500\n}}\nif (-not $target) {{ exit 0 }}\n$window = [System.Windows.Automation.AutomationElement]::FromHandle($target.MainWindowHandle)\nfor ($attempt = 0; $attempt -lt 20; $attempt++) {{\n  $edits = $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition) | Where-Object {{ $_.Current.ControlType -eq [System.Windows.Automation.ControlType]::Edit }}\n  $search = $edits | Where-Object {{ ($_.Current.Name + ' ' + $_.Current.HelpText) -match '(?i)search.*(device|name|serial)|device.*search|search' }} | Select-Object -First 1\n  if ($search) {{\n    try {{ ([System.Windows.Automation.ValuePattern]$search.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern)).SetValue($serial); exit 0 }} catch {{}}\n  }}\n  Start-Sleep -Milliseconds 500\n}}";
+		string encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+		Process.Start(new ProcessStartInfo("powershell.exe")
+		{
+			UseShellExecute = false,
+			CreateNoWindow = true,
+			WindowStyle = ProcessWindowStyle.Hidden,
+			ArgumentList = { "-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded }
+		});
+	}
+
 	private string BuildQaSheetHtml()
 	{
 		string text = ((FinalHashGroupTagCheck.IsChecked == true) ? "Ok" : "Waiting");
@@ -6667,7 +6704,7 @@ $items = @(
 			("6", "Dell preboot diagnostics", _states["Diagnostics"], Detail("Diagnostics", "Diagnostics log not found.")),
 			("7", "USB ports verified", item, item2),
 			("", "Battery health checked", "Ok", _batterySummary),
-			("8", "Hash and group tag checked", text, (text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off."),
+			("8", "Check hash and group tag", text, (text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off."),
 			("8", "Laptop cleaned", text2, (text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off."),
 			("8", "Removed User from Laptop in Intune", text3, (text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off."),
 			("8", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated."),
