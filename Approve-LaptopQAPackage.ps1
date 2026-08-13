@@ -55,7 +55,7 @@ if ($LASTEXITCODE -eq 0) {
     throw "Accepted-package tag already exists: $tagName"
 }
 
-if ($PSCmdlet.ShouldProcess($package, 'Mark package manifest Accepted')) {
+if (-not $WhatIfPreference) {
     $manifest.Status = 'Accepted'
     $manifest | Add-Member -NotePropertyName AcceptedUtc -NotePropertyValue ((Get-Date).ToUniversalTime().ToString('o')) -Force
     $manifest | Add-Member -NotePropertyName AcceptedBy -NotePropertyValue $AcceptedBy -Force

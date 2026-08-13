@@ -50,7 +50,7 @@ if ($OneDrive) {
     else {
         $manifest.PackageName
     }
-    if ($PSCmdlet.ShouldProcess('OneDrive release location', "Deploy accepted package $package")) {
+    if (-not $WhatIfPreference) {
         $results += & $syncScript -SourceFolder $package -VersionPrefix $versionPrefix -DelayMinutes 30
     }
 }
@@ -80,7 +80,7 @@ if ($RemovableDrives) {
             throw "Unexpected removable-drive target: $resolvedTargetApp"
         }
 
-        if ($PSCmdlet.ShouldProcess($target.DriveRoot, "Deploy accepted package $($manifest.PackageName)")) {
+        if (-not $WhatIfPreference) {
             $targetConfig = Join-Path $target.TargetRoot 'Laptop-QA-Config.json'
             $configHashBefore = if (Test-Path -LiteralPath $targetConfig -PathType Leaf) {
                 (Get-FileHash -LiteralPath $targetConfig -Algorithm SHA256).Hash
