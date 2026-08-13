@@ -29,7 +29,7 @@ The application is Windows-only (`net10.0-windows`, WPF) and several workflows r
 
 ### Portable package and removable-drive launch
 
-V4 publishes as `LaptopQATestingV4.exe`. The package-root `Windows Laptop QA Launcher.vbs` starts `LAPTOP QA\App\Start Laptop QA Local.ps1` silently. The PowerShell launcher stages only the executable/runtime locally, passes the package folder as `--data-root`, and leaves QA data, configuration, reports, logs, hashes, and hardware snapshots on the removable drive.
+V4 publishes as `LaptopQATestingV4.exe`. The package-root `Windows Laptop QA Launcher.vbs` starts `LAPTOP QA\App\Start Laptop QA Local.ps1` silently. The PowerShell launcher stages only the executable/runtime under `%LOCALAPPDATA%\Laptop QA\V4`, passes the package folder as `--data-root`, and leaves QA data, configuration, reports, logs, hashes, and hardware snapshots on the removable drive. Cleanup must remain constrained to that V4 staging root.
 
 The launcher uses the V4 executable name, `LaptopQATestingV4.exe`. When changing package layout or executable naming, test both entry points:
 

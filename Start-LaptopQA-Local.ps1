@@ -47,6 +47,7 @@ if (-not $isWindowsPlatform) {
 }
 
 $exeName = 'LaptopQATestingV4.exe'
+$version = 'V4'
 $isInsideAppFolder = Test-Path -LiteralPath (Join-Path $scriptFolder $exeName) -PathType Leaf
 $nestedAppFolder = Join-Path $scriptFolder 'App'
 $isContainerFolder = Test-Path -LiteralPath (Join-Path $nestedAppFolder $exeName) -PathType Leaf
@@ -195,7 +196,9 @@ function Remove-OldLocalStageFolders {
             $currentFull = [System.IO.Path]::GetFullPath($CurrentLocalRoot).TrimEnd('\', '/')
         }
 
-        Get-ChildItem -LiteralPath $LocalBase -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
+        Get-ChildItem -LiteralPath $LocalBase -Directory -Force -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '^\d{14}-\d+$' } |
+            ForEach-Object {
             $versionRoot = $_.FullName
             Get-ChildItem -LiteralPath $versionRoot -Directory -Force -ErrorAction SilentlyContinue | ForEach-Object {
                 $candidate = [System.IO.Path]::GetFullPath($_.FullName).TrimEnd('\', '/')
@@ -295,7 +298,21 @@ try {
     $startInfo.UseShellExecute = $true
     $escapedDataRoot = $packageRoot.Replace('"', '\"')
     $startInfo.Arguments = "--data-root `"$escapedDataRoot`""
-    $process = [System.Diagnostics.Process]::Start($startInfo)
+    $process = $null
+    $startError = $null
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        try {
+            $process = [System.Diagnostics.Process]::Start($startInfo)
+            if ($process) { break }
+        }
+        catch {
+            $startError = $_.Exception.Message
+            Start-Sleep -Milliseconds (500 * $attempt)
+        }
+    }
+    if (-not $process) {
+        throw "Could not start the locally staged app after three attempts. $startError"
+    }
     Write-LauncherLog "Started local app: $localExe"
     Write-LauncherLog "App data root passed as removable folder: $packageRoot"
     if (-not $NoWait) {
