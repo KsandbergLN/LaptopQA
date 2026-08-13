@@ -11,7 +11,10 @@ This guide is for technicians using the supported Windows app and macOS companio
 5. Mark each step Pass, Fail, or Ignore only when the device matrix or test procedure allows it. Add notes for failures, exceptions, or administrator actions.
 6. Review the summary and generate the QA sheet. Keep the package's `QA sheets`, `logs`, `hardware`, and `activity` folders with the session data.
 7. Select **ServiceNow** to open the configured Generic Service Request. Laptop QA attempts to fill the request type, assignment group, and description automatically. After the attempt, the QA summary is copied to the clipboard for review or manual paste. Confirm all ServiceNow fields before submitting. If the automation cannot start, the app opens the request and leaves the same QA summary on the clipboard for manual completion.
-8. Select **Check Hash and Group Tag** to open Intune Windows Devices. Laptop QA sends the service tag to the Intune device-search field when it becomes available and keeps the service tag on the clipboard. Verify the device and group tag in Intune before treating the check as complete.
+8. Select **Check Hash and Group Tag** to open Intune Windows Devices in a new Edge tab. The service tag is copied to the clipboard for a manual device search. Verify the device and group tag in Intune, then select the adjacent checkbox to mark the step complete.
+9. Select **Remove User from Laptop in Intune** to open Intune Autopilot Devices in a new Edge tab. The service tag is copied to the clipboard. Complete the removal, then select the adjacent checkbox to mark the step complete.
+10. Select **Update Stockrooms** to open the current laptop's ServiceNow hardware list in a new Edge tab. Laptop QA attempts to select **Serial number**, enter the service tag, and run the search. The service tag remains copied to the clipboard; if the page does not update, select **Serial number**, paste the service tag, and press Enter. Update the applicable stockroom record, then select the adjacent checkbox to mark the step complete.
+11. Open **Settings** to change any final-check destination under **Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` where the active laptop's service tag belongs.
 
 ## macOS companion
 

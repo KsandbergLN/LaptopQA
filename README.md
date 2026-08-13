@@ -50,6 +50,8 @@ Windows keeps searchable QA session history for 90 days under `.runtime/sessions
 
 Technicians should use [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). Developers and maintainers should start with [`DEVELOPER-HANDOFF.md`](DEVELOPER-HANDOFF.md).
 
+Final-check navigation links are configurable from **Settings > Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` so Laptop QA can insert the active device's service tag.
+
 ## Where to make changes
 
 - `MainWindow.xaml` and `MainWindow.xaml.cs` — Windows shell and core workflow.

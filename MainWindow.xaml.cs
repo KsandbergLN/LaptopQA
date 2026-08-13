@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -171,6 +172,10 @@ public partial class MainWindow : Window, IComponentConnector
 	private const string DefaultServiceNowTypeOfRequest = "Other";
 
 	private const string IntuneWindowsDevicesUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+
+	private const string IntuneWindowsEnrollmentUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+
+	private const string ServiceNowStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
 
 	private const string DefaultWaveBackData = "M -20,440 C 190,370 380,550 580,470 C 760,400 980,555 1300,465 L1300,740 L-20,740 Z";
 
@@ -1552,6 +1557,9 @@ public partial class MainWindow : Window, IComponentConnector
 	[DllImport("user32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]
 	private static extern bool IsWindowVisible(IntPtr hWnd);
+
+	[DllImport("user32.dll")]
+	private static extern void keybd_event(byte virtualKey, byte scanCode, uint flags, UIntPtr extraInfo);
 
 	[DllImport("kernel32.dll")]
 	[return: MarshalAs(UnmanagedType.Bool)]
@@ -3637,24 +3645,159 @@ $items = @(
 
 	private void CheckHashGroupTagButton_Click(object sender, RoutedEventArgs e)
 	{
+		OpenServiceTagPageInNewTab(GetFinalCheckLink(_config.CheckHashAndGroupTagUrl, IntuneWindowsDevicesUrl), "Check Hash and Group Tag", "Intune");
+	}
+
+	private void RemoveUserFromIntuneButton_Click(object sender, RoutedEventArgs e)
+	{
+		OpenServiceTagPageInNewTab(GetFinalCheckLink(_config.RemoveUserFromIntuneUrl, IntuneWindowsEnrollmentUrl), "Remove User from Laptop in Intune", "Intune");
+	}
+
+	private async void UpdateStockroomsButton_Click(object sender, RoutedEventArgs e)
+	{
 		string serial = _serviceTag.Trim();
 		if (!IsUsefulFileIdentifier(serial))
 		{
-			MessageBox.Show(this, "A valid service tag is required before Intune can search for this device.", "Check Hash and Group Tag", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			MessageBox.Show(this, "A valid service tag is required before opening ServiceNow for this laptop.", "Update Stockrooms", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 			return;
 		}
 
 		try
 		{
+			string url = GetFinalCheckLink(_config.UpdateStockroomsUrl, ServiceNowStockroomsUrl).Replace("{SERIAL}", Uri.EscapeDataString(serial), StringComparison.Ordinal);
 			Clipboard.SetText(serial);
-			RunIntuneDeviceSearch(IntuneWindowsDevicesUrl, serial);
-			AddActivity("Intune", "Opened Windows Devices and requested a search for service tag " + serial + ".");
+			OpenUrlInNewEdgeTab(url);
+			bool searchApplied = await Task.Run(() => TryApplyServiceNowHardwareSearch(serial));
+			AddActivity("ServiceNow", searchApplied
+				? "Update Stockrooms opened; Serial number selected and searched for service tag " + serial + "."
+				: "Update Stockrooms opened; ServiceNow search controls were unavailable, so the service tag was copied: " + serial + ".");
+			ShowTransientNotification(searchApplied
+				? "Serial number selected. ServiceNow search started."
+				: "Service tag copied. ServiceNow opened in a new tab.");
 		}
 		catch (Exception ex)
 		{
-			AddActivity("Intune", "Could not open Windows Devices search: " + ex.Message);
-			MessageBox.Show(this, "Intune could not be opened automatically. The service tag is on the clipboard for manual search.\n\n" + ex.Message, "Check Hash and Group Tag", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			Clipboard.SetText(serial);
+			AddActivity("ServiceNow", "Update Stockrooms automation could not start: " + ex.Message);
+			MessageBox.Show(this, "ServiceNow could not be opened automatically. The service tag is on the clipboard.\n\n" + ex.Message, "Update Stockrooms", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 		}
+	}
+
+	private void OpenUrlInNewEdgeTab(string url)
+	{
+		string? edgePath = GetEdgePath();
+		if (string.IsNullOrWhiteSpace(edgePath))
+		{
+			Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+			return;
+		}
+
+		Process.Start(new ProcessStartInfo(edgePath)
+		{
+			UseShellExecute = false,
+			ArgumentList = { "--new-tab", url }
+		});
+	}
+
+	private static string GetFinalCheckLink(string? configuredUrl, string defaultUrl)
+	{
+		return string.IsNullOrWhiteSpace(configuredUrl) ? defaultUrl : configuredUrl.Trim();
+	}
+
+	private static bool TryApplyServiceNowHardwareSearch(string serial)
+	{
+		const string fieldName = "Search a specific field of the Hardware list, 10 items";
+		const string fieldAutomationId = "940f143f832ec7d0412bf8d6feaad3e0_select";
+		const string searchAutomationId = "940f143f832ec7d0412bf8d6feaad3e0_text";
+
+		for (int attempt = 0; attempt < 12; attempt++)
+		{
+			try
+			{
+				AutomationElement root = AutomationElement.RootElement;
+				AutomationElement? field = root.FindFirst(TreeScope.Descendants, new OrCondition(
+					new PropertyCondition(AutomationElement.AutomationIdProperty, fieldAutomationId),
+					new PropertyCondition(AutomationElement.NameProperty, fieldName)));
+				if (field is null)
+				{
+					Thread.Sleep(500);
+					continue;
+				}
+
+				if (field.TryGetCurrentPattern(ExpandCollapsePattern.Pattern, out object? expandPattern))
+				{
+					((ExpandCollapsePattern)expandPattern).Expand();
+					Thread.Sleep(125);
+				}
+
+				AutomationElement? serialOption = root.FindFirst(TreeScope.Descendants, new AndCondition(
+					new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.ListItem),
+					new PropertyCondition(AutomationElement.NameProperty, "Serial number")));
+				if (serialOption is null || !serialOption.TryGetCurrentPattern(SelectionItemPattern.Pattern, out object? selectionPattern))
+				{
+					Thread.Sleep(500);
+					continue;
+				}
+				((SelectionItemPattern)selectionPattern).Select();
+
+				AutomationElement? search = root.FindFirst(TreeScope.Descendants, new AndCondition(
+					new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Edit),
+					new OrCondition(
+						new PropertyCondition(AutomationElement.AutomationIdProperty, searchAutomationId),
+						new PropertyCondition(AutomationElement.NameProperty, "Search"))));
+				if (search is null || !search.TryGetCurrentPattern(ValuePattern.Pattern, out object? valuePattern))
+				{
+					Thread.Sleep(500);
+					continue;
+				}
+
+				((ValuePattern)valuePattern).SetValue(serial);
+				search.SetFocus();
+				Thread.Sleep(100);
+				keybd_event(0x0D, 0, 0, UIntPtr.Zero);
+				keybd_event(0x0D, 0, 0x0002, UIntPtr.Zero);
+				return true;
+			}
+			catch (ElementNotAvailableException)
+			{
+				Thread.Sleep(500);
+			}
+			catch (InvalidOperationException)
+			{
+				Thread.Sleep(500);
+			}
+		}
+
+		return false;
+	}
+
+	private void OpenServiceTagPageInNewTab(string url, string actionName, string destinationName)
+	{
+		string serial = _serviceTag.Trim();
+		if (!IsUsefulFileIdentifier(serial))
+		{
+			MessageBox.Show(this, "A valid service tag is required before opening " + destinationName + " for this laptop.", actionName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+			return;
+		}
+
+		try
+		{
+			url = url.Replace("{SERIAL}", Uri.EscapeDataString(serial), StringComparison.Ordinal);
+			Clipboard.SetText(serial);
+			OpenUrlInNewEdgeTab(url);
+			AddActivity(destinationName, actionName + " opened in a new tab; service tag copied: " + serial + ".");
+			ShowTransientNotification("Service tag copied. " + destinationName + " opened in a new tab.");
+		}
+		catch (Exception ex)
+		{
+			AddActivity(destinationName, actionName + " could not open: " + ex.Message);
+			MessageBox.Show(this, destinationName + " could not be opened automatically. The service tag is on the clipboard.\n\n" + ex.Message, actionName, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+		}
+	}
+
+	private void ShowTransientNotification(string message)
+	{
+		new TransientNotificationWindow(this, message, _currentTheme).Show();
 	}
 
 	private QaSheetFiles SaveQaSheet()
@@ -6671,18 +6814,6 @@ $items = @(
 		});
 	}
 
-	private static void RunIntuneDeviceSearch(string intuneUrl, string serial)
-	{
-		string script = $"$ErrorActionPreference = 'SilentlyContinue'\n$url = {PowerShellLiteral(intuneUrl)}\n$serial = {PowerShellLiteral(serial)}\nSet-Clipboard -Value $serial\nStart-Process 'msedge.exe' $url\nStart-Sleep -Seconds 4\nAdd-Type -AssemblyName UIAutomationClient\n$target = $null\nfor ($attempt = 0; $attempt -lt 24; $attempt++) {{\n  $target = Get-Process msedge | Where-Object {{ $_.MainWindowHandle -ne 0 -and $_.MainWindowTitle -match 'Intune|Windows devices|Microsoft Endpoint' }} | Sort-Object StartTime -Descending | Select-Object -First 1\n  if ($target) {{ break }}\n  Start-Sleep -Milliseconds 500\n}}\nif (-not $target) {{ exit 0 }}\n$window = [System.Windows.Automation.AutomationElement]::FromHandle($target.MainWindowHandle)\nfor ($attempt = 0; $attempt -lt 20; $attempt++) {{\n  $edits = $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition) | Where-Object {{ $_.Current.ControlType -eq [System.Windows.Automation.ControlType]::Edit }}\n  $search = $edits | Where-Object {{ ($_.Current.Name + ' ' + $_.Current.HelpText) -match '(?i)search.*(device|name|serial)|device.*search|search' }} | Select-Object -First 1\n  if ($search) {{\n    try {{ ([System.Windows.Automation.ValuePattern]$search.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern)).SetValue($serial); exit 0 }} catch {{}}\n  }}\n  Start-Sleep -Milliseconds 500\n}}";
-		string encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
-		Process.Start(new ProcessStartInfo("powershell.exe")
-		{
-			UseShellExecute = false,
-			CreateNoWindow = true,
-			WindowStyle = ProcessWindowStyle.Hidden,
-			ArgumentList = { "-NoProfile", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded }
-		});
-	}
 
 	private string BuildQaSheetHtml()
 	{

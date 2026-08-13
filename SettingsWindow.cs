@@ -23,6 +23,12 @@ public sealed class SettingsWindow : Window
 
 	private const string DefaultServiceNowTypeOfRequest = "Other";
 
+	private const string DefaultCheckHashAndGroupTagUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+
+	private const string DefaultRemoveUserFromIntuneUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+
+	private const string DefaultUpdateStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
+
 	private readonly TextBox _name = new TextBox();
 
 	private readonly TextBox _cameraRoll = new TextBox();
@@ -50,6 +56,12 @@ public sealed class SettingsWindow : Window
 	private readonly TextBox _serviceNowAssignmentGroupSysId = new TextBox();
 
 	private readonly TextBox _serviceNowDelay = new TextBox();
+
+	private readonly TextBox _checkHashAndGroupTagUrl = new TextBox();
+
+	private readonly TextBox _removeUserFromIntuneUrl = new TextBox();
+
+	private readonly TextBox _updateStockroomsUrl = new TextBox();
 
 	private readonly ComboBox _themeChoice = new ComboBox();
 
@@ -100,7 +112,10 @@ public sealed class SettingsWindow : Window
 			ServiceNowTypeOfRequest = config.ServiceNowTypeOfRequest,
 			ServiceNowAssignmentGroupName = config.ServiceNowAssignmentGroupName,
 			ServiceNowAssignmentGroupSysId = config.ServiceNowAssignmentGroupSysId,
-			ServiceNowAutomationDelayMilliseconds = config.ServiceNowAutomationDelayMilliseconds
+			ServiceNowAutomationDelayMilliseconds = config.ServiceNowAutomationDelayMilliseconds,
+			CheckHashAndGroupTagUrl = config.CheckHashAndGroupTagUrl,
+			RemoveUserFromIntuneUrl = config.RemoveUserFromIntuneUrl,
+			UpdateStockroomsUrl = config.UpdateStockroomsUrl
 		};
 		base.Title = "Settings";
 		Rect workArea = SystemParameters.WorkArea;
@@ -148,7 +163,7 @@ public sealed class SettingsWindow : Window
 		Canvas canvas = new Canvas
 		{
 			Width = 718.0,
-			Height = 780.0
+			Height = 960.0
 		};
 		ScrollViewer element = new ScrollViewer
 		{
@@ -235,7 +250,13 @@ public sealed class SettingsWindow : Window
 		AddField(canvas, "ServiceNow automation wait milliseconds", _serviceNowDelay, ((config.ServiceNowAutomationDelayMilliseconds <= 0) ? 500 : config.ServiceNowAutomationDelayMilliseconds).ToString(CultureInfo.InvariantCulture), 386.0, 526.0, 314.0);
 		AddField(canvas, "ServiceNow assignment group name", _serviceNowAssignmentGroupName, string.IsNullOrWhiteSpace(config.ServiceNowAssignmentGroupName) ? "Desktop Support (Miamisburg) - L2" : config.ServiceNowAssignmentGroupName, 36.0, 590.0, 330.0);
 		AddField(canvas, "ServiceNow assignment group sys ID", _serviceNowAssignmentGroupSysId, string.IsNullOrWhiteSpace(config.ServiceNowAssignmentGroupSysId) ? "9d144e37bdef1000e25cbf141e60d715" : config.ServiceNowAssignmentGroupSysId, 386.0, 590.0, 314.0);
-		TextBlock textBlock2 = Text("Warranty uses the packaged or system-installed Dell Command | Warranty tool automatically. Diagnostics folder is optional; leave it blank to auto-detect the Dell log on a small FAT32 removable drive.", 36.0, 670.0, 664.0, 58.0, 12.5, FontWeights.Normal);
+		TextBlock finalCheckLinksTitle = Text("Final Check Links", 36.0, 662.0, 250.0, 24.0, 15.0, FontWeights.Bold);
+		canvas.Children.Add(finalCheckLinksTitle);
+		AddField(canvas, "Check Hash and Group Tag URL", _checkHashAndGroupTagUrl, string.IsNullOrWhiteSpace(config.CheckHashAndGroupTagUrl) ? DefaultCheckHashAndGroupTagUrl : config.CheckHashAndGroupTagUrl, 36.0, 696.0, 664.0);
+		AddField(canvas, "Remove User from Laptop in Intune URL", _removeUserFromIntuneUrl, string.IsNullOrWhiteSpace(config.RemoveUserFromIntuneUrl) ? DefaultRemoveUserFromIntuneUrl : config.RemoveUserFromIntuneUrl, 36.0, 760.0, 664.0);
+		AddField(canvas, "Update Stockrooms URL", _updateStockroomsUrl, string.IsNullOrWhiteSpace(config.UpdateStockroomsUrl) ? DefaultUpdateStockroomsUrl : config.UpdateStockroomsUrl, 36.0, 824.0, 664.0);
+		_updateStockroomsUrl.ToolTip = "Use {SERIAL} where the current laptop's service tag should be placed in the ServiceNow URL.";
+		TextBlock textBlock2 = Text("Warranty uses the packaged or system-installed Dell Command | Warranty tool automatically. Diagnostics folder is optional; leave it blank to auto-detect the Dell log on a small FAT32 removable drive.", 36.0, 900.0, 664.0, 40.0, 12.5, FontWeights.Normal);
 		textBlock2.TextWrapping = TextWrapping.Wrap;
 		canvas.Children.Add(textBlock2);
 		_labels.Add(textBlock2);
@@ -379,6 +400,9 @@ public sealed class SettingsWindow : Window
 		Config.ServiceNowTypeOfRequest = (string.IsNullOrWhiteSpace(_serviceNowType.Text) ? "Other" : _serviceNowType.Text.Trim());
 		Config.ServiceNowAssignmentGroupName = (string.IsNullOrWhiteSpace(_serviceNowAssignmentGroupName.Text) ? "Desktop Support (Miamisburg) - L2" : _serviceNowAssignmentGroupName.Text.Trim());
 		Config.ServiceNowAssignmentGroupSysId = (string.IsNullOrWhiteSpace(_serviceNowAssignmentGroupSysId.Text) ? "9d144e37bdef1000e25cbf141e60d715" : _serviceNowAssignmentGroupSysId.Text.Trim());
+		Config.CheckHashAndGroupTagUrl = string.IsNullOrWhiteSpace(_checkHashAndGroupTagUrl.Text) ? DefaultCheckHashAndGroupTagUrl : _checkHashAndGroupTagUrl.Text.Trim();
+		Config.RemoveUserFromIntuneUrl = string.IsNullOrWhiteSpace(_removeUserFromIntuneUrl.Text) ? DefaultRemoveUserFromIntuneUrl : _removeUserFromIntuneUrl.Text.Trim();
+		Config.UpdateStockroomsUrl = string.IsNullOrWhiteSpace(_updateStockroomsUrl.Text) ? DefaultUpdateStockroomsUrl : _updateStockroomsUrl.Text.Trim();
 		if (TryReadPositiveInt(_cleanupTimeout, "Camera Roll cleanup timeout seconds", out var value) && TryReadPositiveInt(_cleanupRetry, "Cleanup retry delay seconds", out var value2) && TryReadPositiveInt(_wifiDelay, "Wi-Fi rescan wait seconds", out var value3) && TryReadPositiveInt(_ethernetRestore, "Ethernet restore wait seconds", out var value4) && TryReadPositiveInt(_serviceNowDelay, "ServiceNow automation wait milliseconds", out var value5))
 		{
 			Config.CameraRollCleanupTimeoutSeconds = value;
