@@ -12,6 +12,7 @@ The repository root is the canonical Windows source. The `main` branch is author
 - [`CANONICAL-SOURCE.md`](CANONICAL-SOURCE.md) — source-of-truth rules and generated-file boundaries.
 - [`DEVELOPER-HANDOFF.md`](DEVELOPER-HANDOFF.md) — architecture, testing, release, recovery, and ownership-transfer guidance.
 - [`macos/README.md`](macos/README.md) — macOS workflow, shared data behavior, and Apple Silicon packaging.
+- [`docs/FUTURE-WISHLIST.md`](docs/FUTURE-WISHLIST.md) — future automation and Windows launch improvements under consideration.
 
 ## Prerequisites
 
