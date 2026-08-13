@@ -33,14 +33,15 @@ The Windows project explicitly excludes `macos\**\*.cs`; do not remove that boun
 
 ## Quick start
 
-Clone the private repository, then run the Windows app after building:
+For a developer build, clone the private repository and build the Windows app:
 
 ```powershell
 git clone https://github.com/KsandbergLN/LaptopQA.git
 Set-Location .\LaptopQA
 dotnet build .\LaptopQA.Windows.csproj -c Release
-Start-Process .\bin\Release\net10.0-windows\LaptopQATestingV4.exe
 ```
+
+For normal technician use on Windows, open `Windows Laptop QA Launcher.vbs` from the approved package. On macOS, open `macOS Laptop QA Launcher.app`. Do not launch the internal executable directly unless you are developing or troubleshooting.
 
 For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.
 
