@@ -114,7 +114,7 @@ function Copy-AppFolder {
     )
 
     $existingLocalExe = Join-Path $Destination $exeName
-    if ($existingLocalExe) {
+    if (Test-Path -LiteralPath $existingLocalExe -PathType Leaf) {
         Write-LauncherLog "Using existing local staged copy: $Destination"
         Remove-LocalDataItems -LocalApp $Destination
         return
@@ -284,6 +284,10 @@ try {
 
     Copy-AppFolder -Source $sourceApp -Destination $localApp
     Write-LauncherLog "Copied app to local folder: $localApp"
+
+    if (-not (Test-Path -LiteralPath $localExe -PathType Leaf)) {
+        throw "The local staged executable was not created:`n$localExe"
+    }
 
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
     $startInfo.FileName = $localExe
