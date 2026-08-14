@@ -48,6 +48,9 @@ public sealed partial class SettingsWindow : Window
         ServiceNowDelayBox.Text = c.ServiceNowAutomationDelayMilliseconds.ToString(CultureInfo.InvariantCulture);
         ServiceNowGroupBox.Text = c.ServiceNowAssignmentGroupName;
         ServiceNowGroupIdBox.Text = c.ServiceNowAssignmentGroupSysId;
+        CheckHashAndGroupTagUrlBox.Text = c.CheckHashAndGroupTagUrl;
+        RemoveUserFromIntuneUrlBox.Text = c.RemoveUserFromIntuneUrl;
+        UpdateStockroomsUrlBox.Text = c.UpdateStockroomsUrl;
     }
 
     private async void SaveButton_Click(object? sender, RoutedEventArgs e)
@@ -75,6 +78,9 @@ public sealed partial class SettingsWindow : Window
         _config.ServiceNowAutomationDelayMilliseconds = serviceNow;
         _config.ServiceNowAssignmentGroupName = ServiceNowGroupBox.Text?.Trim() ?? "";
         _config.ServiceNowAssignmentGroupSysId = ServiceNowGroupIdBox.Text?.Trim() ?? "";
+        _config.CheckHashAndGroupTagUrl = CheckHashAndGroupTagUrlBox.Text?.Trim() ?? "";
+        _config.RemoveUserFromIntuneUrl = RemoveUserFromIntuneUrlBox.Text?.Trim() ?? "";
+        _config.UpdateStockroomsUrl = UpdateStockroomsUrlBox.Text?.Trim() ?? "";
         Close(new SettingsResult(_config, false));
         await Task.CompletedTask;
     }
@@ -198,6 +204,7 @@ public sealed partial class SettingsWindow : Window
         WifiRescanEthernetDisableDelaySeconds = c.WifiRescanEthernetDisableDelaySeconds, EthernetRestoreDelaySeconds = c.EthernetRestoreDelaySeconds,
         ServiceNowRequestUrl = c.ServiceNowRequestUrl,
         ServiceNowTypeOfRequest = c.ServiceNowTypeOfRequest, ServiceNowAssignmentGroupName = c.ServiceNowAssignmentGroupName,
-        ServiceNowAssignmentGroupSysId = c.ServiceNowAssignmentGroupSysId, ServiceNowAutomationDelayMilliseconds = c.ServiceNowAutomationDelayMilliseconds
+        ServiceNowAssignmentGroupSysId = c.ServiceNowAssignmentGroupSysId, ServiceNowAutomationDelayMilliseconds = c.ServiceNowAutomationDelayMilliseconds,
+        CheckHashAndGroupTagUrl = c.CheckHashAndGroupTagUrl, RemoveUserFromIntuneUrl = c.RemoveUserFromIntuneUrl, UpdateStockroomsUrl = c.UpdateStockroomsUrl
     };
 }

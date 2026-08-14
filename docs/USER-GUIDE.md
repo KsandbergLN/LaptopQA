@@ -14,7 +14,7 @@ This guide is for technicians using the supported Windows app and macOS companio
 8. Select **Check Hash and Group Tag** to open Intune Windows Devices in a new Edge tab. The service tag is copied to the clipboard for a manual device search. Verify the device and group tag in Intune, then select the adjacent checkbox to mark the step complete.
 9. Select **Remove User from Laptop in Intune** to open Intune Autopilot Devices in a new Edge tab. The service tag is copied to the clipboard. Complete the removal, then select the adjacent checkbox to mark the step complete.
 10. Select **Update Stockrooms** to open the current laptop's ServiceNow hardware list in a new Edge tab. Laptop QA attempts to select **Serial number**, enter the service tag, and run the search. The service tag remains copied to the clipboard; if the page does not update, select **Serial number**, paste the service tag, and press Enter. Update the applicable stockroom record, then select the adjacent checkbox to mark the step complete.
-11. Open **Settings** to change any final-check destination under **Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` where the active laptop's service tag belongs.
+11. Open **Settings** to change any final-check destination under **Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` where the active laptop's service tag belongs. The macOS companion supports the same final-check links and manual completion checkboxes. Its buttons open the configured pages and copy the relevant information to the clipboard; they do not fill or submit forms.
 
 ## macOS companion
 
