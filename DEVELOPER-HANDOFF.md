@@ -29,16 +29,16 @@ The application is Windows-only (`net10.0-windows`, WPF) and several workflows r
 
 ### Portable package and removable-drive launch
 
-Windows publishes as `LaptopQA.Windows.exe`. For normal technician use, launch the package-root `Windows Laptop QA Launcher.vbs`; it starts `LAPTOP QA\App\Start Laptop QA Local.ps1` silently. The PowerShell launcher stages only the executable/runtime under `%LOCALAPPDATA%\Laptop QA\Windows`, passes the package folder as `--data-root`, and leaves QA data, configuration, reports, logs, hashes, and hardware snapshots on the removable drive.
+Windows publishes as `LaptopQATestingV4.exe`. For normal technician use, launch the package-root `Windows Laptop QA Launcher.vbs`; it starts `LAPTOP QA\App\Start Laptop QA Local.ps1` silently. The PowerShell launcher stages only the executable/runtime under `%LOCALAPPDATA%\Laptop QA\Windows`, passes the package folder as `--data-root`, and leaves QA data, configuration, reports, logs, hashes, and hardware snapshots on the removable drive.
 
-The launcher uses `LaptopQA.Windows.exe`. When changing package layout or executable naming, test both entry points:
+The launcher uses `LaptopQATestingV4.exe`. When changing package layout or executable naming, test both entry points:
 
 ```text
 <iteration root>\Windows Laptop QA Launcher.vbs
 <iteration root>\LAPTOP QA\App\Start Laptop QA Local.ps1
 ```
 
-For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus the package-root VBS and `Laptop-QA-Drive.json`. Preserve the target drive's `Laptop-QA-Config.json`, `.runtime`, `activity`, `logs`, `QA sheets`, `hardware`, and `hash` folders. Verify the deployed `LaptopQA.Windows.exe` SHA-256 hash against the package before calling the deployment complete.
+For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus the package-root VBS and `Laptop-QA-Drive.json`. Preserve the target drive's `Laptop-QA-Config.json`, `.runtime`, `activity`, `logs`, `QA sheets`, `hardware`, and `hash` folders. Verify the deployed `LaptopQATestingV4.exe` SHA-256 hash against the package before calling the deployment complete.
 
 ## Code map
 
