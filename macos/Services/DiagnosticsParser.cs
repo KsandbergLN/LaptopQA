@@ -10,6 +10,7 @@ public static class DiagnosticsParser
         var currentTest = "";
         var currentTestHasUnansweredPrompt = false;
         var hasUnansweredPrompt = false;
+        var unansweredPrompts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var rawLine in raw.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None))
         {
@@ -29,6 +30,7 @@ public static class DiagnosticsParser
                 {
                     hasUnansweredPrompt = true;
                     currentTestHasUnansweredPrompt = true;
+                    unansweredPrompts.Add(PromptLabel(currentTest, line));
                     RemoveCurrentFailure(failures, currentTest);
                 }
             }
@@ -53,12 +55,12 @@ public static class DiagnosticsParser
         {
             var detail = string.Join("; ", failures.Take(3));
             if (failures.Count > 3) detail += $"; plus {failures.Count - 3} more";
-            if (hasUnansweredPrompt) detail += "; Technician did not respond to a diagnostics prompt.";
+            if (hasUnansweredPrompt) detail += "; " + DescribeUnansweredPrompts(unansweredPrompts);
             return new("Bad", "Diagnostics failed", detail, path, raw, hasUnansweredPrompt);
         }
 
         if (hasUnansweredPrompt)
-            return new("Warning", "Diagnostics completed with warning", "Technician did not respond to a diagnostics prompt.", path, raw, true);
+            return new("Warning", "Diagnostics completed with warning", DescribeUnansweredPrompts(unansweredPrompts), path, raw, true);
 
         return Regex.IsMatch(raw, @"Test Result:\s*Success\b", RegexOptions.IgnoreCase)
             ? new("Ok", "Passed all diagnostics tests", "Dell preboot diagnostics reported no failed tests.", path, raw, false)
@@ -76,6 +78,27 @@ public static class DiagnosticsParser
     }
 
     private static string Humanize(string value) => Regex.Replace(value.Trim(), @"\s+", " ");
+
+    private static string PromptLabel(string currentTest, string promptLine)
+    {
+        var test = Condense(currentTest);
+        if (!string.IsNullOrWhiteSpace(test)) return test;
+        if (Regex.IsMatch(promptLine, @"\b(?:video|graphics?|display|lcd|screen)\b", RegexOptions.IgnoreCase)) return "Video";
+        if (Regex.IsMatch(promptLine, @"\b(?:audio|speaker|tone|sound)\b", RegexOptions.IgnoreCase)) return "Audio";
+        if (Regex.IsMatch(promptLine, @"\b(?:camera|webcam)\b", RegexOptions.IgnoreCase)) return "Camera";
+        if (Regex.IsMatch(promptLine, @"\b(?:keyboard|key)\b", RegexOptions.IgnoreCase)) return "Keyboard";
+        if (Regex.IsMatch(promptLine, @"\b(?:touchpad|trackpad|mouse|pointer)\b", RegexOptions.IgnoreCase)) return "Pointing device";
+        return "diagnostics";
+    }
+
+    private static string DescribeUnansweredPrompts(IEnumerable<string> prompts)
+    {
+        var labels = prompts.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (labels.Count == 0) return "Technician did not respond to a diagnostics prompt.";
+        return labels.Count == 1
+            ? $"Technician did not respond to the {labels[0]} prompt."
+            : "Technician did not respond to the following prompts: " + string.Join(", ", labels) + ".";
+    }
 
     private static string Condense(string value)
     {

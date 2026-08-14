@@ -1,6 +1,6 @@
 # Laptop QA  Developer Handoff
 
-Last reviewed: 2026-08-12
+Last reviewed: 2026-08-14
 
 > **Canonical-source marker:** `CANONICAL-SOURCE.md` is authoritative. Historical version numbers do not override it.
 
@@ -51,10 +51,10 @@ For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus
 | Final-check actions | `MainWindow.xaml.cs`, `TransientNotificationWindow.cs` | Check Hash and Group Tag, Remove User from Laptop in Intune, and Update Stockrooms open their configured Intune or ServiceNow page in a new Edge tab and copy the service tag to the clipboard. Update Stockrooms uses Windows UI Automation to select ServiceNow's Serial number field, enter the tag, and press Enter; it must gracefully fall back to the copied tag when the page accessibility tree changes. The themed toast confirms launches without blocking the technician. Completion remains a separate manual checkbox. |
 | macOS final-check actions | `macos/MainWindow.axaml`, `macos/MainWindow.axaml.cs`, `macos/SettingsWindow.*` | The macOS companion mirrors the three action buttons, aligned manual checkboxes, shared Final Check Links configuration, service-tag clipboard behavior, and centered themed toast. Each action only opens its configured link and copies the relevant information; macOS does not automate browser forms. |
 | Configuration | `AppConfig.cs`, `Laptop-QA-Config.json`, `SettingsWindow.cs` | Defaults, persisted settings, and settings UI. The Final Check Links group holds the three external-action URLs; `UpdateStockroomsUrl` must retain `{SERIAL}` for dynamic service-tag replacement. |
-| Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | The active QA is saved as `.runtime/qa-session.json`; searchable 90-day history is stored as stable session files under `.runtime/sessions`, with an atomic `.runtime/sessions-index.json` metadata index that can be rebuilt from those snapshots. |
+| Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | The active QA is saved as `.runtime/qa-session.json`; searchable 90-day history is stored as stable session files under `.runtime/sessions`, with an atomic `.runtime/sessions-index.json` metadata index that can be rebuilt from those snapshots. The steps 1-7 handoff prompt is tracked per session, so it appears once only after all test rows are complete. |
 | Logging | `ErrorLog.cs` | Activity/error log paths, migration, redaction, and session filenames. |
 | Hardware models/UI | `HardwareSnapshot.cs`, `HardwareWindow.cs` | Collected device data and hardware drawer/window. |
-| Diagnostics/report UI | `DiagnosticsResult.cs`, `QaSheetFiles.cs`, `QaSheetImageWindow.cs` | Diagnostics results and QA sheet display/output. |
+| Diagnostics/report UI | `DiagnosticsResult.cs`, `QaSheetFiles.cs`, `QaSheetImageWindow.cs`, `macos/Services/DiagnosticsParser.cs` | Diagnostics results and QA sheet display/output. Unanswered Dell interactive prompts are reported with their detected category (for example Video, Audio, Camera, Keyboard, or pointing device) rather than a generic warning. |
 | Keyboard test | `KeyboardTesterWindow.cs` | Standalone keyboard tester window. |
 | Localization | `LanguageCatalog.cs`, `WpfLocalization.cs`, `Shared\UiLocalization.cs`, `Shared\ui-translations.json` | Culture selection and translated UI strings. Shared files are linked by the project file. |
 | Packaging | `Build-LaptopQAIteration.ps1`, `Deploy-LaptopQAPackage.ps1`, `Start-LaptopQA-Local.ps1`, `Start-LaptopQA-Silent.vbs` | Produces the self-contained V4 package and validates/deploys its portable launcher. |
@@ -110,6 +110,8 @@ Search for a region name first, then search for the visible button/control name 
 - Open Settings and verify theme/language changes.
 - Exercise Wi-Fi/Ethernet, camera, keyboard, external display, and USB rows on suitable hardware.
 - Load or browse to a Dell diagnostics log and verify its result.
+- Verify an unanswered Dell diagnostics prompt names the affected prompt category in both the main UI and QA sheet.
+- Complete Windows steps 1-7 on a device with BIOS USB connector data; confirm the handoff prompt appears only after the USB port count is detected and every detected port has a result.
 - Save/open a QA sheet and confirm the output image.
 - Select ServiceNow and verify the request type, assignment group, and description are populated; confirm the QA description is returned to the clipboard afterward.
 - Launch the packaged app from the root VBS and directly from the app-folder PowerShell script; verify both retain the removable package as the data root.

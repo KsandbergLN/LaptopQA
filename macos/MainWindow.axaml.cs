@@ -1008,7 +1008,7 @@ public sealed partial class MainWindow : Window
         Resources["TextBrush"] = Brush.Parse(Pick("#06141B", "#F3F7F8", "#F4F4F4")); Resources["MutedBrush"] = Brush.Parse(Pick("#1D323C", "#B9C7CB", "#BDBDBD"));
         Resources["AccentBrush"] = Brush.Parse(Pick("#004F4A", "#A2E6DD", "#D8D8D8")); Resources["PanelBrush"] = Brush.Parse(Pick("#FFFFFFFF", "#A03A525C", "#F0101010"));
         Resources["PanelStroke"] = Brush.Parse(Pick("#7F969F", "#6682949B", "#5A5A5A")); Resources["InputBrush"] = Brush.Parse(Pick("#FFFFFFFF", "#A01D3038", "#FF080808"));
-        Resources["PrimaryBrush"] = Brush.Parse(Pick("#60757E", "#60757E", "#343434")); Resources["ResetBrush"] = Brush.Parse(Pick("#203741", "#263D46", "#1A1A1A"));
+        Resources["PrimaryBrush"] = Brush.Parse(Pick("#EAF0EF", "#60757E", "#343434")); Resources["ResetBrush"] = Brush.Parse(Pick("#EAF0EF", "#263D46", "#1A1A1A")); Resources["ButtonTextBrush"] = Brush.Parse(Pick("#17313A", "#FFFFFF", "#FFFFFF")); Resources["NeutralButtonBorderBrush"] = Brush.Parse(Pick("#9AAEB0", "#58717A", "#4A4A4A"));
         Resources["DangerBrush"] = Brush.Parse(Pick("#9B3036", "#8A4646", "#4A4A4A")); Resources["PassBrush"] = Brush.Parse(Pick("#2F855A", "#19734A", "#145C3A"));
         Resources["PowerBrush"] = Brush.Parse(Pick("#EEF4F2", "#314852", "#151515")); Resources["TabForegroundBrush"] = Brush.Parse(Pick("#18333D", "#FFFFFF", "#F4F4F4"));
         Resources["FinalCheckBoxBrush"] = Brush.Parse(Pick("#C8DBD7", "#A2E6DD", "#DADADA")); Resources["FinalCheckMarkBrush"] = Brush.Parse(Pick("#12633D", "#102A2D", "#050505"));

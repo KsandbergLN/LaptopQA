@@ -168,7 +168,7 @@ internal static class Program
 
         const string promptLog = "** Video - Functional Test **\nTest Result: Fail\nDIAG07/22/2024 14:57:25Fail ED.3.3.2 Error:2000:0333 Validate code:100639 Video - User provided no input for graphics test\nTest Result: Success";
         var promptResult = DiagnosticsParser.Parse("sample.txt", promptLog);
-        if (promptResult.State != "Warning" || !promptResult.UnansweredPrompt)
+        if (promptResult.State != "Warning" || !promptResult.UnansweredPrompt || !promptResult.DetailText.Contains("Video", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Unanswered diagnostics prompt was not classified as a warning.");
 
         const string failureLog = "** Memory - Functional Test **\nTest Result: Fail";

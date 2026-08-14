@@ -25,6 +25,8 @@
         <SolidColorBrush x:Key="InputStrokeBrush" Color="#3FAED5DF"/>
         <SolidColorBrush x:Key="PrimaryButtonBrush" Color="#60757E"/>
         <SolidColorBrush x:Key="ResetButtonBrush" Color="#263D46"/>
+        <SolidColorBrush x:Key="ButtonTextBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="NeutralButtonBorderBrush" Color="#6682949B"/>
         <SolidColorBrush x:Key="DangerButtonBrush" Color="#8A4646"/>
         <SolidColorBrush x:Key="OkButtonBrush" Color="#12633D"/>
         <SolidColorBrush x:Key="PowerButtonBrush" Color="#263D46"/>
@@ -77,17 +79,20 @@
         </Style>
 
         <Style x:Key="PrimaryButton" TargetType="{x:Type Button}">
-            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
             <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource NeutralButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="14" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -105,9 +110,10 @@
             </Setter>
         </Style>
         <Style x:Key="FolderFlyoutButton" TargetType="{x:Type Button}">
-            <Setter Property="Foreground" Value="#FFFFFF"/>
-            <Setter Property="Background" Value="#60757E"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryButtonBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource NeutralButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Padding" Value="8,4"/>
@@ -116,8 +122,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="14" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.90"/></Trigger>
@@ -129,14 +135,20 @@
         </Style>
         <Style x:Key="ResetButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{DynamicResource ResetButtonBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PanelStroke}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource NeutralButtonBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style x:Key="PassButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="Background" Value="{DynamicResource OkButtonBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource NeutralButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style x:Key="DangerButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="Background" Value="{DynamicResource DangerButtonBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource NeutralButtonBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
         <Style x:Key="HeaderShadowButton" BasedOn="{StaticResource PrimaryButton}" TargetType="{x:Type Button}">
             <Setter Property="Effect">
@@ -260,21 +272,21 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="9,6"/>
+            <Setter Property="Padding" Value="4,4"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type CheckBox}">
                         <Border x:Name="Outer" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0" Padding="{TemplateBinding Padding}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="24"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Border x:Name="CheckBoxBox" Width="18" Height="18" CornerRadius="4" BorderBrush="{DynamicResource MutedBrush}" BorderThickness="1.2" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <Path x:Name="CheckMark" Data="M 1.5,5.2 L 4.5,8.2 L 9.5,1.4" Visibility="Collapsed" Width="11" Height="10" Stretch="Fill" Stroke="{DynamicResource FinalCheckCheckMarkBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <Border x:Name="CheckBoxBox" Width="16" Height="16" CornerRadius="4" BorderBrush="{DynamicResource MutedBrush}" BorderThickness="1.2" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <Path x:Name="CheckMark" Data="M 1.5,5.2 L 4.5,8.2 L 9.5,1.4" Visibility="Collapsed" Width="10" Height="9" Stretch="Fill" Stroke="{DynamicResource FinalCheckCheckMarkBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <ContentPresenter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             </Grid>
@@ -510,15 +522,15 @@
                     <Border x:Name="FinalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="263">
                         <Canvas>
                             <TextBlock Text="8. Final Checks" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
-                            <CheckBox x:Name="FinalHashGroupTagCheck" Content="" Canvas.Left="24" Canvas.Top="44" Width="26" Height="32" Style="{StaticResource FinalCheckToggle}" Padding="4,6" ToolTip="Mark this complete after confirming the group tag in Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
-                            <Button x:Name="CheckHashGroupTagButton" Content="Check Hash and Group Tag" Canvas.Left="58" Canvas.Top="44" Width="314" Height="32" Style="{StaticResource PrimaryButton}" FontSize="12.5" ToolTip="Open Intune Windows Devices in a new tab and copy this laptop's service tag." Click="CheckHashGroupTagButton_Click"/>
-                            <CheckBox x:Name="FinalDeletedUserCheck" Content="" Canvas.Left="24" Canvas.Top="77" Width="26" Height="32" Style="{StaticResource FinalCheckToggle}" Padding="4,6" ToolTip="Mark this complete after removing the laptop from Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
-                            <Button x:Name="RemoveUserFromIntuneButton" Content="Remove User from Laptop in Intune" Canvas.Left="58" Canvas.Top="77" Width="314" Height="32" Style="{StaticResource PrimaryButton}" FontSize="12.5" ToolTip="Open Intune enrollment in a new tab and copy this laptop's service tag." Click="RemoveUserFromIntuneButton_Click"/>
-                            <CheckBox x:Name="FinalUpdateStockroomsCheck" Content="" Canvas.Left="24" Canvas.Top="110" Width="26" Height="32" Style="{StaticResource FinalCheckToggle}" Padding="4,6" ToolTip="Mark this complete after updating stockroom inventory." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
-                            <Button x:Name="UpdateStockroomsButton" Content="Update Stockrooms" Canvas.Left="58" Canvas.Top="110" Width="314" Height="32" Style="{StaticResource PrimaryButton}" FontSize="12.5" ToolTip="Open this laptop's ServiceNow hardware record in a new tab and copy its service tag." Click="UpdateStockroomsButton_Click"/>
-                            <CheckBox x:Name="FinalTrackpadWorkingCheck" Content="Trackpad Working" Canvas.Left="24" Canvas.Top="143" Width="348" Height="32" Style="{StaticResource FinalCheckToggle}" Padding="4,6" FontSize="12.5" ToolTip="Confirm the trackpad is working." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
-                            <CheckBox x:Name="FinalCleanedLaptopCheck" Content="Cleaned Laptop" Canvas.Left="24" Canvas.Top="176" Width="348" Height="32" Style="{StaticResource FinalCheckToggle}" Padding="4,6" FontSize="12.5" ToolTip="Confirm the laptop was physically cleaned." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
-                            <CheckBox x:Name="FinalConditionSuitableCheck" Canvas.Left="24" Canvas.Top="209" Width="348" Height="32" Style="{StaticResource FinalCheckToggle}" Padding="4,6" FontSize="12.5" ToolTip="Confirm the laptop's overall physical condition is suitable for its intended use." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed">
+                            <CheckBox x:Name="FinalHashGroupTagCheck" Content="" Canvas.Left="24" Canvas.Top="45" Width="24" Height="28" Style="{StaticResource FinalCheckToggle}" ToolTip="Mark this complete after confirming the group tag in Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <Button x:Name="CheckHashGroupTagButton" Content="Check Hash and Group Tag" Canvas.Left="54" Canvas.Top="45" Height="28" Style="{StaticResource PrimaryButton}" Padding="8,4" FontSize="12.5" ToolTip="Open Intune Windows Devices in a new tab and copy this laptop's service tag." Click="CheckHashGroupTagButton_Click"/>
+                            <CheckBox x:Name="FinalDeletedUserCheck" Content="" Canvas.Left="24" Canvas.Top="75" Width="24" Height="28" Style="{StaticResource FinalCheckToggle}" ToolTip="Mark this complete after removing the laptop from Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <Button x:Name="RemoveUserFromIntuneButton" Content="Remove User from Laptop in Intune" Canvas.Left="54" Canvas.Top="75" Height="28" Style="{StaticResource PrimaryButton}" Padding="8,4" FontSize="12.5" ToolTip="Open Intune enrollment in a new tab and copy this laptop's service tag." Click="RemoveUserFromIntuneButton_Click"/>
+                            <CheckBox x:Name="FinalUpdateStockroomsCheck" Content="" Canvas.Left="24" Canvas.Top="105" Width="24" Height="28" Style="{StaticResource FinalCheckToggle}" ToolTip="Mark this complete after updating stockroom inventory." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <Button x:Name="UpdateStockroomsButton" Content="Update Stockrooms" Canvas.Left="54" Canvas.Top="105" Height="28" Style="{StaticResource PrimaryButton}" Padding="8,4" FontSize="12.5" ToolTip="Open this laptop's ServiceNow hardware record in a new tab and copy this laptop's service tag." Click="UpdateStockroomsButton_Click"/>
+                            <CheckBox x:Name="FinalTrackpadWorkingCheck" Content="Trackpad Working" Canvas.Left="24" Canvas.Top="137" Width="148" Height="26" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the trackpad is working." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalCleanedLaptopCheck" Content="Cleaned Laptop" Canvas.Left="24" Canvas.Top="165" Width="142" Height="26" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the laptop was physically cleaned." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
+                            <CheckBox x:Name="FinalConditionSuitableCheck" Canvas.Left="24" Canvas.Top="193" Width="270" Height="26" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the laptop's overall physical condition is suitable for its intended use." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed">
                                 <Viewbox Width="300" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
                                     <TextBlock Text="Physical Condition Suitable for Use" FontSize="12.5" FontWeight="SemiBold"/>
                                 </Viewbox>
@@ -528,7 +540,7 @@
 
                     <Border x:Name="QaOutputPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="503" Width="396" Height="64">
                         <Canvas>
-                            <TextBlock Text="9. QA Output" Canvas.Left="24" Canvas.Top="22" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Text="9. QA Output" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="QaSheetButton" Content="QA Sheet" Canvas.Left="190" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Generate and open the QA sheet PNG." Click="QaSheetButton_Click"/>
                             <Button x:Name="ServiceNowButton" Content="ServiceNow" Canvas.Left="284" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="10.2" ToolTip="Copy the ServiceNow request details and open the request page." Click="ServiceNowButton_Click"/>
                         </Canvas>
@@ -544,7 +556,7 @@
                         </Canvas>
                     </Border>
 
-                    <Button x:Name="HashButton" Content="Get Hash" Canvas.Left="913" Canvas.Top="659" Width="230" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
+                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="913" Canvas.Top="659" Width="230" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
 
                     <Border x:Name="SheetNotesPanel" Style="{StaticResource GlassCard}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
                         <Canvas>

@@ -46,7 +46,7 @@ public partial class MainWindow : Window, IComponentConnector
 		{
 			if (name == "Light")
 			{
-				return new ThemePalette("Light", "#06141B", "#1D323C", "#004F4A", "#7F969F", "#78909A", "#60757E", "#203741", "#9B3036", new string[3] { "#FAFAF6", "#F0F1EC", "#E3E6E0" }, new string[3] { "#FFFFFFFF", "#FFF9FAF7", "#FFF1F4F0" }, new string[2] { "#FFFFFFFF", "#FFF7F8F4" }, new string[3] { "#FFFFFFFF", "#FFF9FAF7", "#FFF1F4F0" }, "#FFFFFFFF", "#EEF0F1EC", "#FFFFFFFF", "#30B5C0C5", "#28A4AFB8", "#DCEBE8", "#C8DBD7", "#12633D", "#FFFFFF", "#657A80");
+				return new ThemePalette("Light", "#06141B", "#1D323C", "#004F4A", "#7F969F", "#78909A", "#EAF0EF", "#EAF0EF", "#9B3036", new string[3] { "#FAFAF6", "#F0F1EC", "#E3E6E0" }, new string[3] { "#FFFFFFFF", "#FFF9FAF7", "#FFF1F4F0" }, new string[2] { "#FFFFFFFF", "#FFF7F8F4" }, new string[3] { "#FFFFFFFF", "#FFF9FAF7", "#FFF1F4F0" }, "#FFFFFFFF", "#EEF0F1EC", "#FFFFFFFF", "#30B5C0C5", "#28A4AFB8", "#DCEBE8", "#C8DBD7", "#12633D", "#FFFFFF", "#657A80");
 			}
 			if (name == "AMOLED")
 			{
@@ -183,6 +183,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private const int QaAndDiagnosticsRetentionDays = 90;
 
+	private const int StepsOneThroughSevenCompletionPromptVersion = 2;
+
 	private bool _notesOpen;
 
 	private bool _activityOpen;
@@ -225,6 +227,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private bool _usbPortTestFinished;
 
+	private bool _usbPortCountDetected;
+
 	private bool _qaLiveMonitoringActive;
 
 	private readonly List<UsbPortCache> _usbPorts = new List<UsbPortCache>();
@@ -238,6 +242,8 @@ public partial class MainWindow : Window, IComponentConnector
 	private bool _qaSessionReady;
 
 	private bool _completionCelebrated;
+
+	private bool _stepsOneThroughSevenCompletionPromptShown;
 
 	private bool _removableDriveWarningShown;
 
@@ -674,6 +680,8 @@ public partial class MainWindow : Window, IComponentConnector
 		SetSolidResource("NoteInputBrush", themePalette.NoteInput);
 		SetSolidResource("PrimaryButtonBrush", themePalette.PrimaryButton);
 		SetSolidResource("ResetButtonBrush", themePalette.ResetButton);
+		SetSolidResource("ButtonTextBrush", flag ? "#17313A" : "#FFFFFF");
+		SetSolidResource("NeutralButtonBorderBrush", flag ? "#9AAEB0" : (flag2 ? "#4A4A4A" : "#6682949B"));
 		SetSolidResource("DangerButtonBrush", themePalette.DangerButton);
 		SetSolidResource("OkButtonBrush", flag ? "#2F855A" : (flag2 ? "#145C3A" : "#19734A"));
 		SetSolidResource("PowerButtonBrush", flag ? "#EEF4F2" : (flag2 ? "#151515" : "#314852"));
@@ -2625,7 +2633,7 @@ public partial class MainWindow : Window, IComponentConnector
 			Content = "Cancel",
 			Width = 92.0,
 			Height = 34.0,
-			Foreground = Brushes.White,
+			Foreground = BrushFromHex((_currentTheme == "Light") ? "#17313A" : "#FFFFFF"),
 			Background = (Brush)FindResource("ResetButtonBrush"),
 			BorderBrush = (Brush)FindResource("PanelStroke"),
 			BorderThickness = new Thickness(1.0),
@@ -2640,7 +2648,7 @@ public partial class MainWindow : Window, IComponentConnector
 			Content = "Confirm",
 			Width = 100.0,
 			Height = 34.0,
-			Foreground = Brushes.White,
+			Foreground = BrushFromHex((_currentTheme == "Light") ? "#17313A" : "#FFFFFF"),
 			Background = (Brush)FindResource("PrimaryButtonBrush"),
 			BorderThickness = new Thickness(0.0),
 			FontWeight = FontWeights.SemiBold,
@@ -2818,13 +2826,13 @@ public partial class MainWindow : Window, IComponentConnector
 			}
 			if (flag2)
 			{
-				text2 += "; Technician did not respond to a diagnostics prompt.";
+				text2 += "; " + DescribeUnansweredDiagnosticsPrompts(unansweredPromptCategories);
 			}
 			return new DiagnosticsResult("Bad", "Diagnostics failed", text2, path, raw);
 		}
 		if (flag2)
 		{
-			return new DiagnosticsResult("Warning", "Diagnostics not completed", "Technician did not respond to a diagnostics prompt.", path, raw);
+			return new DiagnosticsResult("Warning", "Diagnostics not completed", DescribeUnansweredDiagnosticsPrompts(unansweredPromptCategories), path, raw);
 		}
 		if (!Regex.IsMatch(raw, "Test Result:\\s*Success\\b", RegexOptions.IgnoreCase))
 		{
@@ -2850,6 +2858,21 @@ public partial class MainWindow : Window, IComponentConnector
 		if (Regex.IsMatch(value, "\\b(?:keyboard|key)\\b", RegexOptions.IgnoreCase)) return "Keyboard";
 		if (Regex.IsMatch(value, "\\b(?:touchpad|trackpad|mouse|pointer)\\b", RegexOptions.IgnoreCase)) return "PointingDevice";
 		return "";
+	}
+
+	private static string DescribeUnansweredDiagnosticsPrompts(IEnumerable<string> categories)
+	{
+		List<string> list = categories.Where((string category) => !string.IsNullOrWhiteSpace(category)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+		if (list.Count == 0)
+		{
+			return "Technician did not respond to a diagnostics prompt.";
+		}
+		list = list.Select((string category) => category == "PointingDevice" ? "pointing device" : category).ToList();
+		if (list.Count == 1)
+		{
+			return "Technician did not respond to the " + list[0] + " prompt.";
+		}
+		return "Technician did not respond to the following prompts: " + string.Join(", ", list) + ".";
 	}
 
 	private static string HumanizeDiagnosticsText(string value)
@@ -3090,6 +3113,7 @@ $summaries = @(
 	{
 		button.Content = text;
 		button.Background = BiosButtonBrush(state);
+		button.Foreground = (state == "Ok" || state == "Bad" || state == "Working") ? Brushes.White : (Brush)FindResource("ButtonTextBrush");
 	}
 
 	private void SetBiosStatusIcon(string state)
@@ -3580,7 +3604,7 @@ $items = @(
 			temporaryPath = null;
 			FinalHashGroupTagCheck.IsChecked = true;
 			AddActivity("Hash", "Hash saved for serial " + serial + ": " + path);
-			if (MessageBox.Show(this, "Hash saved using the Device Serial Number stored inside the CSV:\n\n" + path + "\n\nOpen the Hash folder now?", "Get Hash", MessageBoxButton.YesNo, MessageBoxImage.Asterisk) == MessageBoxResult.Yes)
+			if (MessageBox.Show(this, "Hash saved using the Device Serial Number stored inside the CSV:\n\n" + path + "\n\nOpen the Hash folder now?", "Export Hash", MessageBoxButton.YesNo, MessageBoxImage.Asterisk) == MessageBoxResult.Yes)
 			{
 				OpenManagedFolder(HashDir, "Hash");
 			}
@@ -3588,7 +3612,7 @@ $items = @(
 		catch (Exception ex)
 		{
 			AddActivity("Hash", "Hash collection failed: " + ex.Message);
-			MessageBox.Show(this, "Hash creation failed:\n" + ex.Message, "Get Hash", MessageBoxButton.OK, MessageBoxImage.Hand);
+			MessageBox.Show(this, "Hash creation failed:\n" + ex.Message, "Export Hash", MessageBoxButton.OK, MessageBoxImage.Hand);
 		}
 		finally
 		{
@@ -4423,8 +4447,10 @@ $items = @(
 			_usbPortPollTimer?.Stop();
 			_usbPortTestActive = false;
 			_usbPortTestFinished = false;
+			_usbPortCountDetected = false;
 			_usbPortDetectionAdjustment = "";
 			List<string> list = await DetectExpectedUsbPortsAsync();
+			_usbPortCountDetected = list.Count > 0;
 			_usbPorts.Clear();
 			_usbPorts.AddRange(list.Select((string _, int index) => new UsbPortCache
 			{
@@ -4447,6 +4473,7 @@ $items = @(
 		catch (Exception ex)
 		{
 			_usbPorts.Clear();
+			_usbPortCountDetected = false;
 			_states["UsbPorts"] = "Warning";
 			AddActivity("USB", "USB connector detection failed: " + ex.Message);
 		}
@@ -4845,33 +4872,121 @@ $items = @(
 			AddActivity("Final Checks", $"{checkBox.Content} {((checkBox.IsChecked == true) ? "checked off" : "cleared")}.");
 		}
 		SaveQaSessionCache();
+		CheckForStepsOneThroughSevenCompletion();
 		CheckForQaCompletionCelebration();
+	}
+
+	private bool AreStepsOneThroughSevenComplete()
+	{
+		bool testStepsComplete = new string[5] { "WiFi", "Ethernet", "Camera", "ExternalVideo", "Keyboard" }.All((string key) => IsFinalQaResult(_states.GetValueOrDefault(key, "Waiting")));
+		string diagnosticsState = _states.GetValueOrDefault("Diagnostics", "Warning");
+		bool diagnosticsComplete = IsFinalQaResult(diagnosticsState) || (diagnosticsState == "Warning" && !DiagnosticsMain.Text.Contains("not found", StringComparison.OrdinalIgnoreCase) && !DiagnosticsMain.Text.Contains("unavailable", StringComparison.OrdinalIgnoreCase));
+		bool usbPortsComplete = _usbPortCountDetected && _usbPorts.Count > 0 && _usbPortTestFinished && _usbPorts.All((UsbPortCache port) => port.Passed || port.Failed);
+		return testStepsComplete && diagnosticsComplete && usbPortsComplete;
 	}
 
 	private bool IsQaComplete()
 	{
-		bool num = new string[5] { "WiFi", "Ethernet", "Camera", "ExternalVideo", "Keyboard" }.All((string key) => IsFinalResult(_states.GetValueOrDefault(key, "Waiting")));
-		string valueOrDefault = _states.GetValueOrDefault("Diagnostics", "Warning");
-		bool flag = IsFinalResult(valueOrDefault) || (valueOrDefault == "Warning" && !DiagnosticsMain.Text.Contains("not found", StringComparison.OrdinalIgnoreCase) && !DiagnosticsMain.Text.Contains("unavailable", StringComparison.OrdinalIgnoreCase));
+		bool flag = AreStepsOneThroughSevenComplete();
 		bool flag2 = FinalTrackpadWorkingCheck.IsChecked == true && FinalHashGroupTagCheck.IsChecked == true && FinalDeletedUserCheck.IsChecked == true && FinalUpdateStockroomsCheck.IsChecked == true && FinalCleanedLaptopCheck.IsChecked == true && FinalConditionSuitableCheck.IsChecked == true;
-		bool flag3 = _usbPorts.Count == 0 || (_usbPortTestFinished && _usbPorts.All((UsbPortCache port) => port.Passed || port.Failed));
-		return num && flag && flag3 && flag2;
-		static bool IsFinalResult(string state)
+		return flag && flag2;
+	}
+
+	private static bool IsFinalQaResult(string state)
+	{
+		switch (state)
 		{
-			switch (state)
-			{
-			case "Ok":
-			case "Bad":
-			case "Ignored":
-				return true;
-			default:
-				return false;
-			}
+		case "Ok":
+		case "Bad":
+		case "Ignored":
+			return true;
+		default:
+			return false;
 		}
+	}
+
+	private void CheckForStepsOneThroughSevenCompletion()
+	{
+		if (!_qaSessionReady || _suppressQaSessionCache)
+		{
+			return;
+		}
+		if (!AreStepsOneThroughSevenComplete())
+		{
+			_stepsOneThroughSevenCompletionPromptShown = false;
+			return;
+		}
+		if (_stepsOneThroughSevenCompletionPromptShown)
+		{
+			return;
+		}
+		_stepsOneThroughSevenCompletionPromptShown = true;
+		SaveQaSessionCache();
+		AddActivity("QA", "Steps 1-7 complete. Technician prompted to move the QA USB drive to their own PC for final checks and QA logging.");
+		ShowStepsOneThroughSevenCompletionPrompt();
+	}
+
+	private void ShowStepsOneThroughSevenCompletionPrompt()
+	{
+		Window dialog = new Window
+		{
+			Title = "Steps 1-7 Complete",
+			Width = 520.0,
+			SizeToContent = SizeToContent.Height,
+			WindowStyle = WindowStyle.None,
+			ResizeMode = ResizeMode.NoResize,
+			AllowsTransparency = true,
+			Background = Brushes.Transparent,
+			Owner = this,
+			WindowStartupLocation = WindowStartupLocation.CenterOwner,
+			ShowInTaskbar = false,
+			Topmost = Topmost
+		};
+		Border card = new Border
+		{
+			Margin = new Thickness(18.0),
+			Padding = new Thickness(26.0, 24.0, 26.0, 22.0),
+			CornerRadius = new CornerRadius(18.0),
+			Background = (Brush)FindResource("GlassPanelBrush"),
+			BorderBrush = (Brush)FindResource("PanelStroke"),
+			BorderThickness = new Thickness(1.0),
+			Effect = new DropShadowEffect { BlurRadius = 24.0, ShadowDepth = 6.0, Opacity = 0.28, Color = Colors.Black }
+		};
+		dialog.Content = card;
+		StackPanel content = new StackPanel();
+		card.Child = content;
+		content.Children.Add(new TextBlock { Text = "Steps 1-7 complete", Foreground = (Brush)FindResource("TextBrush"), FontSize = 21.0, FontWeight = FontWeights.Bold, Margin = new Thickness(0.0, 0.0, 0.0, 10.0) });
+		content.Children.Add(new TextBlock
+		{
+			Text = "All data for this QA session has been saved. Unplug the QA USB drive and connect it to your own PC to finish the final checks and log the QA.",
+			Foreground = (Brush)FindResource("MutedBrush"),
+			FontSize = 13.0,
+			TextWrapping = TextWrapping.Wrap,
+			Margin = new Thickness(0.0, 0.0, 0.0, 20.0)
+		});
+		Button continueButton = new Button
+		{
+			Content = "Continue",
+			Width = 100.0,
+			Height = 34.0,
+			HorizontalAlignment = HorizontalAlignment.Right,
+			Foreground = BrushFromHex((_currentTheme == "Light") ? "#17313A" : "#FFFFFF"),
+			Background = (Brush)FindResource("PrimaryButtonBrush"),
+			BorderBrush = (Brush)FindResource("PanelStroke"),
+			BorderThickness = new Thickness(1.0),
+			FontWeight = FontWeights.SemiBold,
+			Padding = new Thickness(10.0, 6.0, 10.0, 6.0),
+			Template = ButtonChrome.RoundedTemplate(),
+			IsDefault = true
+		};
+		continueButton.Click += delegate { dialog.DialogResult = true; dialog.Close(); };
+		content.Children.Add(continueButton);
+		dialog.ShowDialog();
 	}
 
 	private void CheckForQaCompletionCelebration()
 	{
+		CheckForStepsOneThroughSevenCompletion();
 		if (!_qaSessionReady || _suppressQaSessionCache)
 		{
 			return;
@@ -5882,8 +5997,10 @@ $items = @(
 			FinalTrackpadWorkingCheck.IsChecked = cache.FinalTrackpadWorking;
 			FinalDeletedUserCheck.IsChecked = cache.FinalDeletedUser;
 			FinalConditionSuitableCheck.IsChecked = cache.FinalConditionSuitableForUse;
+			_stepsOneThroughSevenCompletionPromptShown = cache.StepsOneThroughSevenCompletionPromptShown && cache.StepsOneThroughSevenCompletionPromptVersion == StepsOneThroughSevenCompletionPromptVersion;
 			_usbPortTestFinished = cache.UsbPortTestFinished;
 			List<UsbPortCache> usbPorts = cache.UsbPorts;
+			_usbPortCountDetected = usbPorts != null && usbPorts.Count > 0;
 			if (usbPorts != null && usbPorts.Count > 0)
 			{
 				if (_usbPorts.Count == 0)
@@ -5935,6 +6052,7 @@ $items = @(
 			DiagnosticsRawButton.IsEnabled = !string.IsNullOrWhiteSpace(_diagnosticsRawText);
 			_suppressQaSessionCache = false;
 			AddActivity("System", "Cached QA session restored.");
+			CheckForStepsOneThroughSevenCompletion();
 			if (File.Exists(QaSessionCachePath))
 			{
 				_qaSessionCacheWriteUtc = File.GetLastWriteTimeUtc(QaSessionCachePath);
@@ -6043,6 +6161,8 @@ $items = @(
 				FinalDeletedUser = FinalDeletedUserCheck.IsChecked,
 				FinalConditionSuitableForUse = FinalConditionSuitableCheck.IsChecked,
 				UsbPortTestFinished = _usbPortTestFinished,
+				StepsOneThroughSevenCompletionPromptShown = _stepsOneThroughSevenCompletionPromptShown,
+				StepsOneThroughSevenCompletionPromptVersion = StepsOneThroughSevenCompletionPromptVersion,
 				UsbPorts = _usbPorts.Select((UsbPortCache port) => new UsbPortCache
 				{
 					Label = port.Label,
@@ -6227,6 +6347,8 @@ $items = @(
 		_cameraCleanupTask = null;
 		BeginProcessing("New QA");
 		_completionCelebrated = false;
+		_stepsOneThroughSevenCompletionPromptShown = false;
+		_usbPortCountDetected = false;
 		_activity.Clear();
 		ActivityBox.Clear();
 		ResetQaButton.IsEnabled = false;

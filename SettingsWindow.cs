@@ -120,7 +120,7 @@ public sealed class SettingsWindow : Window
 		base.Title = "Settings";
 		Rect workArea = SystemParameters.WorkArea;
 		base.Width = Math.Min(760.0, Math.Max(640.0, workArea.Width - 32.0));
-		base.Height = Math.Min(890.0, Math.Max(520.0, workArea.Height - 32.0));
+		base.Height = Math.Min(760.0, Math.Max(680.0, workArea.Height - 32.0));
 		base.WindowStartupLocation = WindowStartupLocation.CenterOwner;
 		base.WindowStyle = WindowStyle.None;
 		base.AllowsTransparency = true;
@@ -163,7 +163,7 @@ public sealed class SettingsWindow : Window
 		Canvas canvas = new Canvas
 		{
 			Width = 718.0,
-			Height = 960.0
+			Height = 690.0
 		};
 		ScrollViewer element = new ScrollViewer
 		{
@@ -214,50 +214,51 @@ public sealed class SettingsWindow : Window
 		};
 		canvas.Children.Add(button);
 		_secondaryButtons.Add(button);
-		AddField(canvas, "Technician name", _name, config.TechnicianName, 36.0, 78.0, 330.0);
-		AddLabel(canvas, "Language", 386.0, 78.0, 180.0);
+		AddField(canvas, "Technician name", _name, config.TechnicianName, 36.0, 64.0, 330.0);
+		AddLabel(canvas, "Language", 386.0, 64.0, 180.0);
 		_languageChoice.Width = 180.0;
-		_languageChoice.Height = 30.0;
+		_languageChoice.Height = 26.0;
 		foreach (AppLanguage item in LanguageCatalog.All)
 		{
 			_languageChoice.Items.Add(item);
 		}
 		_languageChoice.SelectedItem = LanguageCatalog.Resolve(config.AppLanguage);
-		SetCanvas(_languageChoice, 386.0, 102.0);
+		SetCanvas(_languageChoice, 386.0, 82.0);
 		canvas.Children.Add(_languageChoice);
 		_inputs.Add(_languageChoice);
-		AddLabel(canvas, "Theme", 582.0, 78.0, 118.0);
+		AddLabel(canvas, "Theme", 582.0, 64.0, 118.0);
 		_themeChoice.Width = 118.0;
-		_themeChoice.Height = 30.0;
+		_themeChoice.Height = 26.0;
 		_themeChoice.Items.Add("Light");
 		_themeChoice.Items.Add("Dark");
 		_themeChoice.Items.Add("AMOLED");
 		_themeChoice.SelectedItem = _initialTheme;
-		SetCanvas(_themeChoice, 582.0, 102.0);
+		SetCanvas(_themeChoice, 582.0, 82.0);
 		canvas.Children.Add(_themeChoice);
 		_inputs.Add(_themeChoice);
-		AddField(canvas, "Autopilot group tag", _autopilotGroupTag, string.IsNullOrWhiteSpace(config.AutopilotGroupTag) ? "LNG AAD" : config.AutopilotGroupTag, 36.0, 142.0, 330.0);
-		AddField(canvas, "Device name format", _qaComputerNameFormat, string.IsNullOrWhiteSpace(config.QaComputerNameFormat) ? "LNG-{serial}" : config.QaComputerNameFormat, 386.0, 142.0, 314.0);
+		AddField(canvas, "Autopilot group tag", _autopilotGroupTag, string.IsNullOrWhiteSpace(config.AutopilotGroupTag) ? "LNG AAD" : config.AutopilotGroupTag, 36.0, 110.0, 330.0);
+		AddField(canvas, "Device name format", _qaComputerNameFormat, string.IsNullOrWhiteSpace(config.QaComputerNameFormat) ? "LNG-{serial}" : config.QaComputerNameFormat, 386.0, 110.0, 314.0);
 		_qaComputerNameFormat.ToolTip = "Controls the device name used in the app, on QA sheets, and in saved files. Available values: {serial}, {computer}, and {asset}.";
-		AddBrowseField(canvas, "Camera Roll folder", _cameraRoll, config.CameraRoll, 36.0, 206.0, 568.0);
-		AddBrowseField(canvas, "Dell diagnostics log folder (optional)", _diagnosticsFolder, config.DellDiagnosticsLogFolder, 36.0, 270.0, 568.0);
-		AddField(canvas, "Camera Roll cleanup timeout seconds", _cleanupTimeout, config.CameraRollCleanupTimeoutSeconds.ToString(CultureInfo.InvariantCulture), 36.0, 334.0, 190.0);
-		AddField(canvas, "Cleanup retry delay seconds", _cleanupRetry, config.CameraRollCleanupRetryDelaySeconds.ToString(CultureInfo.InvariantCulture), 386.0, 334.0, 190.0);
-		AddField(canvas, "Wi-Fi rescan wait seconds", _wifiDelay, config.WifiRescanEthernetDisableDelaySeconds.ToString(CultureInfo.InvariantCulture), 36.0, 398.0, 190.0);
-		AddField(canvas, "Ethernet restore wait seconds", _ethernetRestore, config.EthernetRestoreDelaySeconds.ToString(CultureInfo.InvariantCulture), 386.0, 398.0, 190.0);
-		AddField(canvas, "ServiceNow request URL", _serviceNowUrl, string.IsNullOrWhiteSpace(config.ServiceNowRequestUrl) ? "https://reedelsevier.service-now.com/reed?id=sc_cat_item&sys_id=23302f892bed96006f7581afe8da1547&sysparm_category=c69e7347db824740d2cbf2f9af961982" : config.ServiceNowRequestUrl, 36.0, 462.0, 664.0);
-		AddField(canvas, "ServiceNow type of request", _serviceNowType, string.IsNullOrWhiteSpace(config.ServiceNowTypeOfRequest) ? "Other" : config.ServiceNowTypeOfRequest, 36.0, 526.0, 330.0);
-		AddField(canvas, "ServiceNow automation wait milliseconds", _serviceNowDelay, ((config.ServiceNowAutomationDelayMilliseconds <= 0) ? 500 : config.ServiceNowAutomationDelayMilliseconds).ToString(CultureInfo.InvariantCulture), 386.0, 526.0, 314.0);
-		AddField(canvas, "ServiceNow assignment group name", _serviceNowAssignmentGroupName, string.IsNullOrWhiteSpace(config.ServiceNowAssignmentGroupName) ? "Desktop Support (Miamisburg) - L2" : config.ServiceNowAssignmentGroupName, 36.0, 590.0, 330.0);
-		AddField(canvas, "ServiceNow assignment group sys ID", _serviceNowAssignmentGroupSysId, string.IsNullOrWhiteSpace(config.ServiceNowAssignmentGroupSysId) ? "9d144e37bdef1000e25cbf141e60d715" : config.ServiceNowAssignmentGroupSysId, 386.0, 590.0, 314.0);
-		TextBlock finalCheckLinksTitle = Text("Final Check Links", 36.0, 662.0, 250.0, 24.0, 15.0, FontWeights.Bold);
+		AddBrowseField(canvas, "Camera Roll folder", _cameraRoll, config.CameraRoll, 36.0, 156.0, 568.0);
+		AddBrowseField(canvas, "Dell diagnostics log folder (optional)", _diagnosticsFolder, config.DellDiagnosticsLogFolder, 36.0, 202.0, 568.0);
+		AddField(canvas, "Camera Roll cleanup timeout seconds", _cleanupTimeout, config.CameraRollCleanupTimeoutSeconds.ToString(CultureInfo.InvariantCulture), 36.0, 248.0, 190.0);
+		AddField(canvas, "Cleanup retry delay seconds", _cleanupRetry, config.CameraRollCleanupRetryDelaySeconds.ToString(CultureInfo.InvariantCulture), 386.0, 248.0, 190.0);
+		AddField(canvas, "Wi-Fi rescan wait seconds", _wifiDelay, config.WifiRescanEthernetDisableDelaySeconds.ToString(CultureInfo.InvariantCulture), 36.0, 294.0, 190.0);
+		AddField(canvas, "Ethernet restore wait seconds", _ethernetRestore, config.EthernetRestoreDelaySeconds.ToString(CultureInfo.InvariantCulture), 386.0, 294.0, 190.0);
+		AddField(canvas, "ServiceNow request URL", _serviceNowUrl, string.IsNullOrWhiteSpace(config.ServiceNowRequestUrl) ? "https://reedelsevier.service-now.com/reed?id=sc_cat_item&sys_id=23302f892bed96006f7581afe8da1547&sysparm_category=c69e7347db824740d2cbf2f9af961982" : config.ServiceNowRequestUrl, 36.0, 340.0, 664.0);
+		AddField(canvas, "ServiceNow type of request", _serviceNowType, string.IsNullOrWhiteSpace(config.ServiceNowTypeOfRequest) ? "Other" : config.ServiceNowTypeOfRequest, 36.0, 386.0, 330.0);
+		AddField(canvas, "ServiceNow automation wait milliseconds", _serviceNowDelay, ((config.ServiceNowAutomationDelayMilliseconds <= 0) ? 500 : config.ServiceNowAutomationDelayMilliseconds).ToString(CultureInfo.InvariantCulture), 386.0, 386.0, 314.0);
+		AddField(canvas, "ServiceNow assignment group name", _serviceNowAssignmentGroupName, string.IsNullOrWhiteSpace(config.ServiceNowAssignmentGroupName) ? "Desktop Support (Miamisburg) - L2" : config.ServiceNowAssignmentGroupName, 36.0, 432.0, 330.0);
+		AddField(canvas, "ServiceNow assignment group sys ID", _serviceNowAssignmentGroupSysId, string.IsNullOrWhiteSpace(config.ServiceNowAssignmentGroupSysId) ? "9d144e37bdef1000e25cbf141e60d715" : config.ServiceNowAssignmentGroupSysId, 386.0, 432.0, 314.0);
+		TextBlock finalCheckLinksTitle = Text("Final Check Links", 36.0, 480.0, 250.0, 24.0, 15.0, FontWeights.Bold);
 		canvas.Children.Add(finalCheckLinksTitle);
-		AddField(canvas, "Check Hash and Group Tag URL", _checkHashAndGroupTagUrl, string.IsNullOrWhiteSpace(config.CheckHashAndGroupTagUrl) ? DefaultCheckHashAndGroupTagUrl : config.CheckHashAndGroupTagUrl, 36.0, 696.0, 664.0);
-		AddField(canvas, "Remove User from Laptop in Intune URL", _removeUserFromIntuneUrl, string.IsNullOrWhiteSpace(config.RemoveUserFromIntuneUrl) ? DefaultRemoveUserFromIntuneUrl : config.RemoveUserFromIntuneUrl, 36.0, 760.0, 664.0);
-		AddField(canvas, "Update Stockrooms URL", _updateStockroomsUrl, string.IsNullOrWhiteSpace(config.UpdateStockroomsUrl) ? DefaultUpdateStockroomsUrl : config.UpdateStockroomsUrl, 36.0, 824.0, 664.0);
+		AddField(canvas, "Check Hash and Group Tag URL", _checkHashAndGroupTagUrl, string.IsNullOrWhiteSpace(config.CheckHashAndGroupTagUrl) ? DefaultCheckHashAndGroupTagUrl : config.CheckHashAndGroupTagUrl, 36.0, 506.0, 664.0);
+		AddField(canvas, "Remove User from Laptop in Intune URL", _removeUserFromIntuneUrl, string.IsNullOrWhiteSpace(config.RemoveUserFromIntuneUrl) ? DefaultRemoveUserFromIntuneUrl : config.RemoveUserFromIntuneUrl, 36.0, 552.0, 664.0);
+		AddField(canvas, "Update Stockrooms URL", _updateStockroomsUrl, string.IsNullOrWhiteSpace(config.UpdateStockroomsUrl) ? DefaultUpdateStockroomsUrl : config.UpdateStockroomsUrl, 36.0, 598.0, 664.0);
 		_updateStockroomsUrl.ToolTip = "Use {SERIAL} where the current laptop's service tag should be placed in the ServiceNow URL.";
-		TextBlock textBlock2 = Text("Warranty uses the packaged or system-installed Dell Command | Warranty tool automatically. Diagnostics folder is optional; leave it blank to auto-detect the Dell log on a small FAT32 removable drive.", 36.0, 900.0, 664.0, 40.0, 12.5, FontWeights.Normal);
+		TextBlock textBlock2 = Text("Warranty uses the packaged or system-installed Dell Command | Warranty tool automatically. Leave the diagnostics folder blank to auto-detect the Dell log on a small FAT32 removable drive.", 36.0, 644.0, 664.0, 44.0, 11.5, FontWeights.Normal);
 		textBlock2.TextWrapping = TextWrapping.Wrap;
+		textBlock2.VerticalAlignment = VerticalAlignment.Top;
 		canvas.Children.Add(textBlock2);
 		_labels.Add(textBlock2);
 		_saveButton = DialogButton("Save", 80.0, 32.0);
@@ -311,8 +312,8 @@ public sealed class SettingsWindow : Window
 		AddLabel(canvas, label, left, top, Math.Max(width, 250.0));
 		box.Text = value;
 		box.Width = width;
-		box.Height = 30.0;
-		SetCanvas(box, left, top + 22.0);
+		box.Height = 26.0;
+		SetCanvas(box, left, top + 18.0);
 		canvas.Children.Add(box);
 		_inputs.Add(box);
 	}
@@ -320,8 +321,8 @@ public sealed class SettingsWindow : Window
 	private void AddBrowseField(Canvas canvas, string label, TextBox box, string value, double left, double top, double width)
 	{
 		AddField(canvas, label, box, value, left, top, width);
-		Button button = DialogButton("Browse", 88.0, 30.0);
-		SetCanvas(button, left + width + 8.0, top + 22.0);
+		Button button = DialogButton("Browse", 88.0, 26.0);
+		SetCanvas(button, left + width + 8.0, top + 18.0);
 		button.Click += delegate
 		{
 			BrowseForFolder(label, box);
@@ -333,8 +334,8 @@ public sealed class SettingsWindow : Window
 	private void AddBrowseFileField(Canvas canvas, string label, TextBox box, string value, double left, double top, double width)
 	{
 		AddField(canvas, label, box, value, left, top, width);
-		Button button = DialogButton("Browse", 88.0, 30.0);
-		SetCanvas(button, left + width + 8.0, top + 22.0);
+		Button button = DialogButton("Browse", 88.0, 26.0);
+		SetCanvas(button, left + width + 8.0, top + 18.0);
 		button.Click += delegate
 		{
 			BrowseForFile(label, box);
@@ -355,7 +356,7 @@ public sealed class SettingsWindow : Window
 
 	private void AddLabel(Canvas canvas, string text, double left, double top, double width)
 	{
-		TextBlock textBlock = Text(text, left, top, width, 20.0, 12.5, FontWeights.Normal);
+		TextBlock textBlock = Text(text, left, top, width, 17.0, 11.5, FontWeights.Normal);
 		canvas.Children.Add(textBlock);
 		_labels.Add(textBlock);
 	}

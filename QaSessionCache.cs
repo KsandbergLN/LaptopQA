@@ -49,6 +49,10 @@ public sealed class QaSessionCache
 
 	public bool UsbPortTestFinished { get; set; }
 
+	public bool StepsOneThroughSevenCompletionPromptShown { get; set; }
+
+	public int StepsOneThroughSevenCompletionPromptVersion { get; set; }
+
 	public List<UsbPortCache> UsbPorts { get; set; } = new List<UsbPortCache>();
 
 	public string RmaIssues { get; set; } = "";
