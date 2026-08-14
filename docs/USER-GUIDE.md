@@ -16,6 +16,10 @@ This guide is for technicians using the supported Windows app and macOS companio
 10. Select **Update Stockrooms** to open the current laptop's ServiceNow hardware list in a new Edge tab. Laptop QA attempts to select **Serial number**, enter the service tag, and run the search. The service tag remains copied to the clipboard; if the page does not update, select **Serial number**, paste the service tag, and press Enter. Update the applicable stockroom record, then select the adjacent checkbox to mark the step complete.
 11. Open **Settings** to change any final-check destination under **Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` where the active laptop's service tag belongs. The macOS companion supports the same final-check links and manual completion checkboxes. Its buttons open the configured pages and copy the relevant information to the clipboard; they do not fill or submit forms.
 
+### When the session saves
+
+Laptop QA automatically saves the active session shortly after a button click or text change, once the session is ready. It also saves during startup, when the steps 1-7 handoff is reached, before resetting to start a new QA, and when the app closes. The active session is stored in `.runtime/qa-session.json`; searchable snapshots are kept under `.runtime/sessions` for 90 days. Keep those folders with the package so the macOS companion can load the cached Windows session.
+
 ## macOS companion
 
 Starting with step 8 (QA Output), the technician may move to their personal Mac and open the macOS companion. Load the cached Windows session and continue the same Windows QA workflow there: complete the final checks, generate the QA sheet, and prepare ServiceNow details. Windows-only operations such as BIOS changes, hardware hash collection, USB port scoring, and steps 1–7 must be completed in the Windows app before switching to the Mac.
