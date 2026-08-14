@@ -1,5 +1,7 @@
 # Laptop QA
 
+![Laptop QA application](assets/laptop-qa-app.png)
+
 Laptop QA contains two supported technician applications:
 
 - **Windows app** — WPF on .NET 10, built from the repository root.
