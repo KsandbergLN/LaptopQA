@@ -314,18 +314,9 @@ internal static class Program
         if (!sheet.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || pngHeader.Length != 8 || !pngHeader.SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
             throw new InvalidOperationException("The self-contained QA sheet PNG was not generated correctly.");
 
-        var serviceNowUrl = ServiceNowService.BuildAutofillUrl(new AppConfig(), new CachedWindowsSnapshot { Model = "Latitude 7440", SerialNumber = "TEST123", AssetTag = "7000001" });
-        var serviceNowScript = ServiceNowService.BuildAutofillScript(new AppConfig(), new CachedWindowsSnapshot { Model = "Latitude 7440", SerialNumber = "TEST123", AssetTag = "7000001" });
-        if (!serviceNowUrl.Contains("sysparm_variable_values", StringComparison.OrdinalIgnoreCase) ||
-            !Uri.UnescapeDataString(serviceNowUrl).Contains("\"type_of_request\":\"Other\"", StringComparison.Ordinal) ||
-            !Uri.UnescapeDataString(serviceNowUrl).Contains("\"assignment_group\":", StringComparison.Ordinal) ||
-            !Uri.UnescapeDataString(serviceNowUrl).Contains("\"describe_request\":", StringComparison.Ordinal) ||
-            !serviceNowScript.Contains("describe_request", StringComparison.Ordinal) ||
-            !serviceNowScript.Contains("assignment_group", StringComparison.Ordinal) ||
-            !serviceNowScript.Contains("function inspect", StringComparison.Ordinal) ||
-            !serviceNowScript.Contains("type-values", StringComparison.Ordinal) ||
-            !serviceNowScript.Contains("Laptop QA | 7440 | TEST123 | 7000001", StringComparison.Ordinal))
-            throw new InvalidOperationException("ServiceNow in-page autofill was not generated correctly.");
+        var serviceNowDescription = ServiceNowService.BuildDescription(new CachedWindowsSnapshot { Model = "Latitude 7440", SerialNumber = "TEST123", AssetTag = "7000001" });
+        if (!string.Equals(serviceNowDescription, "Laptop QA | 7440 | TEST123 | 7000001", StringComparison.Ordinal))
+            throw new InvalidOperationException("ServiceNow clipboard details were not generated correctly.");
 
         var topEightLanguages = new[] { "en-US", "es-ES", "fr-FR", "de-DE", "pt-BR", "zh-CN", "ja-JP", "hi-IN" };
         var interfaceSamples = new[] { "Settings", "Save", "Cancel", "Folders", "Start New QA", "Final Checks", "QA Sheet", "Browse", "Search", "Print" };

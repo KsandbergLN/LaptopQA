@@ -29,7 +29,6 @@ public sealed partial class MainWindow : Window
     private DateTime _sharedQaCacheWriteUtc;
     private DateTime _sharedConfigWriteUtc;
     private bool _closeCleanupComplete;
-    private bool _serviceNowInProgress;
     private bool _removableDriveWarningShown;
     private bool _completionCelebrated;
     private bool _completionMonitoringEnabled;
@@ -697,11 +696,6 @@ public sealed partial class MainWindow : Window
             if (topLevel?.StorageProvider is null) throw new InvalidOperationException("The macOS file picker is unavailable.");
 
             var startFolderPath = DiagnosticsFolderPath();
-            if (string.IsNullOrWhiteSpace(startFolderPath) || !Directory.Exists(startFolderPath))
-            {
-                await ShowNoticeAsync("Diagnostics", "No FAT32 diagnostics drive was detected. Connect the diagnostics drive and try again.");
-                return;
-            }
             var startFolder = Directory.Exists(startFolderPath)
                 ? await topLevel.StorageProvider.TryGetFolderFromPathAsync(startFolderPath)
                 : null;
@@ -720,11 +714,6 @@ public sealed partial class MainWindow : Window
             if (selected is null) return;
 
             var selectedPath = selected.TryGetLocalPath();
-            if (string.IsNullOrWhiteSpace(selectedPath) || !IsPathInsideFolder(selectedPath, startFolderPath))
-            {
-                await ShowNoticeAsync("Diagnostics", "Select the diagnostics log from the FAT32 diagnostics drive.");
-                return;
-            }
 
             await using var stream = await selected.OpenReadAsync();
             using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
@@ -806,7 +795,6 @@ public sealed partial class MainWindow : Window
         var result = await dialog.ShowDialog<SettingsResult?>(this);
         if (result is null) { ApplyTheme(originalTheme); return; }
         _config = result.Config;
-        if (result.FactoryReset) MacPreferencesService.ResetServiceNowInstructions();
         var saveWarning = _storage.Save(_config);
         LanguageCatalog.ApplyCulture(_config.AppLanguage);
         ApplyTheme(_config.AppTheme);
@@ -1072,36 +1060,56 @@ public sealed partial class MainWindow : Window
 
     private async void ServiceNowButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (_serviceNowInProgress) return;
-        _serviceNowInProgress = true;
-        var button = sender as Button;
-        if (button is not null) button.IsEnabled = false;
         try
         {
-            if (!MacPreferencesService.ServiceNowInstructionsShown())
-            {
-                await ShowNoticeAsync("ServiceNow First-Time Setup",
-                    "Laptop QA will open ServiceNow and enter the request fields for you.\n\n" +
-                    "Enable Accessibility before using ServiceNow:\n" +
-                    "1. Open the Apple menu and choose System Settings.\n" +
-                    "2. Select Privacy & Security, then Accessibility.\n" +
-                    "3. Turn on Laptop QA.\n" +
-                    "4. If Laptop QA is not listed, click the + button, select the Laptop QA app you launch, click Open, and then turn it on.\n\n" +
-                    "If macOS asks about browser control, also open System Settings > Privacy & Security > Automation, select Laptop QA, and allow your browser.\n\n" +
-                    "In Edge or Chrome, enable View > Developer > Allow JavaScript from Apple Events if requested. Keep the browser in front until the fields finish filling.\n\n" +
-                    "Laptop QA will reuse its existing ServiceNow tab. Wait for the fields to finish before editing or submitting the request.");
-                try { MacPreferencesService.MarkServiceNowInstructionsShown(); }
-                catch (Exception preferenceError) { AddActivity("ServiceNow", preferenceError.Message); }
-            }
-            AddActivity("ServiceNow", "Opening ServiceNow and waiting for the catalog form.");
-            var browser = await ServiceNowService.OpenAndAutofillAsync(_config, _hardware);
-            AddActivity("ServiceNow", $"Autofill started in {browser} using cached Windows model, service tag, and asset tag.");
+            var description = ServiceNowService.BuildDescription(_hardware);
+            await CopyTextAsync(description, "ServiceNow request details copied.");
+            Open(_config.ServiceNowRequestUrl);
+            AddActivity("ServiceNow", "Request details copied; ServiceNow opened for manual entry.");
+            ShowTransientNotification("Request details copied. ServiceNow opened.");
         }
-        catch (Exception ex) { AddActivity("ServiceNow", $"Autofill failed: {ex.Message}"); await ShowNoticeAsync("ServiceNow", ex.Message); }
-        finally
+        catch (Exception ex)
         {
-            _serviceNowInProgress = false;
-            if (button is not null) button.IsEnabled = true;
+            AddActivity("ServiceNow", $"Could not open ServiceNow: {ex.Message}");
+            await ShowNoticeAsync("ServiceNow", "The request details were copied, but ServiceNow could not be opened.\n\n" + ex.Message);
+        }
+    }
+
+    private async void CheckHashGroupTagButton_Click(object? sender, RoutedEventArgs e) =>
+        await OpenFinalCheckLinkAsync(_config.CheckHashAndGroupTagUrl, DefaultCheckHashAndGroupTagUrl, "Check Hash and Group Tag", "Intune");
+
+    private async void RemoveUserFromIntuneButton_Click(object? sender, RoutedEventArgs e) =>
+        await OpenFinalCheckLinkAsync(_config.RemoveUserFromIntuneUrl, DefaultRemoveUserFromIntuneUrl, "Remove User from Laptop in Intune", "Intune");
+
+    private async void UpdateStockroomsButton_Click(object? sender, RoutedEventArgs e) =>
+        await OpenFinalCheckLinkAsync(_config.UpdateStockroomsUrl, DefaultUpdateStockroomsUrl, "Update Stockrooms", "ServiceNow");
+
+    private const string DefaultCheckHashAndGroupTagUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+    private const string DefaultRemoveUserFromIntuneUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+    private const string DefaultUpdateStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
+
+    private async Task OpenFinalCheckLinkAsync(string? configuredUrl, string defaultUrl, string actionName, string destination)
+    {
+        var serial = (_cache.ServiceTag ?? _hardware.SerialNumber ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(serial))
+        {
+            await ShowNoticeAsync(actionName, "A valid service tag is required before opening " + destination + " for this laptop.");
+            return;
+        }
+
+        try
+        {
+            var url = (string.IsNullOrWhiteSpace(configuredUrl) ? defaultUrl : configuredUrl.Trim())
+                .Replace("{SERIAL}", Uri.EscapeDataString(serial), StringComparison.Ordinal);
+            await CopyTextAsync(serial, actionName + " copied the service tag.");
+            Open(url);
+            AddActivity(destination, actionName + " opened; service tag copied: " + serial + ".");
+            ShowTransientNotification("Service tag copied. " + destination + " opened.");
+        }
+        catch (Exception ex)
+        {
+            AddActivity(destination, actionName + " could not open: " + ex.Message);
+            await ShowNoticeAsync(actionName, destination + " could not be opened automatically. The service tag is on the clipboard.\n\n" + ex.Message);
         }
     }
 
@@ -1309,7 +1317,16 @@ public sealed partial class MainWindow : Window
                 .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            return mountedDrives.FirstOrDefault() ?? "";
+            var detected = mountedDrives.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(detected)) return detected;
+
+            // Some macOS USB mounts are not surfaced through .NET DriveInfo.
+            // The Dell log name at a mounted volume root is a stronger fallback signal.
+            return Directory.EnumerateDirectories("/Volumes")
+                .Where(path => File.Exists(Path.Combine(path, "DellPrebootDiagnosticsLog.txt")))
+                .OrderByDescending(path => Path.GetFileName(path).Contains("DELL DIAG", StringComparison.OrdinalIgnoreCase))
+                .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault() ?? "";
         }
         catch
         {
@@ -1411,5 +1428,36 @@ public sealed partial class MainWindow : Window
         var window = new Window { Title = title, Width = 440, Topmost = Topmost, SizeToContent = SizeToContent.Height, Content = panel, WindowStartupLocation = WindowStartupLocation.CenterOwner };
         AvaloniaLocalization.Apply(window, _config.AppLanguage);
         ok.Click += (_, _) => window.Close(); await window.ShowDialog(this);
+    }
+
+    private void ShowTransientNotification(string message)
+    {
+        var light = string.Equals(_config.AppTheme, "Light", StringComparison.OrdinalIgnoreCase);
+        var amoled = string.Equals(_config.AppTheme, "AMOLED", StringComparison.OrdinalIgnoreCase);
+        var background = Brush.Parse(light ? "#FFF8FAF9" : amoled ? "#FF101010" : "#FF263D46");
+        var border = Brush.Parse(light ? "#FF9DB3B9" : amoled ? "#FF535353" : "#FF65828B");
+        var foreground = Brush.Parse(light ? "#FF13252D" : "#FFF3F7F8");
+        var accent = Brush.Parse(light ? "#FF12633D" : amoled ? "#FFB0B0B0" : "#FF7DCDBE");
+        var text = new TextBlock { Text = message, Foreground = foreground, FontSize = 12.5, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0) };
+        var content = new Grid { ColumnDefinitions = new ColumnDefinitions("9,*"), Children = { new Border { Background = accent, CornerRadius = new CornerRadius(4) }, text } };
+        Grid.SetColumn(text, 1);
+        var window = new Window
+        {
+            Width = 350,
+            Height = 68,
+            CanResize = false,
+            ShowInTaskbar = false,
+            Topmost = Topmost,
+            Background = Brushes.Transparent,
+            TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent },
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = new Border { Background = background, BorderBrush = border, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(16), Padding = new Thickness(16, 12), BoxShadow = new BoxShadows(new BoxShadow { Blur = 18, OffsetY = 4, Color = Color.Parse(amoled ? "#99000000" : "#66000000") }), Child = content }
+        };
+        window.Opened += async (_, _) =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2.2));
+            window.Close();
+        };
+        window.Show(this);
     }
 }

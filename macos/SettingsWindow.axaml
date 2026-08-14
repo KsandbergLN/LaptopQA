@@ -65,6 +65,10 @@
         </Grid>
         <TextBlock Classes="label" Text="Assignment group name"/><TextBox x:Name="ServiceNowGroupBox"/>
         <TextBlock Classes="label" Text="Assignment group sys ID"/><TextBox x:Name="ServiceNowGroupIdBox" Margin="0,0,0,22"/>
+        <TextBlock Classes="section" Text="Final Check Links"/>
+        <TextBlock Classes="label" Text="Check Hash and Group Tag URL"/><TextBox x:Name="CheckHashAndGroupTagUrlBox"/>
+        <TextBlock Classes="label" Text="Remove User from Laptop in Intune URL"/><TextBox x:Name="RemoveUserFromIntuneUrlBox"/>
+        <TextBlock Classes="label" Text="Update Stockrooms URL"/><TextBox x:Name="UpdateStockroomsUrlBox" ToolTip.Tip="Keep {SERIAL} where the current laptop's service tag should be inserted." Margin="0,0,0,22"/>
       </StackPanel>
     </ScrollViewer>
     <Grid Grid.Row="2" Margin="28,14,28,22" ColumnDefinitions="Auto,*,Auto,10,Auto">
