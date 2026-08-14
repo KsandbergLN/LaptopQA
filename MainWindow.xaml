@@ -346,7 +346,10 @@
     </Window.Resources>
 
     <Viewbox x:Name="WindowFitViewbox" Stretch="Uniform" UseLayoutRounding="True" SnapsToDevicePixels="True">
-    <Grid x:Name="WindowScaleRoot" Width="1280" Height="720" Background="Transparent" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Grid x:Name="WindowScaleRoot" Width="1280" Height="720" Background="Transparent" UseLayoutRounding="True" SnapsToDevicePixels="True" ClipToBounds="True">
+        <Grid.Clip>
+            <RectangleGeometry Rect="0,0,1280,720" RadiusX="22" RadiusY="22"/>
+        </Grid.Clip>
         <Border x:Name="Shell" CornerRadius="22" Background="{DynamicResource ShellBrush}" MouseLeftButtonDown="Shell_MouseLeftButtonDown">
             <Border.Effect>
                 <DropShadowEffect BlurRadius="84" ShadowDepth="8" Direction="315" Opacity="0.26" Color="#000000"/>
