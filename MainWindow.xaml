@@ -360,7 +360,7 @@
 
                 <Canvas>
                     <Button x:Name="SettingsButton" Canvas.Left="14" Canvas.Top="29" Width="34" Height="32" Style="{StaticResource HeaderIconButton}" ToolTip="Open settings." Click="SettingsButton_Click">
-                        <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="17" FontWeight="Normal"/>
+                        <TextBlock Text="&#xE700;" FontFamily="Segoe MDL2 Assets" FontSize="17" FontWeight="Normal"/>
                     </Button>
                     <TextBlock x:Name="HeaderTitle" Text="Laptop QA Testing" Canvas.Left="54" Canvas.Top="26" Width="360" Height="42" Foreground="{DynamicResource TextBrush}" FontSize="28" FontWeight="Light" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown"/>
                     <TextBox x:Name="HeaderDeviceName" Text="Device Name: loading..." Canvas.Left="56" Canvas.Top="62" Width="175" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>

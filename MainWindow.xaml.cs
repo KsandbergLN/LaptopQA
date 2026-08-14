@@ -2685,7 +2685,7 @@ public partial class MainWindow : Window, IComponentConnector
 				{
 					try
 					{
-						return d.IsReady && d.DriveType == DriveType.Removable && string.Equals(d.DriveFormat, "FAT32", StringComparison.OrdinalIgnoreCase) && d.TotalSize > 0 && d.TotalSize <= 134217728 && File.Exists(Path.Combine(d.RootDirectory.FullName, "DellPrebootDiagnosticsLog.txt"));
+					return d.IsReady && string.Equals(d.DriveFormat, "FAT32", StringComparison.OrdinalIgnoreCase) && d.TotalSize > 0 && d.TotalSize <= 134217728 && File.Exists(Path.Combine(d.RootDirectory.FullName, "DellPrebootDiagnosticsLog.txt"));
 					}
 					catch
 					{
@@ -2709,7 +2709,7 @@ public partial class MainWindow : Window, IComponentConnector
 				{
 					try
 					{
-						return d.IsReady && d.DriveType == DriveType.Removable && string.Equals(d.DriveFormat, "FAT32", StringComparison.OrdinalIgnoreCase) && d.TotalSize > 0 && d.TotalSize <= 134217728;
+					return d.IsReady && string.Equals(d.DriveFormat, "FAT32", StringComparison.OrdinalIgnoreCase) && d.TotalSize > 0 && d.TotalSize <= 134217728;
 					}
 					catch
 					{
@@ -4290,12 +4290,6 @@ $items = @(
 	private async void DiagnosticsBrowseButton_Click(object sender, RoutedEventArgs e)
 	{
 		string text = FindDiagnosticsBrowseStartFolder();
-		if (string.IsNullOrWhiteSpace(text) || !Directory.Exists(text))
-		{
-			AddActivity("Diagnostics", "Diagnostics browse unavailable: no FAT32 diagnostics drive was detected.");
-			MessageBox.Show(this, "No FAT32 diagnostics drive was detected. Connect the diagnostics drive and try again.", "Diagnostics", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-			return;
-		}
 		OpenFileDialog openFileDialog = new OpenFileDialog
 		{
 			Title = "Select Dell diagnostics log",
@@ -4309,12 +4303,6 @@ $items = @(
 		if (openFileDialog.ShowDialog(this) != true)
 		{
 			AddActivity("Diagnostics", "Diagnostics log browse canceled.");
-			return;
-		}
-		if (!IsOnFat32DiagnosticsDrive(openFileDialog.FileName))
-		{
-			AddActivity("Diagnostics", "Diagnostics log rejected because it is not on the FAT32 diagnostics drive: " + openFileDialog.FileName);
-			MessageBox.Show(this, "Select the diagnostics log from the small FAT32 diagnostics drive.", "Diagnostics", MessageBoxButton.OK, MessageBoxImage.Asterisk);
 			return;
 		}
 		DiagnosticsBrowseButton.IsEnabled = false;
