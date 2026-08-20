@@ -52,6 +52,7 @@ public sealed class ConfigService
             var config = !string.IsNullOrWhiteSpace(json)
                 ? JsonSerializer.Deserialize<AppConfig>(json, JsonOptions()) ?? new AppConfig()
                 : new AppConfig();
+            NormalizeFinalCheckLinkAssignments(config);
             var hasSavedTheme = !string.IsNullOrWhiteSpace(json) &&
                                 JsonNode.Parse(json) is JsonObject saved &&
                                 saved.Any(property => property.Key.Equals(nameof(AppConfig.AppTheme), StringComparison.OrdinalIgnoreCase));
@@ -62,6 +63,17 @@ public sealed class ConfigService
         {
             return new AppConfig();
         }
+    }
+
+    private static void NormalizeFinalCheckLinkAssignments(AppConfig config)
+    {
+        var checkLinkIsEnrollment = (config.CheckHashAndGroupTagUrl ?? "").Contains("AutopilotDevices.ReactView", StringComparison.OrdinalIgnoreCase);
+        var removeLinkIsDevices = (config.RemoveUserFromIntuneUrl ?? "").Contains("DevicesWindowsMenu", StringComparison.OrdinalIgnoreCase);
+        if (!checkLinkIsEnrollment || !removeLinkIsDevices) return;
+
+        var checkUrl = config.CheckHashAndGroupTagUrl ?? "";
+        config.CheckHashAndGroupTagUrl = config.RemoveUserFromIntuneUrl ?? "";
+        config.RemoveUserFromIntuneUrl = checkUrl;
     }
 
     public string? Save(AppConfig config)
