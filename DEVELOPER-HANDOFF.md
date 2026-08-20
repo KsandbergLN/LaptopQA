@@ -15,6 +15,8 @@ Do not edit these as source:
 
 The canonical source and its shared dependencies are maintained in this repository. Generated output and historical alternatives are excluded. Use reviewed branches; do not edit historical folders directly.
 
+Laptop QA is the technician workflow for preparing, testing, and documenting Windows laptops. The Windows app owns hardware, diagnostics, BIOS, USB, hash, and QA-output operations; the macOS companion resumes the cached Windows session from step 8 for final checks, QA-sheet generation, and ServiceNow preparation.
+
 ## Build and smoke check
 
 Run from the repository root:
