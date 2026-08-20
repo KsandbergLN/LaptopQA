@@ -556,7 +556,8 @@
                         </Canvas>
                     </Border>
 
-                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="913" Canvas.Top="659" Width="230" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
+                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="854" Canvas.Top="659" Width="170" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
+                    <Button x:Name="UploadHashButton" Content="Upload Hash" Canvas.Left="1034" Canvas.Top="659" Width="168" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Open Intune Autopilot Devices in a new tab to upload a hardware hash." Click="UploadHashButton_Click"/>
 
                     <Border x:Name="SheetNotesPanel" Style="{StaticResource GlassCard}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
                         <Canvas>

@@ -175,6 +175,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private const string IntuneWindowsEnrollmentUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
 
+	private const string IntuneAutopilotDevicesUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+
 	private const string ServiceNowStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
 
 	private const string DefaultWaveBackData = "M -20,440 C 190,370 380,550 580,470 C 760,400 980,555 1300,465 L1300,740 L-20,740 Z";
@@ -3624,6 +3626,21 @@ $items = @(
 			{
 				try { File.Delete(temporaryPath); } catch { }
 			}
+		}
+	}
+
+	private void UploadHashButton_Click(object sender, RoutedEventArgs e)
+	{
+		try
+		{
+			OpenUrlInNewEdgeTab(IntuneAutopilotDevicesUrl);
+			AddActivity("Hash", "Intune Autopilot Devices opened for hardware hash upload.");
+			ShowTransientNotification("Intune Autopilot Devices opened in a new tab.");
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Hash", "Could not open Intune Autopilot Devices: " + ex.Message);
+			MessageBox.Show(this, "Intune Autopilot Devices could not be opened automatically.\n\n" + ex.Message, "Upload Hash", MessageBoxButton.OK, MessageBoxImage.Exclamation);
 		}
 	}
 
