@@ -2,6 +2,8 @@
 
 This is the Avalonia/C# macOS companion for Laptop QA. It lets technicians continue the Windows QA workflow on a personal MacBook. WPF is Windows-only, so Avalonia is used to preserve the glass-card layout, themes, colors, and desktop behavior.
 
+Laptop QA prepares, tests, and documents Windows laptops through a guided session. The companion focuses on the cached-session, final-check, QA-sheet, notes, and ServiceNow portions of that workflow; Windows hardware and diagnostics remain owned by the Windows app.
+
 ## Workflow consistency
 
 Complete Windows steps 1–7 first; technicians can then use the companion starting with step 8 (QA Output) on their personal MacBook to continue the same Windows QA workflow. It mirrors the Windows workflow and presentation so cached results, notes, and QA records remain consistent. It is an alternate workstation, not a separate Mac-specific checklist.

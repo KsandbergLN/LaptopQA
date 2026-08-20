@@ -2,6 +2,8 @@
 
 This guide is for technicians using the supported Windows app and macOS companion. Both apps support the Windows QA workflow; the macOS companion uses the cached session so the workflow can continue on a MacBook when preferred.
 
+Laptop QA prepares, tests, and documents Windows laptops in one guided session, covering hardware and diagnostics checks, BIOS and USB workflows, device-hash and final-check links, QA-sheet output, and ServiceNow preparation.
+
 ## Windows workflow
 
 1. On Windows, double-click `Windows Laptop QA Launcher.vbs` in the approved package. The launcher starts the app and keeps the package data folders together. Do not launch the internal executable directly for normal technician use.
