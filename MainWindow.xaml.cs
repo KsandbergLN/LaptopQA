@@ -594,7 +594,9 @@ public partial class MainWindow : Window, IComponentConnector
 			{
 				return new AppConfig();
 			}
-			return JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(ConfigPath), JsonOptions()) ?? new AppConfig();
+			AppConfig appConfig = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(ConfigPath), JsonOptions()) ?? new AppConfig();
+			NormalizeFinalCheckLinkAssignments(appConfig);
+			return appConfig;
 		}
 		catch
 		{
@@ -3410,9 +3412,9 @@ $items = @(
 			AddActivity("Camera", "Restoring audio and cleaning Camera Roll.");
 			string audioResult = await RunAudioActionAsync("Restore");
 			AddActivity("Camera", string.IsNullOrWhiteSpace(audioResult) ? "Audio restore command completed." : ("Audio restore command completed: " + ShortActivityText(audioResult)));
-			string cleanupResult = CleanupCameraRoll();
+			string cleanupResult = await CleanupCameraRollAsync();
 			AddActivity("Camera", "Camera cleanup completed successfully. " + cleanupResult);
-			return "Audio restored and Camera Roll cleaned.";
+			return "Audio restored and Camera Roll verified empty.";
 		}
 		finally
 		{
@@ -4040,7 +4042,7 @@ $items = @(
 			new QaRenderRow("8", L("Removed User from Laptop in Intune"), text3, L((text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off.")),
 			new QaRenderRow("8", L("Update Stockrooms"), text4, L((text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated.")),
 			new QaRenderRow("8", L("Trackpad working"), text5, L((text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off.")),
-			new QaRenderRow("8", L("Physical condition suitable for use"), text6, L((text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."))
+			new QaRenderRow("8", L("Checked physical condition is suitable for use"), text6, L((text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."))
 		};
 		string StateFor(string key, string fallback = "Waiting")
 		{
@@ -6502,28 +6504,69 @@ $items = @(
 		return await RunProcessCaptureAsync("powershell.exe", $"-NoProfile -ExecutionPolicy Bypass -File \"{AudioScript}\" -Action {action} -StateFile \"{value}\" -LogFile \"{value2}\"", 45);
 	}
 
-	private string CleanupCameraRoll()
+	private async Task<string> CleanupCameraRollAsync()
 	{
-		string text = ConfiguredCameraRollPath();
-		if (!Directory.Exists(text))
+		string path = ConfiguredCameraRollPath();
+		Directory.CreateDirectory(path);
+		DateTime deadline = DateTime.UtcNow.AddSeconds(Math.Clamp(_config.CameraRollCleanupTimeoutSeconds, 2, 120));
+		TimeSpan retryDelay = TimeSpan.FromSeconds(Math.Clamp(_config.CameraRollCleanupRetryDelaySeconds, 1, 10));
+		int attempts = 0;
+		int removedFiles = 0;
+		int removedFolders = 0;
+		Exception? lastError = null;
+		while (true)
 		{
-			return "Camera Roll folder was not found: " + text;
+			attempts++;
+			lastError = null;
+			foreach (string entry in Directory.EnumerateFileSystemEntries(path).ToArray())
+			{
+				try
+				{
+					if (Directory.Exists(entry))
+					{
+						Directory.Delete(entry, recursive: true);
+						removedFolders++;
+					}
+					else
+					{
+						File.Delete(entry);
+						removedFiles++;
+					}
+				}
+				catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+				{
+					lastError = ex;
+				}
+			}
+			string[] remaining = Directory.EnumerateFileSystemEntries(path).ToArray();
+			if (remaining.Length == 0)
+			{
+				return $"Camera Roll verified empty after {attempts} attempt(s); removed {removedFiles} file(s) and {removedFolders} folder(s).";
+			}
+			if (DateTime.UtcNow >= deadline)
+			{
+				string names = string.Join(", ", remaining.Take(3).Select(Path.GetFileName));
+				if (remaining.Length > 3)
+				{
+					names += $"; plus {remaining.Length - 3} more";
+				}
+				throw new IOException("Camera Roll could not be verified empty after " + attempts + " cleanup attempt(s). Remaining: " + names + ((lastError == null) ? "" : " Last error: " + lastError.Message));
+			}
+			AddActivity("Camera", "Camera Roll still contains " + remaining.Length + " item(s) after cleanup attempt " + attempts + "; retrying in " + retryDelay.TotalSeconds + " second(s)." + ((lastError == null) ? "" : " Last error: " + lastError.Message));
+			await Task.Delay(retryDelay);
 		}
-		int num = 0;
-		int num2 = 0;
-		string[] files = Directory.GetFiles(text);
-		for (int i = 0; i < files.Length; i++)
+	}
+
+	private static void NormalizeFinalCheckLinkAssignments(AppConfig config)
+	{
+		bool checkLinkIsEnrollment = (config.CheckHashAndGroupTagUrl ?? "").Contains("AutopilotDevices.ReactView", StringComparison.OrdinalIgnoreCase);
+		bool removeLinkIsDevices = (config.RemoveUserFromIntuneUrl ?? "").Contains("DevicesWindowsMenu", StringComparison.OrdinalIgnoreCase);
+		if (checkLinkIsEnrollment && removeLinkIsDevices)
 		{
-			File.Delete(files[i]);
-			num++;
+			string checkHashAndGroupTagUrl = config.CheckHashAndGroupTagUrl ?? "";
+			config.CheckHashAndGroupTagUrl = config.RemoveUserFromIntuneUrl ?? "";
+			config.RemoveUserFromIntuneUrl = checkHashAndGroupTagUrl;
 		}
-		files = Directory.GetDirectories(text);
-		for (int i = 0; i < files.Length; i++)
-		{
-			Directory.Delete(files[i], recursive: true);
-			num2++;
-		}
-		return $"Camera Roll cleanup removed {num} file(s) and {num2} folder(s) from {text}.";
 	}
 
 	private int CleanupOldFiles(string folder, int days, string? section = null, string? label = null, bool recursive = false)
@@ -6950,7 +6993,7 @@ $items = @(
 			("8", "Removed User from Laptop in Intune", text3, (text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off."),
 			("8", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated."),
 			("8", "Trackpad working", text5, (text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off."),
-			("8", "Physical condition suitable for use", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use.")
+			("8", "Checked physical condition is suitable for use", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use.")
 		};
 		string text7 = (source.Any(((string, string, string, string) r) => r.Item3 == "Bad") ? "Needs Attention" : (source.Any(((string, string, string, string) r) => r.Item3 == "Warning") ? "Warning" : (source.All(((string, string, string, string) r) => r.Item3 == "Ok" || r.Item3 == "Ignored") ? "Passed" : "Incomplete")));
 		string value = ((text7 == "Passed") ? "overall-pass" : ((text7 == "Needs Attention") ? "overall-fail" : "overall-incomplete"));
