@@ -1084,8 +1084,8 @@ public sealed partial class MainWindow : Window
     private async void UpdateStockroomsButton_Click(object? sender, RoutedEventArgs e) =>
         await OpenFinalCheckLinkAsync(_config.UpdateStockroomsUrl, DefaultUpdateStockroomsUrl, "Update Stockrooms", "ServiceNow");
 
-    private const string DefaultCheckHashAndGroupTagUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
-    private const string DefaultRemoveUserFromIntuneUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+    private const string DefaultCheckHashAndGroupTagUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+    private const string DefaultRemoveUserFromIntuneUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
     private const string DefaultUpdateStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
 
     private async Task OpenFinalCheckLinkAsync(string? configuredUrl, string defaultUrl, string actionName, string destination)

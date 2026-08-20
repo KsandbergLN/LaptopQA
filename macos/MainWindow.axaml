@@ -79,12 +79,12 @@
             <Grid RowDefinitions="Auto,28,28,28,26,26,26" RowSpacing="1">
               <TextBlock Text="8. Final Checks" FontSize="16" FontWeight="Bold" Margin="0,0,0,4"/>
               <Grid Grid.Row="1" ColumnDefinitions="24,*">
-                <CheckBox x:Name="HashGroupTagCheck" Padding="4" ToolTip.Tip="Mark this complete after confirming the group tag in Intune."/>
-                <Button Grid.Column="1" Classes="action" HorizontalAlignment="Left" Padding="8,4" Content="Check Hash and Group Tag" FontSize="12.5" Click="CheckHashGroupTagButton_Click" ToolTip.Tip="Open Intune Windows Devices in a new tab and copy this laptop's service tag."/>
+                <CheckBox x:Name="RemovedUserCheck" Padding="4" ToolTip.Tip="Mark this complete after removing the laptop from Intune."/>
+                <Button Grid.Column="1" Classes="action" HorizontalAlignment="Left" Padding="8,4" Content="Remove User from Laptop in Intune" FontSize="12.5" Click="RemoveUserFromIntuneButton_Click" ToolTip.Tip="Open Intune Windows Devices in a new tab and copy this laptop's service tag."/>
               </Grid>
               <Grid Grid.Row="2" ColumnDefinitions="24,*">
-                <CheckBox x:Name="RemovedUserCheck" Padding="4" ToolTip.Tip="Mark this complete after removing the laptop from Intune."/>
-                <Button Grid.Column="1" Classes="action" HorizontalAlignment="Left" Padding="8,4" Content="Remove User from Laptop in Intune" FontSize="12.5" Click="RemoveUserFromIntuneButton_Click" ToolTip.Tip="Open Intune Autopilot Devices in a new tab and copy this laptop's service tag."/>
+                <CheckBox x:Name="HashGroupTagCheck" Padding="4" ToolTip.Tip="Mark this complete after confirming the group tag in Intune."/>
+                <Button Grid.Column="1" Classes="action" HorizontalAlignment="Left" Padding="8,4" Content="Check Hash and Group Tag" FontSize="12.5" Click="CheckHashGroupTagButton_Click" ToolTip.Tip="Open Intune Autopilot Devices in a new tab and copy this laptop's service tag."/>
               </Grid>
               <Grid Grid.Row="3" ColumnDefinitions="24,*">
                 <CheckBox x:Name="StockroomsCheck" Padding="4" ToolTip.Tip="Mark this complete after updating stockroom inventory."/>

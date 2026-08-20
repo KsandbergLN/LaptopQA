@@ -67,9 +67,9 @@ public sealed class ConfigService
 
     private static void NormalizeFinalCheckLinkAssignments(AppConfig config)
     {
-        var checkLinkIsEnrollment = (config.CheckHashAndGroupTagUrl ?? "").Contains("AutopilotDevices.ReactView", StringComparison.OrdinalIgnoreCase);
-        var removeLinkIsDevices = (config.RemoveUserFromIntuneUrl ?? "").Contains("DevicesWindowsMenu", StringComparison.OrdinalIgnoreCase);
-        if (!checkLinkIsEnrollment || !removeLinkIsDevices) return;
+        var checkLinkIsDevices = (config.CheckHashAndGroupTagUrl ?? "").Contains("DevicesWindowsMenu", StringComparison.OrdinalIgnoreCase);
+        var removeLinkIsEnrollment = (config.RemoveUserFromIntuneUrl ?? "").Contains("AutopilotDevices.ReactView", StringComparison.OrdinalIgnoreCase);
+        if (!checkLinkIsDevices || !removeLinkIsEnrollment) return;
 
         var checkUrl = config.CheckHashAndGroupTagUrl ?? "";
         config.CheckHashAndGroupTagUrl = config.RemoveUserFromIntuneUrl ?? "";

@@ -171,9 +171,9 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private const string DefaultServiceNowTypeOfRequest = "Other";
 
-	private const string IntuneWindowsDevicesUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+	private const string IntuneWindowsDevicesUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
 
-	private const string IntuneWindowsEnrollmentUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+	private const string IntuneWindowsEnrollmentUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
 
 	private const string ServiceNowStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
 
@@ -6561,9 +6561,9 @@ $items = @(
 
 	private static void NormalizeFinalCheckLinkAssignments(AppConfig config)
 	{
-		bool checkLinkIsEnrollment = (config.CheckHashAndGroupTagUrl ?? "").Contains("AutopilotDevices.ReactView", StringComparison.OrdinalIgnoreCase);
-		bool removeLinkIsDevices = (config.RemoveUserFromIntuneUrl ?? "").Contains("DevicesWindowsMenu", StringComparison.OrdinalIgnoreCase);
-		if (checkLinkIsEnrollment && removeLinkIsDevices)
+		bool checkLinkIsDevices = (config.CheckHashAndGroupTagUrl ?? "").Contains("DevicesWindowsMenu", StringComparison.OrdinalIgnoreCase);
+		bool removeLinkIsEnrollment = (config.RemoveUserFromIntuneUrl ?? "").Contains("AutopilotDevices.ReactView", StringComparison.OrdinalIgnoreCase);
+		if (checkLinkIsDevices && removeLinkIsEnrollment)
 		{
 			string checkHashAndGroupTagUrl = config.CheckHashAndGroupTagUrl ?? "";
 			config.CheckHashAndGroupTagUrl = config.RemoveUserFromIntuneUrl ?? "";
