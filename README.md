@@ -7,6 +7,8 @@ Laptop QA contains two supported technician applications:
 - **Windows app** — WPF on .NET 10, built from the repository root.
 - **macOS companion** — Avalonia on .NET 10, built from `macos\`.
 
+Laptop QA is a technician workflow for preparing, testing, and documenting Windows laptops. It brings hardware and diagnostics checks, BIOS and USB workflows, device-hash and final-check links, QA-sheet output, and ServiceNow preparation into one session. The macOS companion can open the cached Windows session from step 8 onward when a technician prefers to finish on a MacBook.
+
 The repository root is the canonical Windows source. The `main` branch is authoritative. Generated build output, runtime data, logs, and release packages are intentionally ignored.
 
 ## Start here
