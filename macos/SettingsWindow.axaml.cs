@@ -205,6 +205,6 @@ public sealed partial class SettingsWindow : Window
         ServiceNowRequestUrl = c.ServiceNowRequestUrl,
         ServiceNowTypeOfRequest = c.ServiceNowTypeOfRequest, ServiceNowAssignmentGroupName = c.ServiceNowAssignmentGroupName,
         ServiceNowAssignmentGroupSysId = c.ServiceNowAssignmentGroupSysId, ServiceNowAutomationDelayMilliseconds = c.ServiceNowAutomationDelayMilliseconds,
-        CheckHashAndGroupTagUrl = c.CheckHashAndGroupTagUrl, RemoveUserFromIntuneUrl = c.RemoveUserFromIntuneUrl, UpdateStockroomsUrl = c.UpdateStockroomsUrl
+        CheckHashAndGroupTagUrl = c.CheckHashAndGroupTagUrl, RemoveUserFromIntuneUrl = c.RemoveUserFromIntuneUrl, UpdateStockroomsUrl = c.UpdateStockroomsUrl, UploadHashUrl = c.UploadHashUrl
     };
 }

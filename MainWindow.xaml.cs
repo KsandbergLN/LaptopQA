@@ -3633,7 +3633,8 @@ $items = @(
 	{
 		try
 		{
-			OpenUrlInNewEdgeTab(IntuneAutopilotDevicesUrl);
+			string url = string.IsNullOrWhiteSpace(_config.UploadHashUrl) ? IntuneAutopilotDevicesUrl : _config.UploadHashUrl.Trim();
+			OpenUrlInNewEdgeTab(url);
 			AddActivity("Hash", "Intune Autopilot Devices opened for hardware hash upload.");
 			ShowTransientNotification("Intune Autopilot Devices opened in a new tab.");
 		}

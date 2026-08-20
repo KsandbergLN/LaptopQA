@@ -29,6 +29,8 @@ public sealed class SettingsWindow : Window
 
 	private const string DefaultUpdateStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
 
+	private const string DefaultUploadHashUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
+
 	private readonly TextBox _name = new TextBox();
 
 	private readonly TextBox _cameraRoll = new TextBox();
@@ -62,6 +64,8 @@ public sealed class SettingsWindow : Window
 	private readonly TextBox _removeUserFromIntuneUrl = new TextBox();
 
 	private readonly TextBox _updateStockroomsUrl = new TextBox();
+
+	private readonly TextBox _uploadHashUrl = new TextBox();
 
 	private readonly ComboBox _themeChoice = new ComboBox();
 
@@ -115,7 +119,8 @@ public sealed class SettingsWindow : Window
 			ServiceNowAutomationDelayMilliseconds = config.ServiceNowAutomationDelayMilliseconds,
 			CheckHashAndGroupTagUrl = config.CheckHashAndGroupTagUrl,
 			RemoveUserFromIntuneUrl = config.RemoveUserFromIntuneUrl,
-			UpdateStockroomsUrl = config.UpdateStockroomsUrl
+			UpdateStockroomsUrl = config.UpdateStockroomsUrl,
+			UploadHashUrl = config.UploadHashUrl
 		};
 		base.Title = "Settings";
 		Rect workArea = SystemParameters.WorkArea;
@@ -256,11 +261,7 @@ public sealed class SettingsWindow : Window
 		AddField(canvas, "Remove User from Laptop in Intune URL", _removeUserFromIntuneUrl, string.IsNullOrWhiteSpace(config.RemoveUserFromIntuneUrl) ? DefaultRemoveUserFromIntuneUrl : config.RemoveUserFromIntuneUrl, 36.0, 552.0, 664.0);
 		AddField(canvas, "Update Stockrooms URL", _updateStockroomsUrl, string.IsNullOrWhiteSpace(config.UpdateStockroomsUrl) ? DefaultUpdateStockroomsUrl : config.UpdateStockroomsUrl, 36.0, 598.0, 664.0);
 		_updateStockroomsUrl.ToolTip = "Use {SERIAL} where the current laptop's service tag should be placed in the ServiceNow URL.";
-		TextBlock textBlock2 = Text("Warranty uses the packaged or system-installed Dell Command | Warranty tool automatically. Leave the diagnostics folder blank to auto-detect the Dell log on a small FAT32 removable drive.", 36.0, 644.0, 664.0, 44.0, 11.5, FontWeights.Normal);
-		textBlock2.TextWrapping = TextWrapping.Wrap;
-		textBlock2.VerticalAlignment = VerticalAlignment.Top;
-		canvas.Children.Add(textBlock2);
-		_labels.Add(textBlock2);
+		AddField(canvas, "Upload Hash URL", _uploadHashUrl, string.IsNullOrWhiteSpace(config.UploadHashUrl) ? DefaultUploadHashUrl : config.UploadHashUrl, 36.0, 644.0, 664.0);
 		_saveButton = DialogButton("Save", 80.0, 32.0);
 		SetCanvas(_saveButton, 538.0, 9.0);
 		_saveButton.Click += delegate
@@ -404,6 +405,7 @@ public sealed class SettingsWindow : Window
 		Config.CheckHashAndGroupTagUrl = string.IsNullOrWhiteSpace(_checkHashAndGroupTagUrl.Text) ? DefaultCheckHashAndGroupTagUrl : _checkHashAndGroupTagUrl.Text.Trim();
 		Config.RemoveUserFromIntuneUrl = string.IsNullOrWhiteSpace(_removeUserFromIntuneUrl.Text) ? DefaultRemoveUserFromIntuneUrl : _removeUserFromIntuneUrl.Text.Trim();
 		Config.UpdateStockroomsUrl = string.IsNullOrWhiteSpace(_updateStockroomsUrl.Text) ? DefaultUpdateStockroomsUrl : _updateStockroomsUrl.Text.Trim();
+		Config.UploadHashUrl = string.IsNullOrWhiteSpace(_uploadHashUrl.Text) ? DefaultUploadHashUrl : _uploadHashUrl.Text.Trim();
 		if (TryReadPositiveInt(_cleanupTimeout, "Camera Roll cleanup timeout seconds", out var value) && TryReadPositiveInt(_cleanupRetry, "Cleanup retry delay seconds", out var value2) && TryReadPositiveInt(_wifiDelay, "Wi-Fi rescan wait seconds", out var value3) && TryReadPositiveInt(_ethernetRestore, "Ethernet restore wait seconds", out var value4) && TryReadPositiveInt(_serviceNowDelay, "ServiceNow automation wait milliseconds", out var value5))
 		{
 			Config.CameraRollCleanupTimeoutSeconds = value;
