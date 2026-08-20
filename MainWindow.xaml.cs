@@ -197,6 +197,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private string _currentTheme = "Light";
 
+	internal string ActiveTheme => _currentTheme;
+
 	private bool _suppressQaSessionCache;
 
 	private readonly DispatcherTimer _qaSessionSaveTimer;
