@@ -1083,19 +1083,22 @@ public partial class MainWindow : Window, IComponentConnector
 	{
 		UpdateDeviceNameHeader();
 		string text = (string.IsNullOrWhiteSpace(_assetTag) ? "None" : _assetTag.Trim());
-		HeaderAsset.Text = L("Asset: " + text);
 		if (IsMissingAssetTag(text))
 		{
+			HeaderAsset.Text = L("Set Asset Tag");
 			HeaderAssetBubble.Background = BrushFromHex((_currentTheme == "Light") ? "#B23A43" : ((_currentTheme == "AMOLED") ? "#5C2025" : "#9F2E38"));
 			HeaderAssetBubble.BorderBrush = BrushFromHex((_currentTheme == "Light") ? "#7F1D1D" : ((_currentTheme == "AMOLED") ? "#B26A70" : "#FCA5A5"));
 			HeaderAsset.Foreground = Brushes.White;
+			HeaderAsset.FontWeight = FontWeights.SemiBold;
 			HeaderAsset.ToolTip = "Asset tag is missing. Click to set it in BIOS.";
 		}
 		else
 		{
+			HeaderAsset.Text = L("Asset: " + text);
 			HeaderAssetBubble.Background = Brushes.Transparent;
 			HeaderAssetBubble.BorderBrush = Brushes.Transparent;
 			HeaderAsset.Foreground = (Brush)FindResource("MutedBrush");
+			HeaderAsset.FontWeight = FontWeights.Normal;
 			HeaderAsset.ToolTip = "Click to review or change the BIOS asset tag.";
 		}
 	}
@@ -6354,11 +6357,10 @@ $items = @(
 			_serviceTag = cache.ServiceTag.Trim();
 			HeaderSerial.Text = L("Service Tag: " + _serviceTag);
 		}
-		if (!string.IsNullOrWhiteSpace(cache.AssetTag))
-		{
-			_assetTag = cache.AssetTag.Trim();
-			UpdateAssetHeader();
-		}
+		_assetTag = !string.IsNullOrWhiteSpace(cache.AssetTag)
+			? cache.AssetTag.Trim()
+			: cache.Hardware?.ChassisAssetTag?.Trim() ?? string.Empty;
+		UpdateAssetHeader();
 		if (cache.Warranty != null)
 		{
 			_warranty = cache.Warranty;
@@ -6923,7 +6925,8 @@ $items = @(
 		{
 			UseShellExecute = true,
 			Verb = "runas",
-			WorkingDirectory = Path.GetDirectoryName(file) ?? Environment.CurrentDirectory
+			WorkingDirectory = Path.GetDirectoryName(file) ?? Environment.CurrentDirectory,
+			WindowStyle = ProcessWindowStyle.Hidden
 		};
 		foreach (string argument in arguments)
 		{
