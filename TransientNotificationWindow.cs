@@ -17,8 +17,8 @@ internal sealed class TransientNotificationWindow : Window
 		ResizeMode = ResizeMode.NoResize;
 		AllowsTransparency = true;
 		Background = Brushes.Transparent;
-		Width = 350;
-		Height = 68;
+		Width = 500;
+		Height = 92;
 
 		(bool isDark, Color background, Color border, Color foreground, Color accent) = ThemeColors(theme);
 		Border card = new Border
@@ -27,7 +27,7 @@ internal sealed class TransientNotificationWindow : Window
 			BorderBrush = new SolidColorBrush(border),
 			BorderThickness = new Thickness(1),
 			CornerRadius = new CornerRadius(16),
-			Padding = new Thickness(16, 12, 16, 12),
+			Padding = new Thickness(18, 16, 18, 16),
 			Effect = new System.Windows.Media.Effects.DropShadowEffect
 			{
 				BlurRadius = 18,
@@ -46,7 +46,7 @@ internal sealed class TransientNotificationWindow : Window
 			Foreground = new SolidColorBrush(foreground),
 			FontFamily = new FontFamily("Segoe UI"),
 			FontWeight = FontWeights.SemiBold,
-			FontSize = 12.5,
+			FontSize = 14,
 			TextWrapping = TextWrapping.Wrap,
 			VerticalAlignment = VerticalAlignment.Center,
 			Margin = new Thickness(12, 0, 0, 0)

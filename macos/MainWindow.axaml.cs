@@ -1462,20 +1462,20 @@ public sealed partial class MainWindow : Window
         var border = Brush.Parse(light ? "#FF9DB3B9" : amoled ? "#FF535353" : "#FF65828B");
         var foreground = Brush.Parse(light ? "#FF13252D" : "#FFF3F7F8");
         var accent = Brush.Parse(light ? "#FF12633D" : amoled ? "#FFB0B0B0" : "#FF7DCDBE");
-        var text = new TextBlock { Text = message, Foreground = foreground, FontSize = 12.5, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(12, 0, 0, 0) };
+        var text = new TextBlock { Text = message, Foreground = foreground, FontSize = 14, FontWeight = FontWeight.SemiBold, TextWrapping = TextWrapping.Wrap, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center, Margin = new Thickness(14, 0, 0, 0) };
         var content = new Grid { ColumnDefinitions = new ColumnDefinitions("9,*"), Children = { new Border { Background = accent, CornerRadius = new CornerRadius(4) }, text } };
         Grid.SetColumn(text, 1);
         var window = new Window
         {
-            Width = 350,
-            Height = 68,
+            Width = 500,
+            Height = 92,
             CanResize = false,
             ShowInTaskbar = false,
             Topmost = Topmost,
             Background = Brushes.Transparent,
             TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent },
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new Border { Background = background, BorderBrush = border, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(16), Padding = new Thickness(16, 12), BoxShadow = new BoxShadows(new BoxShadow { Blur = 18, OffsetY = 4, Color = Color.Parse(amoled ? "#99000000" : "#66000000") }), Child = content }
+            Content = new Border { Background = background, BorderBrush = border, BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(16), Padding = new Thickness(18, 16), BoxShadow = new BoxShadows(new BoxShadow { Blur = 18, OffsetY = 4, Color = Color.Parse(amoled ? "#99000000" : "#66000000") }), Child = content }
         };
         window.Opened += async (_, _) =>
         {
