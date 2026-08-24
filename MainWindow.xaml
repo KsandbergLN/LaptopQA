@@ -381,7 +381,7 @@
                     <TextBox x:Name="HeaderDeviceName" Text="Device Name: loading..." Canvas.Left="56" Canvas.Top="62" Width="175" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
                     <TextBox x:Name="HeaderSerial" Text="Service Tag: loading..." Canvas.Left="235" Canvas.Top="62" Width="145" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
                     <Border x:Name="HeaderAssetBubble" Canvas.Left="384" Canvas.Top="62" Width="145" Height="20" CornerRadius="10" Padding="0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
-                        <TextBox x:Name="HeaderAsset" Text="Asset: loading..." Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                        <TextBox x:Name="HeaderAsset" Text="Asset: loading..." Style="{StaticResource SelectableHeaderText}" FontSize="11.5" Cursor="Hand" ToolTip="Set a missing BIOS asset tag." PreviewMouseLeftButtonDown="HeaderAsset_PreviewMouseLeftButtonDown"/>
                     </Border>
                     <TextBox x:Name="HeaderWarranty" Text="Warranty: loading..." Canvas.Left="56" Canvas.Top="80" Width="170" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
                     <TextBlock x:Name="HeaderTechnician" Text="Technician: loading..." Canvas.Left="230" Canvas.Top="80" Width="190" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
