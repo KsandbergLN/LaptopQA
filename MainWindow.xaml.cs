@@ -4254,11 +4254,12 @@ $items = @(
 				(L("Asset Number"), cache.AssetTag),
 				(L("Warranty"), WarrantyDisplayText(cache.Warranty))
 			};
+			bool? warrantyCurrent = IsWarrantyCurrent(cache.Warranty);
 			for (int num5 = 0; num5 < array2.Length; num5++)
 			{
 				int num6 = num5 % 4;
 				int num7 = num5 / 4;
-				DrawQaField(drawingContext, array2[num5].Item1, array2[num5].Item2, 26.0 + (double)num6 * (num4 + 8.0), num3 + (double)(num7 * 50), num4, 44.0);
+				DrawQaField(drawingContext, array2[num5].Item1, array2[num5].Item2, 26.0 + (double)num6 * (num4 + 8.0), num3 + (double)(num7 * 50), num4, 44.0, (num5 == 7) ? warrantyCurrent : null);
 			}
 			num3 += 119.0;
 			DrawQaSectionTitle(drawingContext, L("Hardware Specs"), 26.0, num3);
@@ -4339,11 +4340,16 @@ $items = @(
 		DrawQaText(dc, L(overall), x, y + 23.0, 130.0, 20.0, 15.5, Brushes.White, FontWeights.ExtraBold, TextAlignment.Center);
 	}
 
-	private void DrawQaField(DrawingContext dc, string label, string value, double x, double y, double width, double height)
+	private void DrawQaField(DrawingContext dc, string label, string value, double x, double y, double width, double height, bool? status = null)
 	{
 		dc.DrawRoundedRectangle(BrushFromHex("#F7FAFB"), new Pen(BrushFromHex("#CBD9DF"), 1.0), new Rect(x, y, width, height), 7.0, 7.0);
 		DrawQaText(dc, label.ToUpperInvariant(), x + 8.0, y + 7.0, width - 16.0, 11.0, 8.8, BrushFromHex("#52666F"), FontWeights.ExtraBold);
-		DrawQaText(dc, value, x + 8.0, y + 23.0, width - 16.0, 16.0, 11.2, BrushFromHex("#13252D"), FontWeights.Bold);
+		double valueWidth = width - (status.HasValue ? 38.0 : 16.0);
+		DrawQaText(dc, value, x + 8.0, y + 23.0, valueWidth, 16.0, 11.2, BrushFromHex("#13252D"), FontWeights.Bold);
+		if (status.HasValue)
+		{
+			DrawQaText(dc, status.Value ? "✓" : "X", x + width - 28.0, y + 20.0, 18.0, 20.0, 15.0, status.Value ? BrushFromHex("#16834A") : BrushFromHex("#C7353F"), FontWeights.Bold, TextAlignment.Center);
+		}
 	}
 
 	private void HeaderClockTimer_Tick(object? sender, EventArgs e)
