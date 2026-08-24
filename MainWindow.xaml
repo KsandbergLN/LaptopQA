@@ -380,10 +380,11 @@
                     <TextBlock x:Name="HeaderTitle" Text="Laptop QA Testing" Canvas.Left="54" Canvas.Top="26" Width="360" Height="42" Foreground="{DynamicResource TextBrush}" FontSize="28" FontWeight="Light" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown"/>
                     <TextBox x:Name="HeaderDeviceName" Text="Device Name: loading..." Canvas.Left="56" Canvas.Top="62" Width="175" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
                     <TextBox x:Name="HeaderSerial" Text="Service Tag: loading..." Canvas.Left="235" Canvas.Top="62" Width="145" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
-                    <Border x:Name="HeaderAssetBubble" Canvas.Left="384" Canvas.Top="62" Width="145" Height="20" CornerRadius="10" Padding="0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
+                    <Border x:Name="HeaderAssetBubble" Canvas.Left="384" Canvas.Top="58" Width="145" Height="28" CornerRadius="14" Padding="9,0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
                         <TextBox x:Name="HeaderAsset" Text="Asset: loading..." Style="{StaticResource SelectableHeaderText}" FontSize="11.5" Cursor="Hand" ToolTip="Set a missing BIOS asset tag." PreviewMouseLeftButtonDown="HeaderAsset_PreviewMouseLeftButtonDown"/>
                     </Border>
-                    <TextBox x:Name="HeaderWarranty" Text="Warranty: loading..." Canvas.Left="56" Canvas.Top="80" Width="170" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <TextBox x:Name="HeaderWarranty" Text="Warranty: loading..." Canvas.Left="56" Canvas.Top="80" Width="150" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <TextBlock x:Name="HeaderWarrantyStatus" Text="" Canvas.Left="208" Canvas.Top="79" Width="18" Height="20" FontFamily="Segoe UI Symbol" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBlock x:Name="HeaderTechnician" Text="Technician: loading..." Canvas.Left="230" Canvas.Top="80" Width="190" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                     <Border x:Name="SummaryStatusBubble" Canvas.Left="545" Canvas.Top="43" Width="190" Height="32" CornerRadius="16" Background="#D9F5E6" BorderBrush="#7CCBA0" BorderThickness="1" Padding="12,4">
                         <Border.Effect>
