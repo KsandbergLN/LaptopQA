@@ -273,6 +273,7 @@ public sealed class QaSheetImageWindow : Window
 			// The technician can still change the copy count in the dialog before printing.
 			printDialog.PrintTicket.CopyCount = 1;
 			printDialog.PrintTicket.OutputColor = OutputColor.Color;
+			printDialog.PrintTicket.PageOrientation = PageOrientation.Portrait;
 			if (printDialog.ShowDialog() == true)
 			{
 				PrintQueue printQueue = printDialog.PrintQueue;
@@ -280,11 +281,13 @@ public sealed class QaSheetImageWindow : Window
 				PrintTicket requestedTicket = printDialog.PrintTicket.Clone();
 				int requestedCopies = Math.Max(1, requestedTicket.CopyCount ?? 1);
 				requestedTicket.OutputColor = OutputColor.Color;
+				requestedTicket.PageOrientation = PageOrientation.Portrait;
 				PrintTicket validatedTicket = printQueue.MergeAndValidatePrintTicket(printQueue.DefaultPrintTicket, requestedTicket).ValidatedPrintTicket;
-				// Preserve the copy count chosen in the dialog while forcing the standard color feature
-				// on the exact ticket that is submitted to the printer.
+				// Preserve the copy count chosen in the dialog while forcing the standard color and portrait
+				// features on the exact ticket that is submitted to the printer.
 				validatedTicket.CopyCount = requestedCopies;
 				validatedTicket.OutputColor = OutputColor.Color;
+				validatedTicket.PageOrientation = PageOrientation.Portrait;
 				PrintCapabilities printCapabilities = printQueue.GetPrintCapabilities(validatedTicket);
 				PageImageableArea pageImageableArea = printCapabilities.PageImageableArea;
 				double width = printCapabilities.OrientedPageMediaWidth ?? printDialog.PrintableAreaWidth;

@@ -154,6 +154,7 @@ public sealed class QaSheetPreviewWindow : Window
         };
 		info.ArgumentList.Add("-n"); info.ArgumentList.Add("1");
         info.ArgumentList.Add("-o"); info.ArgumentList.Add("fit-to-page");
+		info.ArgumentList.Add("-o"); info.ArgumentList.Add("orientation-requested=3");
         info.ArgumentList.Add("-o"); info.ArgumentList.Add("print-color-mode=color");
         info.ArgumentList.Add("-o"); info.ArgumentList.Add("ColorModel=RGB");
         info.ArgumentList.Add(_imagePath);
