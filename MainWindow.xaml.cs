@@ -3647,7 +3647,7 @@ $items = @(
 	{
 		string state = passed ? "Ok" : "Bad";
 		_states[key] = state;
-		icon.Text = passed ? "✓" : "!";
+		icon.Text = passed ? "✓" : "X";
 		icon.Foreground = StepBrush(state);
 		AddActivity("Physical Checks", label + " marked " + (passed ? "Pass" : "Fail") + ".");
 		SaveQaSessionCache();

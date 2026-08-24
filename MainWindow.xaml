@@ -521,11 +521,12 @@
 
                     <Border x:Name="PhysicalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="96">
                         <Canvas>
-                            <TextBlock Text="8. Trackpad &amp; Physical Condition" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Text="8. Device Condition" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <TextBlock x:Name="TrackpadIcon" Text="-" Canvas.Left="27" Canvas.Top="42" Width="18" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="17" FontWeight="Bold"/>
                             <TextBlock Text="Trackpad Working" Canvas.Left="52" Canvas.Top="43" Width="175" Foreground="{DynamicResource TextBrush}" FontSize="12.5" FontWeight="SemiBold"/>
                             <Button Content="Pass" Canvas.Left="250" Canvas.Top="36" Width="58" Height="28" Style="{StaticResource PassButton}" Padding="5,3" FontSize="10.5" ToolTip="Mark the trackpad test as passed." Click="TrackpadPassButton_Click"/>
                             <Button Content="Fail" Canvas.Left="318" Canvas.Top="36" Width="58" Height="28" Style="{StaticResource DangerButton}" Padding="5,3" FontSize="10.5" ToolTip="Mark the trackpad test as failed." Click="TrackpadFailButton_Click"/>
+                            <Line X1="24" Y1="64" X2="372" Y2="64" Stroke="{DynamicResource CardBorderBrush}" StrokeThickness="0.7" Opacity="0.52"/>
                             <TextBlock x:Name="PhysicalConditionIcon" Text="-" Canvas.Left="27" Canvas.Top="72" Width="18" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="17" FontWeight="Bold"/>
                             <TextBlock Text="Checked Physical Condition" Canvas.Left="52" Canvas.Top="73" Width="175" Foreground="{DynamicResource TextBrush}" FontSize="12.5" FontWeight="SemiBold"/>
                             <Button Content="Pass" Canvas.Left="250" Canvas.Top="66" Width="58" Height="28" Style="{StaticResource PassButton}" Padding="5,3" FontSize="10.5" ToolTip="Mark the physical-condition check as passed." Click="PhysicalConditionPassButton_Click"/>

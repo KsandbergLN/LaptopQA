@@ -77,14 +77,15 @@
           <Border Classes="card" Height="112" Padding="0"><Canvas><TextBlock Text="7. USB Port Test" Canvas.Left="24" Canvas.Top="11" FontSize="16" FontWeight="Bold"/><WrapPanel x:Name="UsbPortIndicatorsPanel" Canvas.Left="24" Canvas.Top="42" Width="348" Height="62" Orientation="Horizontal"/></Canvas></Border>
           <Border Classes="card" Height="96">
             <Grid RowDefinitions="Auto,30,30" RowSpacing="1">
-              <TextBlock Text="8. Trackpad &amp; Physical Condition" FontSize="16" FontWeight="Bold" Margin="0,0,0,4"/>
+              <TextBlock Text="8. Device Condition" FontSize="16" FontWeight="Bold" Margin="0,0,0,4"/>
               <Grid Grid.Row="1" ColumnDefinitions="24,*,60,60" ColumnSpacing="8">
                 <TextBlock x:Name="TrackpadStatus" Text="-" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Column="1" Text="Trackpad Working" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 <Button Grid.Column="2" Classes="action pass" Content="Pass" Height="28" Click="TrackpadPassButton_Click"/>
                 <Button Grid.Column="3" Classes="action danger" Content="Fail" Height="28" Click="TrackpadFailButton_Click"/>
               </Grid>
-              <Grid Grid.Row="2" ColumnDefinitions="24,*,60,60" ColumnSpacing="8">
+              <Grid Grid.Row="2" ColumnDefinitions="24,*,60,60" ColumnSpacing="8" Margin="0,1,0,0">
+                <Border Grid.ColumnSpan="4" Height="1" Background="{DynamicResource CardBorderBrush}" Opacity="0.52" VerticalAlignment="Top"/>
                 <TextBlock x:Name="PhysicalConditionStatus" Text="-" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Column="1" Text="Checked Physical Condition" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 <Button Grid.Column="2" Classes="action pass" Content="Pass" Height="28" Click="PhysicalConditionPassButton_Click"/>

@@ -179,7 +179,7 @@ public sealed partial class MainWindow : Window
     private static string FinalState(string? state, bool? legacyValue) =>
         state is "Ok" or "Bad" or "Ignored" ? state : legacyValue == true ? "Ok" : "Waiting";
 
-    private static string Symbol(string? state) => state switch { "Ok" => "✓", "Bad" => "!", _ => "-" };
+    private static string Symbol(string? state) => state switch { "Ok" => "✓", "Bad" => "X", _ => "-" };
 
     private bool IsQaComplete()
     {
