@@ -762,6 +762,14 @@ public partial class MainWindow : Window, IComponentConnector
 		{
 			UpdateAssetHeader();
 		}
+		if (HeaderWarrantyStatus != null)
+		{
+			HeaderWarrantyStatus.Foreground = HeaderWarrantyStatus.Text == "✓"
+				? BrushFromHex(flag ? "#16834A" : "#55D98B")
+				: HeaderWarrantyStatus.Text == "X"
+					? BrushFromHex(flag ? "#C7353F" : "#FF8E96")
+					: (Brush)FindResource("MutedBrush");
+		}
 		SetBiosStatusIcon(_states.TryGetValue("SecureBoot", out string? value) ? value : "Unknown");
 		RefreshStepIconBrushes();
 		if (CurrentBatteryPanel != null)
@@ -1078,15 +1086,17 @@ public partial class MainWindow : Window, IComponentConnector
 		HeaderAsset.Text = L("Asset: " + text);
 		if (IsMissingAssetTag(text))
 		{
-			HeaderAssetBubble.Background = BrushFromHex((_currentTheme == "Light") ? "#FDE2E4" : ((_currentTheme == "AMOLED") ? "#2A2A2A" : "#5B2028"));
-			HeaderAssetBubble.BorderBrush = BrushFromHex((_currentTheme == "Light") ? "#C94C56" : ((_currentTheme == "AMOLED") ? "#A0A0A0" : "#FCA5A5"));
-			HeaderAsset.Foreground = BrushFromHex((_currentTheme == "Light") ? "#842029" : ((_currentTheme == "AMOLED") ? "#F4F4F4" : "#FEE2E2"));
+			HeaderAssetBubble.Background = BrushFromHex((_currentTheme == "Light") ? "#B23A43" : ((_currentTheme == "AMOLED") ? "#5C2025" : "#9F2E38"));
+			HeaderAssetBubble.BorderBrush = BrushFromHex((_currentTheme == "Light") ? "#7F1D1D" : ((_currentTheme == "AMOLED") ? "#B26A70" : "#FCA5A5"));
+			HeaderAsset.Foreground = Brushes.White;
+			HeaderAsset.ToolTip = "Asset tag is missing. Click to set it in BIOS.";
 		}
 		else
 		{
 			HeaderAssetBubble.Background = Brushes.Transparent;
 			HeaderAssetBubble.BorderBrush = Brushes.Transparent;
 			HeaderAsset.Foreground = (Brush)FindResource("MutedBrush");
+			HeaderAsset.ToolTip = "Click to review or change the BIOS asset tag.";
 		}
 	}
 
@@ -1103,9 +1113,9 @@ public partial class MainWindow : Window, IComponentConnector
 	private async void HeaderAsset_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 	{
 		e.Handled = true;
-		if (!IsMissingAssetTag(_assetTag))
+		string currentValue = IsMissingAssetTag(_assetTag) ? "No asset tag is currently reported." : "Current BIOS asset tag: " + _assetTag.Trim() + ".";
+		if (!ShowThemedConfirmation("Set Asset Tag", currentValue + "\n\nOnly continue when an asset tag needs to be added or corrected. This writes to BIOS and requires administrator approval.", "Continue"))
 		{
-			ShowTransientNotification("This laptop already has an asset tag.");
 			return;
 		}
 		string? assetTag = ShowAssetTagEntryDialog();
@@ -1224,6 +1234,26 @@ public partial class MainWindow : Window, IComponentConnector
 		close.Click += delegate { dialog.Close(); };
 		content.Children.Add(close);
 		dialog.ShowDialog();
+	}
+
+	private bool ShowThemedConfirmation(string title, string message, string confirmText)
+	{
+		bool confirmed = false;
+		Window dialog = CreateThemedDialog(title, 500.0);
+		StackPanel content = (StackPanel)((Border)dialog.Content).Child;
+		content.Children.Add(new TextBlock { Text = title, Foreground = (Brush)FindResource("TextBrush"), FontSize = 21.0, FontWeight = FontWeights.Bold, Margin = new Thickness(0.0, 0.0, 0.0, 12.0) });
+		content.Children.Add(new TextBlock { Text = message, Foreground = (Brush)FindResource("MutedBrush"), FontSize = 13.0, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0.0, 0.0, 0.0, 20.0) });
+		StackPanel buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+		Button cancel = ThemedDialogButton("Cancel", false);
+		Button confirm = ThemedDialogButton(confirmText, true);
+		cancel.Margin = new Thickness(0.0, 0.0, 10.0, 0.0);
+		cancel.Click += delegate { dialog.Close(); };
+		confirm.Click += delegate { confirmed = true; dialog.DialogResult = true; dialog.Close(); };
+		buttons.Children.Add(cancel);
+		buttons.Children.Add(confirm);
+		content.Children.Add(buttons);
+		dialog.ShowDialog();
+		return confirmed;
 	}
 
 	private Window CreateThemedDialog(string title, double width)
@@ -2165,35 +2195,30 @@ public partial class MainWindow : Window, IComponentConnector
 		if (string.IsNullOrWhiteSpace(_serviceTag) || _serviceTag.Equals("Unknown", StringComparison.OrdinalIgnoreCase))
 		{
 			_warranty = "";
-			HeaderWarranty.Text = L("Warranty: X unavailable");
-			HeaderWarranty.ToolTip = "Service Tag unavailable.";
+			SetWarrantyHeader("unavailable", "Service Tag unavailable.", false);
 			AddActivity("Warranty", "Warranty lookup skipped: Service Tag unavailable.");
 			return;
 		}
 		if (!string.IsNullOrWhiteSpace(_warranty) && string.Equals(_warrantyCachedServiceTag, _serviceTag, StringComparison.OrdinalIgnoreCase))
 		{
-			HeaderWarranty.Text = L("Warranty: " + WarrantyDisplayText());
-			HeaderWarranty.ToolTip = WarrantyToolTipText();
+			SetWarrantyHeader(_warranty, WarrantyToolTipText(), IsWarrantyCurrent(_warranty));
 			AddActivity("Warranty", "Using cached warranty expiration: " + _warranty);
 			return;
 		}
-		HeaderWarranty.Text = L("Warranty: loading...");
-		HeaderWarranty.ToolTip = "Warranty lookup is running.";
+		SetWarrantyHeader("loading...", "Warranty lookup is running.", null);
 		AddActivity("Warranty", "Warranty lookup started.");
 		WarrantyResult warrantyResult = await GetDellWarrantyExpirationAsync(_serviceTag);
 		if (warrantyResult.Found && !string.IsNullOrWhiteSpace(warrantyResult.ExpirationDateText))
 		{
 			_warranty = warrantyResult.ExpirationDateText;
 			_warrantyCachedServiceTag = _serviceTag;
-			HeaderWarranty.Text = L("Warranty: " + WarrantyDisplayText());
-			HeaderWarranty.ToolTip = WarrantyToolTipText();
+			SetWarrantyHeader(_warranty, WarrantyToolTipText(), IsWarrantyCurrent(_warranty));
 			AddActivity("Warranty", "Warranty expiration loaded: " + _warranty);
 		}
 		else
 		{
 			_warranty = "";
-			HeaderWarranty.Text = L("Warranty: X unavailable");
-			HeaderWarranty.ToolTip = (string.IsNullOrWhiteSpace(warrantyResult.Message) ? "No warranty expiration date returned." : warrantyResult.Message);
+			SetWarrantyHeader("unavailable", string.IsNullOrWhiteSpace(warrantyResult.Message) ? "No warranty expiration date returned." : warrantyResult.Message, false);
 			AddActivity("Warranty", $"Warranty expiration not loaded: {HeaderWarranty.ToolTip}");
 		}
 	}
@@ -2201,6 +2226,19 @@ public partial class MainWindow : Window, IComponentConnector
 	private string WarrantyDisplayText()
 	{
 		return WarrantyDisplayText(_warranty);
+	}
+
+	private void SetWarrantyHeader(string text, string toolTip, bool? isCurrent)
+	{
+		HeaderWarranty.Text = L("Warranty: " + text);
+		HeaderWarranty.ToolTip = toolTip;
+		HeaderWarrantyStatus.Text = isCurrent.HasValue ? (isCurrent.Value ? "✓" : "X") : "";
+		HeaderWarrantyStatus.Foreground = isCurrent == true
+			? BrushFromHex((_currentTheme == "Light") ? "#16834A" : "#55D98B")
+			: isCurrent == false
+				? BrushFromHex((_currentTheme == "Light") ? "#C7353F" : "#FF8E96")
+				: (Brush)FindResource("MutedBrush");
+		HeaderWarrantyStatus.ToolTip = toolTip;
 	}
 
 	private string WarrantyDisplayText(string? warrantyText)
@@ -6285,8 +6323,7 @@ $items = @(
 		if (cache.Warranty != null)
 		{
 			_warranty = cache.Warranty;
-			HeaderWarranty.Text = L("Warranty: " + WarrantyDisplayText());
-			HeaderWarranty.ToolTip = WarrantyToolTipText();
+			SetWarrantyHeader(_warranty, WarrantyToolTipText(), IsWarrantyCurrent(_warranty));
 		}
 		if (!string.IsNullOrWhiteSpace(cache.WarrantyCachedServiceTag))
 		{
@@ -6512,8 +6549,7 @@ $items = @(
 		HeaderAssetBubble.Background = Brushes.Transparent;
 		HeaderAssetBubble.BorderBrush = Brushes.Transparent;
 		HeaderAsset.Foreground = (Brush)FindResource("MutedBrush");
-		HeaderWarranty.Text = L("Warranty: loading...");
-		HeaderWarranty.ToolTip = "Warranty lookup will run after the Service Tag loads.";
+		SetWarrantyHeader("loading...", "Warranty lookup will run after the Service Tag loads.", null);
 		HeaderBattery.Text = L("Battery Health: loading...");
 		HeaderBatteryDots.Text = "\u25CB\u25CB\u25CB\u25CB";
 		HeaderBatteryDots.Foreground = (Brush)FindResource("MutedBrush");
