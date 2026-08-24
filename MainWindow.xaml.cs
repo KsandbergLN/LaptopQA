@@ -3390,8 +3390,11 @@ $items = @(
 		{
 			string text = ((state == "Ok") ? "Pass" : "Fail");
 			AddActivity("Camera", "Camera marked " + text + ".");
-			string cleanupDetail = await EnsureCameraCleanupAsync(_cameraTestRunId);
-			SetStep("Camera", CameraIcon, CameraMain, CameraDetail, state, main, detail + " " + cleanupDetail);
+			await EnsureCameraCleanupAsync(_cameraTestRunId);
+			// Camera can finish writing its last file after its window closes. Verify again at the technician's final decision.
+			string cleanupDetail = await CleanupCameraRollAsync();
+			AddActivity("Camera", "Final Camera Roll verification completed. " + cleanupDetail);
+			SetStep("Camera", CameraIcon, CameraMain, CameraDetail, state, main, detail + " Camera Roll verified empty.");
 		}
 		catch (Exception ex)
 		{
