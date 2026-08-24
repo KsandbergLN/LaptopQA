@@ -1135,19 +1135,21 @@ public partial class MainWindow : Window, IComponentConnector
 			{
 				throw new InvalidOperationException(DescribeCctkFailure(exitCode));
 			}
-			await Task.Delay(750);
-			Dictionary<string, string> identity = await GetHeaderAsync();
-			string writtenTag = identity.GetValueOrDefault("Asset", "").Trim();
-			if (IsMissingAssetTag(writtenTag) || !string.Equals(writtenTag, assetTag, StringComparison.OrdinalIgnoreCase))
+			string writtenTag = await WaitForAssetTagRefreshAsync(assetTag);
+			if (string.Equals(writtenTag, assetTag, StringComparison.OrdinalIgnoreCase))
 			{
-				throw new InvalidOperationException("CCTK completed, but the BIOS did not report the expected asset tag after the write.");
+				_assetTag = writtenTag;
+				_hardware.ChassisAssetTag = writtenTag;
+				UpdateAssetHeader();
+				SaveQaSessionCache();
+				AddActivity("Asset Tag", "BIOS asset tag was written and verified: " + writtenTag + ".");
+				ShowTransientNotification("Asset tag saved and verified: " + writtenTag + ".");
 			}
-			_assetTag = writtenTag;
-			_hardware.ChassisAssetTag = writtenTag;
-			UpdateAssetHeader();
-			SaveQaSessionCache();
-			AddActivity("Asset Tag", "BIOS asset tag was written and verified: " + writtenTag + ".");
-			ShowTransientNotification("Asset tag saved and verified: " + writtenTag + ".");
+			else
+			{
+				AddActivity("Asset Tag", "Dell Command | Configure completed successfully, but Windows has not refreshed the BIOS asset tag yet. Expected " + assetTag + "; current value " + (string.IsNullOrWhiteSpace(writtenTag) ? "None" : writtenTag) + ".");
+				ShowThemedNotice("Asset Tag Pending", "Dell Command | Configure completed successfully, but Windows has not refreshed the BIOS asset tag yet. Restart the laptop, then choose Start New QA to verify it.");
+			}
 		}
 		catch (Exception ex)
 		{
@@ -1239,6 +1241,25 @@ public partial class MainWindow : Window, IComponentConnector
 	private async Task<int> WriteCctkAssetTagAsync(string assetTag)
 	{
 		return await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
+	}
+
+	private async Task<string> WaitForAssetTagRefreshAsync(string expectedAssetTag)
+	{
+		string currentValue = string.Empty;
+		for (int attempt = 0; attempt < 6; attempt++)
+		{
+			if (attempt > 0)
+			{
+				await Task.Delay(1000);
+			}
+			Dictionary<string, string> identity = await GetHeaderAsync();
+			currentValue = identity.GetValueOrDefault("Asset", "").Trim();
+			if (string.Equals(currentValue, expectedAssetTag, StringComparison.OrdinalIgnoreCase))
+			{
+				return currentValue;
+			}
+		}
+		return currentValue;
 	}
 
 	private static string DescribeCctkFailure(int exitCode)
