@@ -124,7 +124,9 @@ public partial class MainWindow : Window, IComponentConnector
 		["ExternalVideo"] = "Waiting",
 		["Keyboard"] = "Waiting",
 		["Diagnostics"] = "Warning",
-		["UsbPorts"] = "Waiting"
+		["UsbPorts"] = "Waiting",
+		["Trackpad"] = "Waiting",
+		["PhysicalCondition"] = "Waiting"
 	};
 
 	private readonly Dictionary<string, string> _details = new Dictionary<string, string>();
@@ -710,6 +712,7 @@ public partial class MainWindow : Window, IComponentConnector
 		Brush sharedSectionSurfaceBrush = (Brush)base.Resources["SectionSurfaceBrush"];
 		UsbPortTestPanel.Background = sharedSectionSurfaceBrush;
 		FinalChecksPanel.Background = sharedSectionSurfaceBrush;
+		PhysicalChecksPanel.Background = sharedSectionSurfaceBrush;
 		QaOutputPanel.Background = sharedSectionSurfaceBrush;
 		BiosSettingsPanel.Background = sharedSectionSurfaceBrush;
 		WavePathBack.Fill = BrushFromHex(themePalette.WaveBack);
@@ -3632,6 +3635,38 @@ $items = @(
 		}
 	}
 
+	private void TrackpadPassButton_Click(object sender, RoutedEventArgs e) => SetManualCheckResult("Trackpad", TrackpadIcon, true, "Trackpad Working");
+
+	private void TrackpadFailButton_Click(object sender, RoutedEventArgs e) => SetManualCheckResult("Trackpad", TrackpadIcon, false, "Trackpad Working");
+
+	private void PhysicalConditionPassButton_Click(object sender, RoutedEventArgs e) => SetManualCheckResult("PhysicalCondition", PhysicalConditionIcon, true, "Checked Physical Condition");
+
+	private void PhysicalConditionFailButton_Click(object sender, RoutedEventArgs e) => SetManualCheckResult("PhysicalCondition", PhysicalConditionIcon, false, "Checked Physical Condition");
+
+	private void SetManualCheckResult(string key, TextBlock icon, bool passed, string label)
+	{
+		string state = passed ? "Ok" : "Bad";
+		_states[key] = state;
+		icon.Text = passed ? "✓" : "!";
+		icon.Foreground = StepBrush(state);
+		AddActivity("Physical Checks", label + " marked " + (passed ? "Pass" : "Fail") + ".");
+		SaveQaSessionCache();
+		CheckForQaCompletionCelebration();
+	}
+
+	private void RestoreManualCheckResult(string key, TextBlock icon, string? cachedState, bool? legacyPassed)
+	{
+		string state = IsFinalQaResult(cachedState ?? "") ? cachedState! : ((legacyPassed == true) ? "Ok" : "Waiting");
+		_states[key] = state;
+		icon.Text = state switch
+		{
+			"Ok" => "✓",
+			"Bad" => "!",
+			_ => "-"
+		};
+		icon.Foreground = StepBrush(state);
+	}
+
 	private void UploadHashButton_Click(object sender, RoutedEventArgs e)
 	{
 		try
@@ -4046,8 +4081,8 @@ $items = @(
 		string text2 = ((cache.FinalCleanedLaptop == true) ? "Ok" : "Waiting");
 		string text3 = ((cache.FinalDeletedUser == true) ? "Ok" : "Waiting");
 		string text4 = ((cache.FinalUpdateStockrooms == true) ? "Ok" : "Waiting");
-		string text5 = ((cache.FinalTrackpadWorking == true) ? "Ok" : "Waiting");
-		string text6 = ((cache.FinalConditionSuitableForUse == true) ? "Ok" : "Waiting");
+		string text5 = IsFinalQaResult(cache.TrackpadState) ? cache.TrackpadState : ((cache.FinalTrackpadWorking == true) ? "Ok" : "Waiting");
+		string text6 = IsFinalQaResult(cache.PhysicalConditionState) ? cache.PhysicalConditionState : ((cache.FinalConditionSuitableForUse == true) ? "Ok" : "Waiting");
 		string state = ((!cache.UsbPortTestFinished) ? "Waiting" : (cache.UsbPorts.Any((UsbPortCache port) => port.Failed) ? "Bad" : "Ok"));
 		string detail = ((cache.UsbPorts.Count == 0) ? "USB port count unavailable from BIOS connector data." : $"{cache.UsbPorts.Count((UsbPortCache port) => port.Passed)} passed, {cache.UsbPorts.Count((UsbPortCache port) => port.Failed)} failed, {cache.UsbPorts.Count((UsbPortCache port) => !port.Passed && !port.Failed)} pending.");
 		return new List<QaRenderRow>
@@ -4060,12 +4095,12 @@ $items = @(
 			new QaRenderRow("6", L("Dell preboot diagnostics"), StateFor("Diagnostics", "Warning"), L(DetailFor("Diagnostics", "Diagnostics log not found."))),
 			new QaRenderRow("7", L("USB ports verified"), state, detail),
 			new QaRenderRow("", L("Battery health checked"), "Ok", cache.BatterySummary ?? ""),
-			new QaRenderRow("8", L("Check hash and group tag"), text, L((text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off.")),
-			new QaRenderRow("8", L("Laptop cleaned"), text2, L((text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off.")),
-			new QaRenderRow("8", L("Removed User from Laptop in Intune"), text3, L((text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off.")),
-			new QaRenderRow("8", L("Update Stockrooms"), text4, L((text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated.")),
 			new QaRenderRow("8", L("Trackpad working"), text5, L((text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off.")),
-			new QaRenderRow("8", L("Checked physical condition"), text6, L((text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."))
+			new QaRenderRow("8", L("Checked physical condition"), text6, L((text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use.")),
+			new QaRenderRow("9", L("Check hash and group tag"), text, L((text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off.")),
+			new QaRenderRow("9", L("Laptop cleaned"), text2, L((text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off.")),
+			new QaRenderRow("9", L("Removed User from Laptop in Intune"), text3, L((text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off.")),
+			new QaRenderRow("9", L("Update Stockrooms"), text4, L((text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated."))
 		};
 		string StateFor(string key, string fallback = "Waiting")
 		{
@@ -4913,7 +4948,7 @@ $items = @(
 	private bool IsQaComplete()
 	{
 		bool flag = AreStepsOneThroughSevenComplete();
-		bool flag2 = FinalTrackpadWorkingCheck.IsChecked == true && FinalHashGroupTagCheck.IsChecked == true && FinalDeletedUserCheck.IsChecked == true && FinalUpdateStockroomsCheck.IsChecked == true && FinalCleanedLaptopCheck.IsChecked == true && FinalConditionSuitableCheck.IsChecked == true;
+		bool flag2 = IsFinalQaResult(_states.GetValueOrDefault("Trackpad", "Waiting")) && IsFinalQaResult(_states.GetValueOrDefault("PhysicalCondition", "Waiting")) && FinalHashGroupTagCheck.IsChecked == true && FinalDeletedUserCheck.IsChecked == true && FinalUpdateStockroomsCheck.IsChecked == true && FinalCleanedLaptopCheck.IsChecked == true;
 		return flag && flag2;
 	}
 
@@ -5928,7 +5963,7 @@ $items = @(
 
 	private static bool HasSavedQaProgress(QaSessionCache cache)
 	{
-		if (cache.FinalHashGroupTag != true && cache.FinalCleanedLaptop != true && cache.FinalUpdateStockrooms != true && cache.FinalTrackpadWorking != true && cache.FinalDeletedUser != true && cache.FinalConditionSuitableForUse != true && !cache.UsbPortTestFinished)
+		if (cache.FinalHashGroupTag != true && cache.FinalCleanedLaptop != true && cache.FinalUpdateStockrooms != true && !IsFinalQaResult(cache.TrackpadState) && cache.FinalTrackpadWorking != true && cache.FinalDeletedUser != true && !IsFinalQaResult(cache.PhysicalConditionState) && cache.FinalConditionSuitableForUse != true && !cache.UsbPortTestFinished)
 		{
 			List<UsbPortCache> usbPorts = cache.UsbPorts;
 			if (usbPorts == null || !usbPorts.Any((UsbPortCache port) => port.Passed || port.Failed))
@@ -6019,9 +6054,9 @@ $items = @(
 			FinalHashGroupTagCheck.IsChecked = cache.FinalHashGroupTag;
 			FinalCleanedLaptopCheck.IsChecked = cache.FinalCleanedLaptop;
 			FinalUpdateStockroomsCheck.IsChecked = cache.FinalUpdateStockrooms;
-			FinalTrackpadWorkingCheck.IsChecked = cache.FinalTrackpadWorking;
 			FinalDeletedUserCheck.IsChecked = cache.FinalDeletedUser;
-			FinalConditionSuitableCheck.IsChecked = cache.FinalConditionSuitableForUse;
+			RestoreManualCheckResult("Trackpad", TrackpadIcon, cache.TrackpadState, cache.FinalTrackpadWorking);
+			RestoreManualCheckResult("PhysicalCondition", PhysicalConditionIcon, cache.PhysicalConditionState, cache.FinalConditionSuitableForUse);
 			_stepsOneThroughSevenCompletionPromptShown = cache.StepsOneThroughSevenCompletionPromptShown && cache.StepsOneThroughSevenCompletionPromptVersion == StepsOneThroughSevenCompletionPromptVersion;
 			_usbPortTestFinished = cache.UsbPortTestFinished;
 			List<UsbPortCache> usbPorts = cache.UsbPorts;
@@ -6182,9 +6217,11 @@ $items = @(
 				FinalHashGroupTag = FinalHashGroupTagCheck.IsChecked,
 				FinalCleanedLaptop = FinalCleanedLaptopCheck.IsChecked,
 				FinalUpdateStockrooms = FinalUpdateStockroomsCheck.IsChecked,
-				FinalTrackpadWorking = FinalTrackpadWorkingCheck.IsChecked,
+				FinalTrackpadWorking = _states.GetValueOrDefault("Trackpad", "Waiting") == "Ok",
 				FinalDeletedUser = FinalDeletedUserCheck.IsChecked,
-				FinalConditionSuitableForUse = FinalConditionSuitableCheck.IsChecked,
+				FinalConditionSuitableForUse = _states.GetValueOrDefault("PhysicalCondition", "Waiting") == "Ok",
+				TrackpadState = _states.GetValueOrDefault("Trackpad", "Waiting"),
+				PhysicalConditionState = _states.GetValueOrDefault("PhysicalCondition", "Waiting"),
 				UsbPortTestFinished = _usbPortTestFinished,
 				StepsOneThroughSevenCompletionPromptShown = _stepsOneThroughSevenCompletionPromptShown,
 				StepsOneThroughSevenCompletionPromptVersion = StepsOneThroughSevenCompletionPromptVersion,
@@ -6388,9 +6425,9 @@ $items = @(
 		FinalHashGroupTagCheck.IsChecked = false;
 		FinalCleanedLaptopCheck.IsChecked = false;
 		FinalUpdateStockroomsCheck.IsChecked = false;
-		FinalTrackpadWorkingCheck.IsChecked = false;
 		FinalDeletedUserCheck.IsChecked = false;
-		FinalConditionSuitableCheck.IsChecked = false;
+		RestoreManualCheckResult("Trackpad", TrackpadIcon, "Waiting", null);
+		RestoreManualCheckResult("PhysicalCondition", PhysicalConditionIcon, "Waiting", null);
 		await InitializeUsbPortTestAsync();
 		RmaIssueBox.Clear();
 		RepairNotesBox.Clear();
@@ -6997,8 +7034,8 @@ $items = @(
 		string text2 = ((FinalCleanedLaptopCheck.IsChecked == true) ? "Ok" : "Waiting");
 		string text3 = ((FinalDeletedUserCheck.IsChecked == true) ? "Ok" : "Waiting");
 		string text4 = ((FinalUpdateStockroomsCheck.IsChecked == true) ? "Ok" : "Waiting");
-		string text5 = ((FinalTrackpadWorkingCheck.IsChecked == true) ? "Ok" : "Waiting");
-		string text6 = ((FinalConditionSuitableCheck.IsChecked == true) ? "Ok" : "Waiting");
+		string text5 = _states.GetValueOrDefault("Trackpad", "Waiting");
+		string text6 = _states.GetValueOrDefault("PhysicalCondition", "Waiting");
 		string item = ((!_usbPortTestFinished) ? "Waiting" : (_usbPorts.Any((UsbPortCache port) => port.Failed) ? "Bad" : "Ok"));
 		string item2 = ((_usbPorts.Count == 0) ? "USB port count unavailable from BIOS connector data." : $"{_usbPorts.Count((UsbPortCache port) => port.Passed)} passed, {_usbPorts.Count((UsbPortCache port) => port.Failed)} failed, {_usbPorts.Count((UsbPortCache port) => !port.Passed && !port.Failed)} pending.");
 		(string, string, string, string)[] source = new(string, string, string, string)[14]
@@ -7011,12 +7048,12 @@ $items = @(
 			("6", "Dell preboot diagnostics", _states["Diagnostics"], Detail("Diagnostics", "Diagnostics log not found.")),
 			("7", "USB ports verified", item, item2),
 			("", "Battery health checked", "Ok", _batterySummary),
-			("8", "Check hash and group tag", text, (text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off."),
-			("8", "Laptop cleaned", text2, (text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off."),
-			("8", "Removed User from Laptop in Intune", text3, (text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off."),
-			("8", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated."),
 			("8", "Trackpad working", text5, (text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off."),
-			("8", "Checked physical condition", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use.")
+			("8", "Checked physical condition", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."),
+			("9", "Check hash and group tag", text, (text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off."),
+			("9", "Laptop cleaned", text2, (text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off."),
+			("9", "Removed User from Laptop in Intune", text3, (text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off."),
+			("9", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated.")
 		};
 		string text7 = (source.Any(((string, string, string, string) r) => r.Item3 == "Bad") ? "Needs Attention" : (source.Any(((string, string, string, string) r) => r.Item3 == "Warning") ? "Warning" : (source.All(((string, string, string, string) r) => r.Item3 == "Ok" || r.Item3 == "Ignored") ? "Passed" : "Incomplete")));
 		string value = ((text7 == "Passed") ? "overall-pass" : ((text7 == "Needs Attention") ? "overall-fail" : "overall-incomplete"));

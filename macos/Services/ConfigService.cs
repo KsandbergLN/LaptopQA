@@ -144,6 +144,8 @@ public sealed class ConfigService
         Set(root, nameof(cache.FinalTrackpadWorking), cache.FinalTrackpadWorking);
         Set(root, nameof(cache.FinalDeletedUser), cache.FinalDeletedUser);
         Set(root, nameof(cache.FinalConditionSuitableForUse), cache.FinalConditionSuitableForUse);
+        Set(root, nameof(cache.TrackpadState), cache.TrackpadState);
+        Set(root, nameof(cache.PhysicalConditionState), cache.PhysicalConditionState);
         Set(root, nameof(cache.UsbPortTestFinished), cache.UsbPortTestFinished);
         Set(root, nameof(cache.UsbPorts), cache.UsbPorts);
         Set(root, nameof(cache.RmaIssues), cache.RmaIssues);

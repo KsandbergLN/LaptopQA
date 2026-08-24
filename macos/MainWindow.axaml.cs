@@ -51,12 +51,10 @@ public sealed partial class MainWindow : Window
         AddHandler(Button.ClickEvent, AnyAppInteraction_Changed, RoutingStrategies.Bubble, handledEventsToo: true);
         RmaIssuesBox.TextChanged += SharedQaInput_Changed;
         RepairNotesBox.TextChanged += SharedQaInput_Changed;
-        TrackpadCheck.IsCheckedChanged += SharedQaCheck_Changed;
         HashGroupTagCheck.IsCheckedChanged += SharedQaCheck_Changed;
         RemovedUserCheck.IsCheckedChanged += SharedQaCheck_Changed;
         StockroomsCheck.IsCheckedChanged += SharedQaCheck_Changed;
         CleanedCheck.IsCheckedChanged += SharedQaCheck_Changed;
-        ConditionSuitableCheck.IsCheckedChanged += SharedQaCheck_Changed;
         Opened += MainWindow_Opened;
         Activated += MainWindow_Activated;
         Closing += MainWindow_Closing;
@@ -115,9 +113,8 @@ public sealed partial class MainWindow : Window
         HashGroupTagCheck.IsChecked = _cache.FinalHashGroupTag == true;
         CleanedCheck.IsChecked = _cache.FinalCleanedLaptop == true;
         StockroomsCheck.IsChecked = _cache.FinalUpdateStockrooms == true;
-        TrackpadCheck.IsChecked = _cache.FinalTrackpadWorking == true;
         RemovedUserCheck.IsChecked = _cache.FinalDeletedUser == true;
-        ConditionSuitableCheck.IsChecked = _cache.FinalConditionSuitableForUse == true;
+        RestoreManualCheckStatuses();
         UpdateUsbPortUi();
         _loadingSharedQaSession = false;
         _sharedQaSessionLoaded = true;
@@ -156,6 +153,34 @@ public sealed partial class MainWindow : Window
         CheckForQaCompletionCelebration();
     }
 
+    private void TrackpadPassButton_Click(object? sender, RoutedEventArgs e) => SetManualCheckResult("Trackpad", true, "Trackpad Working");
+    private void TrackpadFailButton_Click(object? sender, RoutedEventArgs e) => SetManualCheckResult("Trackpad", false, "Trackpad Working");
+    private void PhysicalConditionPassButton_Click(object? sender, RoutedEventArgs e) => SetManualCheckResult("PhysicalCondition", true, "Checked Physical Condition");
+    private void PhysicalConditionFailButton_Click(object? sender, RoutedEventArgs e) => SetManualCheckResult("PhysicalCondition", false, "Checked Physical Condition");
+
+    private void SetManualCheckResult(string key, bool passed, string label)
+    {
+        if (key == "Trackpad") _cache.TrackpadState = passed ? "Ok" : "Bad";
+        else _cache.PhysicalConditionState = passed ? "Ok" : "Bad";
+        RestoreManualCheckStatuses();
+        AddActivity("Physical Checks", $"{label} marked {(passed ? "Pass" : "Fail")}.");
+        SaveSharedQaSession();
+        CheckForQaCompletionCelebration();
+    }
+
+    private void RestoreManualCheckStatuses()
+    {
+        _cache.TrackpadState = FinalState(_cache.TrackpadState, _cache.FinalTrackpadWorking);
+        _cache.PhysicalConditionState = FinalState(_cache.PhysicalConditionState, _cache.FinalConditionSuitableForUse);
+        TrackpadStatus.Text = Symbol(_cache.TrackpadState);
+        PhysicalConditionStatus.Text = Symbol(_cache.PhysicalConditionState);
+    }
+
+    private static string FinalState(string? state, bool? legacyValue) =>
+        state is "Ok" or "Bad" or "Ignored" ? state : legacyValue == true ? "Ok" : "Waiting";
+
+    private static string Symbol(string? state) => state switch { "Ok" => "✓", "Bad" => "!", _ => "-" };
+
     private bool IsQaComplete()
     {
         static bool IsFinalResult(string? state) => state is "Ok" or "Bad" or "Ignored";
@@ -166,12 +191,12 @@ public sealed partial class MainWindow : Window
                                   (_diagnostics.State == "Warning" &&
                                    !_diagnostics.MainText.Contains("not found", StringComparison.OrdinalIgnoreCase) &&
                                    !_diagnostics.MainText.Contains("unavailable", StringComparison.OrdinalIgnoreCase));
-        var finalChecksComplete = TrackpadCheck.IsChecked == true &&
+        var finalChecksComplete = IsFinalResult(_cache.TrackpadState) &&
                                   HashGroupTagCheck.IsChecked == true &&
                                   RemovedUserCheck.IsChecked == true &&
                                   StockroomsCheck.IsChecked == true &&
                                   CleanedCheck.IsChecked == true &&
-                                  ConditionSuitableCheck.IsChecked == true;
+                                  IsFinalResult(_cache.PhysicalConditionState);
         var usbPortsComplete = _cache.UsbPorts.Count == 0 ||
                                (_cache.UsbPortTestFinished && _cache.UsbPorts.All(port => port.Passed || port.Failed));
         return testsComplete && diagnosticsComplete && usbPortsComplete && finalChecksComplete;
@@ -324,9 +349,9 @@ public sealed partial class MainWindow : Window
             _cache.FinalHashGroupTag = HashGroupTagCheck.IsChecked;
             _cache.FinalCleanedLaptop = CleanedCheck.IsChecked;
             _cache.FinalUpdateStockrooms = StockroomsCheck.IsChecked;
-            _cache.FinalTrackpadWorking = TrackpadCheck.IsChecked;
+            _cache.FinalTrackpadWorking = _cache.TrackpadState == "Ok";
             _cache.FinalDeletedUser = RemovedUserCheck.IsChecked;
-            _cache.FinalConditionSuitableForUse = ConditionSuitableCheck.IsChecked;
+            _cache.FinalConditionSuitableForUse = _cache.PhysicalConditionState == "Ok";
             _cache.RmaIssues = RmaIssuesBox.Text ?? "";
             _cache.RepairNotes = RepairNotesBox.Text ?? "";
             _storage.SaveSharedQaEdits(_cache);
@@ -390,9 +415,8 @@ public sealed partial class MainWindow : Window
         HashGroupTagCheck.IsChecked = _cache.FinalHashGroupTag == true;
         CleanedCheck.IsChecked = _cache.FinalCleanedLaptop == true;
         StockroomsCheck.IsChecked = _cache.FinalUpdateStockrooms == true;
-        TrackpadCheck.IsChecked = _cache.FinalTrackpadWorking == true;
         RemovedUserCheck.IsChecked = _cache.FinalDeletedUser == true;
-        ConditionSuitableCheck.IsChecked = _cache.FinalConditionSuitableForUse == true;
+        RestoreManualCheckStatuses();
         UpdateUsbPortUi();
         _loadingSharedQaSession = false;
         _sharedQaCacheWriteUtc = currentWriteUtc;

@@ -96,6 +96,8 @@ public sealed class WindowsQaSessionCache
     public bool? FinalTrackpadWorking { get; set; }
     public bool? FinalDeletedUser { get; set; }
     public bool? FinalConditionSuitableForUse { get; set; }
+    public string TrackpadState { get; set; } = "Waiting";
+    public string PhysicalConditionState { get; set; } = "Waiting";
     public bool UsbPortTestFinished { get; set; }
     public List<UsbPortCache> UsbPorts { get; set; } = new();
     public string RmaIssues { get; set; } = "";

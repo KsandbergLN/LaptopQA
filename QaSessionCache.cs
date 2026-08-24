@@ -47,6 +47,10 @@ public sealed class QaSessionCache
 
 	public bool? FinalConditionSuitableForUse { get; set; }
 
+	public string TrackpadState { get; set; } = "Waiting";
+
+	public string PhysicalConditionState { get; set; } = "Waiting";
+
 	public bool UsbPortTestFinished { get; set; }
 
 	public bool StepsOneThroughSevenCompletionPromptShown { get; set; }

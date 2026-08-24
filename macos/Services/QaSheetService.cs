@@ -156,9 +156,10 @@ public static class QaSheetService
             new("6", T("Dell preboot diagnostics"), d.Diagnostics.State, T(string.IsNullOrWhiteSpace(d.Diagnostics.DetailText) ? "Diagnostics log not found." : d.Diagnostics.DetailText)),
             new("7", T("USB ports verified"), usbState, usbDetail),
             new("", T("Battery health checked"), BatteryState(d.Hardware.Battery), T(string.IsNullOrWhiteSpace(d.Hardware.Battery) ? "Battery information unavailable in Windows cache" : d.Hardware.Battery)),
-            Check("8", "Hash and group tag checked", d.HashGroupTag, d.Config.AppLanguage), Check("8", "Laptop cleaned", d.Cleaned, d.Config.AppLanguage),
-            Check("8", "Removed User from Laptop in Intune", d.RemovedUser, d.Config.AppLanguage), Check("8", "Update Stockrooms", d.Stockrooms, d.Config.AppLanguage), Check("8", "Trackpad working", d.Trackpad, d.Config.AppLanguage),
-            Check("8", "Checked physical condition", d.ConditionSuitable, d.Config.AppLanguage)
+            ManualCheck("8", "Trackpad working", d.Cache.TrackpadState, d.Trackpad, d.Config.AppLanguage),
+            ManualCheck("8", "Checked physical condition", d.Cache.PhysicalConditionState, d.ConditionSuitable, d.Config.AppLanguage),
+            Check("9", "Hash and group tag checked", d.HashGroupTag, d.Config.AppLanguage), Check("9", "Laptop cleaned", d.Cleaned, d.Config.AppLanguage),
+            Check("9", "Removed User from Laptop in Intune", d.RemovedUser, d.Config.AppLanguage), Check("9", "Update Stockrooms", d.Stockrooms, d.Config.AppLanguage)
         ];
     }
 
@@ -183,6 +184,19 @@ public static class QaSheetService
     private static RowData Check(string number, string task, bool value, string languageCode) =>
         new(number, UiLocalization.Text(languageCode, task), value ? "Ok" : "Waiting",
             UiLocalization.Text(languageCode, value ? $"{task} checked off." : "Not checked off."));
+
+    private static RowData ManualCheck(string number, string task, string? state, bool legacyValue, string languageCode)
+    {
+        var result = state is "Ok" or "Bad" or "Ignored" ? state : legacyValue ? "Ok" : "Waiting";
+        var detail = result switch
+        {
+            "Ok" => $"{task} passed.",
+            "Bad" => $"{task} failed.",
+            "Ignored" => $"{task} was ignored.",
+            _ => "Not checked yet."
+        };
+        return new(number, UiLocalization.Text(languageCode, task), result, UiLocalization.Text(languageCode, detail));
+    }
     private static SKTypeface Typeface(string family, SKFontStyle? style = null) => SKTypeface.FromFamilyName(family, style ?? SKFontStyle.Normal) ?? SKTypeface.Default;
     private sealed class TextStyle(float size, SKColor color, SKTypeface face) : IDisposable
     {
