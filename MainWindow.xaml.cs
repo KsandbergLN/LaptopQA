@@ -348,9 +348,7 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private string ConfigPath => Path.Combine(_dataRoot, "Laptop-QA-Config.json");
 
-	private string CctkExe => Path.Combine(_appRoot, "tools", "cctk", "cctk.exe");
-
-	private string CctkHapiInstaller => Path.Combine(_appRoot, "tools", "cctk", "HAPI", "hapint.exe");
+	private string CctkExe => Path.Combine(_appRoot, "tools", "dell-command-configure", "cctk.exe");
 
 	private string AudioScript => Path.Combine(_appRoot, "tools", "Pnp-AudioDevices.ps1");
 
@@ -1129,13 +1127,13 @@ public partial class MainWindow : Window, IComponentConnector
 		{
 			if (!File.Exists(CctkExe))
 			{
-				throw new FileNotFoundException("Dell CCTK was not found in the Laptop QA tools folder.", CctkExe);
+				throw new FileNotFoundException("Dell Command | Configure was not found in the Laptop QA tools folder.", CctkExe);
 			}
-			AddActivity("Asset Tag", "Asset tag write requested through Dell CCTK.");
+			AddActivity("Asset Tag", "Asset tag write requested through Dell Command | Configure 5.2.2.");
 			int exitCode = await WriteCctkAssetTagAsync(assetTag);
 			if (exitCode != 0)
 			{
-				throw new InvalidOperationException("Dell CCTK exited with code " + exitCode + ".");
+				throw new InvalidOperationException(DescribeCctkFailure(exitCode));
 			}
 			await Task.Delay(750);
 			Dictionary<string, string> identity = await GetHeaderAsync();
@@ -1173,7 +1171,7 @@ public partial class MainWindow : Window, IComponentConnector
 		});
 		content.Children.Add(new TextBlock
 		{
-			Text = "Laptop QA will use Dell CCTK and request administrator approval. Asset tags may contain up to 10 characters and cannot contain spaces.",
+			Text = "Laptop QA will use Dell Command | Configure and request administrator approval. Asset tags may contain up to 10 characters and cannot contain spaces.",
 			Foreground = (Brush)FindResource("MutedBrush"),
 			FontSize = 13.0,
 			TextWrapping = TextWrapping.Wrap,
@@ -1240,23 +1238,20 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private async Task<int> WriteCctkAssetTagAsync(string assetTag)
 	{
-		int exitCode = await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
-		if (exitCode != 147)
-		{
-			return exitCode;
-		}
-		if (!File.Exists(CctkHapiInstaller))
-		{
-			throw new FileNotFoundException("Dell CCTK could not load its HAPI driver, and the bundled HAPI installer was not found.", CctkHapiInstaller);
-		}
-		AddActivity("Asset Tag", "Dell CCTK reported HAPI driver load error 147. Installing the bundled HAPI driver and retrying once.");
-		int hapiExitCode = await RunElevatedProcessForExitCodeAsync(CctkHapiInstaller, new[] { "-i", "-k", "C-C-T-K", "-p", "hapint.exe" }, 45);
-		if (hapiExitCode != 0)
-		{
-			throw new InvalidOperationException("Dell HAPI driver installation failed with code " + hapiExitCode + ".");
-		}
-		await Task.Delay(750);
 		return await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
+	}
+
+	private static string DescribeCctkFailure(int exitCode)
+	{
+		if (exitCode == 147)
+		{
+			return "Dell Command | Configure could not load its BIOS driver (code 147). Restart Windows once, then try again. If it still fails, reinstall Dell Command | Configure.";
+		}
+		if (exitCode == unchecked((int)0xC0000374))
+		{
+			return "Dell Command | Configure stopped unexpectedly because of a memory error (0xC0000374). Restart Windows and try again. If it repeats, send the Laptop QA error log to support.";
+		}
+		return "Dell Command | Configure exited with code " + exitCode + ".";
 	}
 
 	private bool ShowThemedConfirmation(string title, string message, string confirmText)
