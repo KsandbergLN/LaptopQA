@@ -1098,7 +1098,7 @@ public partial class MainWindow : Window, IComponentConnector
 			HeaderAssetBubble.Background = Brushes.Transparent;
 			HeaderAssetBubble.BorderBrush = Brushes.Transparent;
 			HeaderAsset.Foreground = (Brush)FindResource("MutedBrush");
-			HeaderAsset.FontWeight = FontWeights.Normal;
+			HeaderAsset.FontWeight = FontWeights.SemiBold;
 			HeaderAsset.ToolTip = "Click to review or change the BIOS asset tag.";
 		}
 	}
