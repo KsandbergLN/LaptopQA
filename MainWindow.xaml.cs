@@ -350,6 +350,8 @@ public partial class MainWindow : Window, IComponentConnector
 
 	private string CctkExe => Path.Combine(_appRoot, "tools", "cctk", "cctk.exe");
 
+	private string CctkHapiInstaller => Path.Combine(_appRoot, "tools", "cctk", "HAPI", "hapint.exe");
+
 	private string AudioScript => Path.Combine(_appRoot, "tools", "Pnp-AudioDevices.ps1");
 
 	private string AutopilotHashScript => Path.Combine(_appRoot, "tools", "Get-WindowsAutoPilotInfo.ps1");
@@ -1130,7 +1132,7 @@ public partial class MainWindow : Window, IComponentConnector
 				throw new FileNotFoundException("Dell CCTK was not found in the Laptop QA tools folder.", CctkExe);
 			}
 			AddActivity("Asset Tag", "Asset tag write requested through Dell CCTK.");
-			int exitCode = await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
+			int exitCode = await WriteCctkAssetTagAsync(assetTag);
 			if (exitCode != 0)
 			{
 				throw new InvalidOperationException("Dell CCTK exited with code " + exitCode + ".");
@@ -1234,6 +1236,27 @@ public partial class MainWindow : Window, IComponentConnector
 		close.Click += delegate { dialog.Close(); };
 		content.Children.Add(close);
 		dialog.ShowDialog();
+	}
+
+	private async Task<int> WriteCctkAssetTagAsync(string assetTag)
+	{
+		int exitCode = await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
+		if (exitCode != 147)
+		{
+			return exitCode;
+		}
+		if (!File.Exists(CctkHapiInstaller))
+		{
+			throw new FileNotFoundException("Dell CCTK could not load its HAPI driver, and the bundled HAPI installer was not found.", CctkHapiInstaller);
+		}
+		AddActivity("Asset Tag", "Dell CCTK reported HAPI driver load error 147. Installing the bundled HAPI driver and retrying once.");
+		int hapiExitCode = await RunElevatedProcessForExitCodeAsync(CctkHapiInstaller, new[] { "-i", "-k", "C-C-T-K", "-p", "hapint.exe" }, 45);
+		if (hapiExitCode != 0)
+		{
+			throw new InvalidOperationException("Dell HAPI driver installation failed with code " + hapiExitCode + ".");
+		}
+		await Task.Delay(750);
+		return await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
 	}
 
 	private bool ShowThemedConfirmation(string title, string message, string confirmText)
