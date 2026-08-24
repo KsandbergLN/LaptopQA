@@ -1,6 +1,6 @@
 # Laptop QA
 
-![Laptop QA application](assets/laptop-qa-app.png)
+![Laptop QA application](assets/laptop-qa-app-20260824.png)
 
 Laptop QA contains two supported technician applications:
 
