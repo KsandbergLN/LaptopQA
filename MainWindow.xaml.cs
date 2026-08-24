@@ -1100,6 +1100,145 @@ public partial class MainWindow : Window, IComponentConnector
 		return true;
 	}
 
+	private async void HeaderAsset_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+	{
+		e.Handled = true;
+		if (!IsMissingAssetTag(_assetTag))
+		{
+			ShowTransientNotification("This laptop already has an asset tag.");
+			return;
+		}
+		string? assetTag = ShowAssetTagEntryDialog();
+		if (string.IsNullOrWhiteSpace(assetTag))
+		{
+			return;
+		}
+		try
+		{
+			if (!File.Exists(CctkExe))
+			{
+				throw new FileNotFoundException("Dell CCTK was not found in the Laptop QA tools folder.", CctkExe);
+			}
+			AddActivity("Asset Tag", "Asset tag write requested through Dell CCTK.");
+			int exitCode = await RunElevatedProcessForExitCodeAsync(CctkExe, new[] { "--asset=" + assetTag }, 45);
+			if (exitCode != 0)
+			{
+				throw new InvalidOperationException("Dell CCTK exited with code " + exitCode + ".");
+			}
+			await Task.Delay(750);
+			Dictionary<string, string> identity = await GetHeaderAsync();
+			string writtenTag = identity.GetValueOrDefault("Asset", "").Trim();
+			if (IsMissingAssetTag(writtenTag) || !string.Equals(writtenTag, assetTag, StringComparison.OrdinalIgnoreCase))
+			{
+				throw new InvalidOperationException("CCTK completed, but the BIOS did not report the expected asset tag after the write.");
+			}
+			_assetTag = writtenTag;
+			_hardware.ChassisAssetTag = writtenTag;
+			UpdateAssetHeader();
+			SaveQaSessionCache();
+			AddActivity("Asset Tag", "BIOS asset tag was written and verified: " + writtenTag + ".");
+			ShowTransientNotification("Asset tag saved and verified: " + writtenTag + ".");
+		}
+		catch (Exception ex)
+		{
+			AddActivity("Asset Tag", "Asset tag write failed: " + ex.Message);
+			ShowThemedNotice("Set Asset Tag", "The asset tag could not be written.\n\n" + ex.Message);
+		}
+	}
+
+	private string? ShowAssetTagEntryDialog()
+	{
+		string? result = null;
+		Window dialog = CreateThemedDialog("Set Asset Tag", 460.0);
+		StackPanel content = (StackPanel)((Border)dialog.Content).Child;
+		content.Children.Add(new TextBlock
+		{
+			Text = "Set the missing BIOS asset tag",
+			Foreground = (Brush)FindResource("TextBrush"),
+			FontSize = 21.0,
+			FontWeight = FontWeights.Bold,
+			Margin = new Thickness(0.0, 0.0, 0.0, 10.0)
+		});
+		content.Children.Add(new TextBlock
+		{
+			Text = "Laptop QA will use Dell CCTK and request administrator approval. Asset tags may contain up to 10 characters and cannot contain spaces.",
+			Foreground = (Brush)FindResource("MutedBrush"),
+			FontSize = 13.0,
+			TextWrapping = TextWrapping.Wrap,
+			Margin = new Thickness(0.0, 0.0, 0.0, 16.0)
+		});
+		TextBox input = new TextBox
+		{
+			MaxLength = 10,
+			FontSize = 16.0,
+			FontWeight = FontWeights.SemiBold,
+			Padding = new Thickness(12.0, 8.0, 12.0, 8.0),
+			Background = (Brush)FindResource("NoteInputBrush"),
+			Foreground = (Brush)FindResource("TextBrush"),
+			BorderBrush = (Brush)FindResource("PanelStroke"),
+			BorderThickness = new Thickness(1.0)
+		};
+		content.Children.Add(input);
+		TextBlock validation = new TextBlock
+		{
+			Foreground = BrushFromHex((_currentTheme == "Light") ? "#9E2F37" : "#FCA5A5"),
+			FontSize = 11.5,
+			TextWrapping = TextWrapping.Wrap,
+			MinHeight = 20.0,
+			Margin = new Thickness(0.0, 7.0, 0.0, 12.0)
+		};
+		content.Children.Add(validation);
+		StackPanel buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
+		Button cancel = ThemedDialogButton("Cancel", false);
+		Button save = ThemedDialogButton("Set Asset Tag", true);
+		cancel.Margin = new Thickness(0.0, 0.0, 10.0, 0.0);
+		cancel.Click += delegate { dialog.Close(); };
+		save.Click += delegate
+		{
+			string value = input.Text.Trim();
+			if (string.IsNullOrWhiteSpace(value) || value.Length > 10 || value.Any(char.IsWhiteSpace))
+			{
+				validation.Text = "Enter an asset tag of 1-10 characters with no spaces.";
+				return;
+			}
+			result = value;
+			dialog.DialogResult = true;
+			dialog.Close();
+		};
+		buttons.Children.Add(cancel);
+		buttons.Children.Add(save);
+		content.Children.Add(buttons);
+		dialog.Loaded += delegate { input.Focus(); };
+		dialog.ShowDialog();
+		return result;
+	}
+
+	private void ShowThemedNotice(string title, string message)
+	{
+		Window dialog = CreateThemedDialog(title, 500.0);
+		StackPanel content = (StackPanel)((Border)dialog.Content).Child;
+		content.Children.Add(new TextBlock { Text = title, Foreground = (Brush)FindResource("TextBrush"), FontSize = 21.0, FontWeight = FontWeights.Bold, Margin = new Thickness(0.0, 0.0, 0.0, 12.0) });
+		content.Children.Add(new TextBlock { Text = message, Foreground = (Brush)FindResource("MutedBrush"), FontSize = 13.0, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0.0, 0.0, 0.0, 20.0) });
+		Button close = ThemedDialogButton("Close", true);
+		close.HorizontalAlignment = HorizontalAlignment.Right;
+		close.Click += delegate { dialog.Close(); };
+		content.Children.Add(close);
+		dialog.ShowDialog();
+	}
+
+	private Window CreateThemedDialog(string title, double width)
+	{
+		Window dialog = new Window { Title = title, Width = width, SizeToContent = SizeToContent.Height, WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize, AllowsTransparency = true, Background = Brushes.Transparent, Owner = this, WindowStartupLocation = WindowStartupLocation.CenterOwner, ShowInTaskbar = false, Topmost = Topmost };
+		Border card = new Border { Margin = new Thickness(18.0), Padding = new Thickness(26.0, 24.0, 26.0, 22.0), CornerRadius = new CornerRadius(18.0), Background = (Brush)FindResource("GlassPanelBrush"), BorderBrush = (Brush)FindResource("PanelStroke"), BorderThickness = new Thickness(1.0), Effect = new DropShadowEffect { BlurRadius = 24.0, ShadowDepth = 6.0, Opacity = 0.28, Color = Colors.Black }, Child = new StackPanel() };
+		dialog.Content = card;
+		return dialog;
+	}
+
+	private Button ThemedDialogButton(string text, bool primary)
+	{
+		return new Button { Content = text, MinWidth = primary ? 112.0 : 84.0, Height = 34.0, Foreground = primary ? BrushFromHex((_currentTheme == "Light") ? "#17313A" : "#FFFFFF") : (Brush)FindResource("TextBrush"), Background = primary ? (Brush)FindResource("PrimaryButtonBrush") : (Brush)FindResource("NoteInputBrush"), BorderBrush = (Brush)FindResource("PanelStroke"), BorderThickness = new Thickness(1.0), FontWeight = FontWeights.SemiBold, Padding = new Thickness(12.0, 6.0, 12.0, 6.0), Template = ButtonChrome.RoundedTemplate() };
+	}
+
 	private static string HeaderBatteryValue(string summary)
 	{
 		if (string.IsNullOrWhiteSpace(summary))
@@ -6701,6 +6840,34 @@ $items = @(
 	private async Task RunProcessAsync(string file, string args, int timeoutSeconds)
 	{
 		await RunProcessCaptureAsync(file, args, timeoutSeconds);
+	}
+
+	private static async Task<int> RunElevatedProcessForExitCodeAsync(string file, IEnumerable<string> arguments, int timeoutSeconds)
+	{
+		ProcessStartInfo start = new ProcessStartInfo(file)
+		{
+			UseShellExecute = true,
+			Verb = "runas",
+			WorkingDirectory = Path.GetDirectoryName(file) ?? Environment.CurrentDirectory
+		};
+		foreach (string argument in arguments)
+		{
+			start.ArgumentList.Add(argument);
+		}
+		using Process process = Process.Start(start) ?? throw new InvalidOperationException("Could not start Dell CCTK.");
+		bool completed = await Task.Run(() => process.WaitForExit(timeoutSeconds * 1000));
+		if (!completed)
+		{
+			try
+			{
+				process.Kill(entireProcessTree: true);
+			}
+			catch
+			{
+			}
+			throw new TimeoutException("Dell CCTK timed out while setting the asset tag.");
+		}
+		return process.ExitCode;
 	}
 
 	private static Task<string> RunProcessCaptureAsync(string file, IEnumerable<string> arguments, int timeoutSeconds)
