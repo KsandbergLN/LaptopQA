@@ -94,7 +94,7 @@
               <CheckBox Grid.Row="5" x:Name="CleanedCheck" Content="Cleaned Laptop" FontSize="12.5" Padding="4" ToolTip.Tip="Confirm the laptop was physically cleaned."/>
               <CheckBox Grid.Row="6" x:Name="ConditionSuitableCheck" FontSize="12.5" Padding="4" ToolTip.Tip="Confirm the laptop's overall physical condition is suitable for its intended use.">
                 <Viewbox Width="270" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
-                  <TextBlock Text="Checked Physical Condition Is Suitable for Use" FontSize="12.5" FontWeight="SemiBold"/>
+                  <TextBlock Text="Checked Physical Condition" FontSize="12.5" FontWeight="SemiBold"/>
                 </Viewbox>
               </CheckBox>
             </Grid>

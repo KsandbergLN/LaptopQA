@@ -4065,7 +4065,7 @@ $items = @(
 			new QaRenderRow("8", L("Removed User from Laptop in Intune"), text3, L((text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off.")),
 			new QaRenderRow("8", L("Update Stockrooms"), text4, L((text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated.")),
 			new QaRenderRow("8", L("Trackpad working"), text5, L((text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off.")),
-			new QaRenderRow("8", L("Checked physical condition is suitable for use"), text6, L((text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."))
+			new QaRenderRow("8", L("Checked physical condition"), text6, L((text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."))
 		};
 		string StateFor(string key, string fallback = "Waiting")
 		{
@@ -7016,7 +7016,7 @@ $items = @(
 			("8", "Removed User from Laptop in Intune", text3, (text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off."),
 			("8", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated."),
 			("8", "Trackpad working", text5, (text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off."),
-			("8", "Checked physical condition is suitable for use", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use.")
+			("8", "Checked physical condition", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use.")
 		};
 		string text7 = (source.Any(((string, string, string, string) r) => r.Item3 == "Bad") ? "Needs Attention" : (source.Any(((string, string, string, string) r) => r.Item3 == "Warning") ? "Warning" : (source.All(((string, string, string, string) r) => r.Item3 == "Ok" || r.Item3 == "Ignored") ? "Passed" : "Incomplete")));
 		string value = ((text7 == "Passed") ? "overall-pass" : ((text7 == "Needs Attention") ? "overall-fail" : "overall-incomplete"));

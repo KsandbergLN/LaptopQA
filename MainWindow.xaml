@@ -532,7 +532,7 @@
                             <CheckBox x:Name="FinalCleanedLaptopCheck" Content="Cleaned Laptop" Canvas.Left="24" Canvas.Top="165" Width="142" Height="26" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the laptop was physically cleaned." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
                             <CheckBox x:Name="FinalConditionSuitableCheck" Canvas.Left="24" Canvas.Top="193" Width="270" Height="26" Style="{StaticResource FinalCheckToggle}" FontSize="12.5" ToolTip="Confirm the laptop's overall physical condition is suitable for its intended use." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed">
                                 <Viewbox Width="300" Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
-                                    <TextBlock Text="Checked Physical Condition Is Suitable for Use" FontSize="12.5" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Checked Physical Condition" FontSize="12.5" FontWeight="SemiBold"/>
                                 </Viewbox>
                             </CheckBox>
                         </Canvas>

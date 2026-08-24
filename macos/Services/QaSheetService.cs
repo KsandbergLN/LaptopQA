@@ -158,7 +158,7 @@ public static class QaSheetService
             new("", T("Battery health checked"), BatteryState(d.Hardware.Battery), T(string.IsNullOrWhiteSpace(d.Hardware.Battery) ? "Battery information unavailable in Windows cache" : d.Hardware.Battery)),
             Check("8", "Hash and group tag checked", d.HashGroupTag, d.Config.AppLanguage), Check("8", "Laptop cleaned", d.Cleaned, d.Config.AppLanguage),
             Check("8", "Removed User from Laptop in Intune", d.RemovedUser, d.Config.AppLanguage), Check("8", "Update Stockrooms", d.Stockrooms, d.Config.AppLanguage), Check("8", "Trackpad working", d.Trackpad, d.Config.AppLanguage),
-            Check("8", "Checked physical condition is suitable for use", d.ConditionSuitable, d.Config.AppLanguage)
+            Check("8", "Checked physical condition", d.ConditionSuitable, d.Config.AppLanguage)
         ];
     }
 
