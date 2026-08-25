@@ -6,4 +6,4 @@ Repository scope includes the local `Shared`, launcher, drive-marker, and `tools
 
 Do not edit `bin`, `obj`, `dist`, or separately stored historical/recovery copies. Build candidates with `Build-LaptopQAIteration.ps1`; accept them with `Approve-LaptopQAPackage.ps1`; deploy them with `Deploy-LaptopQAPackage.ps1`.
 
-Laptop QA is a guided technician workflow for preparing, testing, and documenting Windows laptops. It combines hardware and diagnostics checks, BIOS and USB workflows, device-hash and final-check links, QA-sheet output, and ServiceNow preparation, with a macOS companion for continuing the cached Windows session from step 8.
+Laptop QA is a guided technician workflow for preparing, testing, and documenting Windows laptops. It combines hardware and diagnostics checks, BIOS and USB workflows, device-condition checks, device-hash upload, final-check links, QA-sheet output, and ServiceNow preparation, with a macOS companion for continuing the cached Windows session from step 8.
