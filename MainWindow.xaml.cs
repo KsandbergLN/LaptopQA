@@ -2287,10 +2287,9 @@ public partial class MainWindow : Window, IComponentConnector
 	{
 		if (string.IsNullOrWhiteSpace(warrantyText))
 		{
-			return "unavailable X";
+			return "unavailable";
 		}
-		string trimmed = warrantyText.Trim();
-		return trimmed + (IsWarrantyCurrent(trimmed) ? " \u2713" : " X");
+		return warrantyText.Trim();
 	}
 
 	private string WarrantyToolTipText()
