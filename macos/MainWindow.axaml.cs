@@ -105,7 +105,7 @@ public sealed partial class MainWindow : Window
         UpdateDeviceNameHeader();
         HeaderSerial.Text = T(string.IsNullOrWhiteSpace(_hardware.SerialNumber) ? "Service Tag:" : $"Service Tag: {_hardware.SerialNumber}");
         HeaderAsset.Text = T(string.IsNullOrWhiteSpace(_hardware.AssetTag) ? "Asset:" : $"Asset: {_hardware.AssetTag}");
-        HeaderWarranty.Text = T(string.IsNullOrWhiteSpace(_hardware.Warranty) ? "Warranty:" : $"Warranty: {WarrantyDisplayText(_hardware.Warranty)}");
+        UpdateWarrantyHeader();
         UpdateBatteryHealthDisplay();
         HardwareBox.Text = _hardware.Summary;
         RmaIssuesBox.Text = _cache.RmaIssues;
@@ -697,19 +697,36 @@ public sealed partial class MainWindow : Window
         return card;
     }
 
-    private static string WarrantyDisplayText(string? warrantyText)
+    private void UpdateWarrantyHeader()
     {
-        if (string.IsNullOrWhiteSpace(warrantyText)) return "unavailable X";
-        var trimmed = warrantyText.Trim();
-        return trimmed + (IsWarrantyCurrent(trimmed) ? " \u2713" : " X");
+        var value = WarrantyDisplayText(_hardware.Warranty);
+        var current = IsWarrantyCurrent(_hardware.Warranty);
+        HeaderWarranty.Text = T($"Warranty: {value}");
+        HeaderWarrantyStatus.Text = current.HasValue ? (current.Value ? "✓" : "X") : "";
+        HeaderWarrantyStatus.Foreground = Brush.Parse(current == true
+            ? (_config.AppTheme.Equals("Light", StringComparison.OrdinalIgnoreCase) ? "#16834A" : "#55D98B")
+            : current == false
+                ? (_config.AppTheme.Equals("Light", StringComparison.OrdinalIgnoreCase) ? "#C7353F" : "#FF8E96")
+                : (_config.AppTheme.Equals("Light", StringComparison.OrdinalIgnoreCase) ? "#1D323C" : "#B9C7CB"));
+        ToolTip.SetTip(HeaderWarranty, current switch
+        {
+            true => "Warranty is active through " + value + ".",
+            false => "Warranty expired on " + value + ".",
+            _ => "Warranty date is unavailable."
+        });
+        ToolTip.SetTip(HeaderWarrantyStatus, ToolTip.GetTip(HeaderWarranty));
     }
 
-    private static bool IsWarrantyCurrent(string warrantyText)
+    private static string WarrantyDisplayText(string? warrantyText) =>
+        string.IsNullOrWhiteSpace(warrantyText) ? "unavailable" : warrantyText.Trim();
+
+    private static bool? IsWarrantyCurrent(string? warrantyText)
     {
+        if (string.IsNullOrWhiteSpace(warrantyText)) return null;
         var formats = new[] { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "M/d/yy", "MM/dd/yy" };
-        return DateTime.TryParseExact(warrantyText.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
-               ? date.Date >= DateTime.Today
-               : DateTime.TryParse(warrantyText, out date) && date.Date >= DateTime.Today;
+        if (DateTime.TryParseExact(warrantyText.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var exact))
+            return exact.Date >= DateTime.Today;
+        return DateTime.TryParse(warrantyText, out var parsed) ? parsed.Date >= DateTime.Today : null;
     }
 
     private async void DiagnosticsBrowseButton_Click(object? sender, RoutedEventArgs e)
@@ -1042,6 +1059,7 @@ public sealed partial class MainWindow : Window
         Resources["ActivityTabBrush"] = Brush.Parse(Pick("#B8C8CB", "#526973", "#2E2E2E")); Resources["HardwareTabBrush"] = Brush.Parse(Pick("#AFC1C5", "#49636C", "#242424"));
         Resources["ShellBrush"] = new LinearGradientBrush { StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative), EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative), GradientStops = new GradientStops { new(Color.Parse(Pick("#FAFAF6", "#253640", "#000000")), 0), new(Color.Parse(Pick("#F0F1EC", "#314A55", "#000000")), .58), new(Color.Parse(Pick("#E3E6E0", "#526A70", "#090909")), 1) } };
         WavePath.Fill = Brush.Parse(Pick("#28A4AFB8", "#3510394A", "#18000000"));
+        if (HeaderWarrantyStatus is not null) UpdateWarrantyHeader();
         if (UsbPortIndicatorsPanel is not null) UpdateUsbPortUi();
     }
 
@@ -1108,8 +1126,8 @@ public sealed partial class MainWindow : Window
     private async void UpdateStockroomsButton_Click(object? sender, RoutedEventArgs e) =>
         await OpenFinalCheckLinkAsync(_config.UpdateStockroomsUrl, DefaultUpdateStockroomsUrl, "Update Stockrooms", "ServiceNow");
 
-    private const string DefaultCheckHashAndGroupTagUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
-    private const string DefaultRemoveUserFromIntuneUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+    private const string DefaultCheckHashAndGroupTagUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+    private const string DefaultRemoveUserFromIntuneUrl = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
     private const string DefaultUpdateStockroomsUrl = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
 
     private async Task OpenFinalCheckLinkAsync(string? configuredUrl, string defaultUrl, string actionName, string destination)
