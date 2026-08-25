@@ -520,7 +520,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="PhysicalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="96">
+                    <Border x:Name="PhysicalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="102">
                         <Canvas>
                             <TextBlock Text="8. Device Condition" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <TextBlock x:Name="TrackpadIcon" Text="-" Canvas.Left="27" Canvas.Top="42" Width="18" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="17" FontWeight="Bold"/>
@@ -535,7 +535,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="FinalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="336" Width="396" Height="170">
+                    <Border x:Name="FinalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="342" Width="396" Height="170">
                         <Canvas>
                             <TextBlock Text="9. Final Checks" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <CheckBox x:Name="FinalDeletedUserCheck" Content="" Canvas.Left="24" Canvas.Top="45" Width="24" Height="28" Style="{StaticResource FinalCheckToggle}" ToolTip="Mark this complete after removing the laptop from Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
@@ -548,7 +548,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="QaOutputPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="518" Width="396" Height="64">
+                    <Border x:Name="QaOutputPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="524" Width="396" Height="64">
                         <Canvas>
                             <TextBlock Text="10. QA Output" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="QaSheetButton" Content="QA Sheet" Canvas.Left="190" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Generate and open the QA sheet PNG." Click="QaSheetButton_Click"/>
@@ -556,7 +556,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="BiosSettingsPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="594" Width="396" Height="64">
+                    <Border x:Name="BiosSettingsPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="600" Width="396" Height="64">
                         <Canvas>
                             <TextBlock Text="BIOS Settings" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="BiosLoadDefaultsButton" Content="Factory Settings" Canvas.Left="168" Canvas.Top="13" Width="96" Height="32" Style="{StaticResource PrimaryButton}" Padding="5,5" FontSize="9.8" ToolTip="Load factory BIOS defaults." Click="BiosLoadDefaultsButton_Click"/>
@@ -566,8 +566,8 @@
                         </Canvas>
                     </Border>
 
-                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="854" Canvas.Top="666" Width="170" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
-                    <Button x:Name="UploadHashButton" Content="Upload Hash" Canvas.Left="1034" Canvas.Top="666" Width="168" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Open Intune Autopilot Devices in a new tab to upload a hardware hash." Click="UploadHashButton_Click"/>
+                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="854" Canvas.Top="672" Width="170" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
+                    <Button x:Name="UploadHashButton" Content="Upload Hash" Canvas.Left="1034" Canvas.Top="672" Width="168" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Open Intune Autopilot Devices in a new tab to upload a hardware hash." Click="UploadHashButton_Click"/>
 
                     <Border x:Name="SheetNotesPanel" Style="{StaticResource GlassCard}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
                         <Canvas>
