@@ -667,9 +667,9 @@
                             <TextBlock x:Name="CurrentBatteryStatusText" Text="" Visibility="Collapsed"/>
                         </Canvas>
                     </Border>
-                    <Button x:Name="PowerButton" Canvas.Left="1208" Canvas.Top="640" Width="56" Height="56" Style="{StaticResource PowerRoundButton}" ToolTip="Power menu" Click="PowerButton_Click">
-                        <Canvas Width="32" Height="32">
-                            <TextBlock Text="&#xE7E8;" Canvas.Left="3" Canvas.Top="2" Width="26" Height="28" FontFamily="Segoe MDL2 Assets" FontSize="25" TextAlignment="Center"/>
+                    <Button x:Name="PowerButton" Canvas.Left="1218" Canvas.Top="660" Width="50" Height="50" Style="{StaticResource PowerRoundButton}" ToolTip="Power menu" Click="PowerButton_Click">
+                        <Canvas Width="28" Height="28">
+                            <TextBlock Text="&#xE7E8;" Canvas.Left="3" Canvas.Top="2" Width="22" Height="24" FontFamily="Segoe MDL2 Assets" FontSize="22" TextAlignment="Center"/>
                         </Canvas>
                     </Button>
                 </Canvas>
