@@ -2,7 +2,7 @@
 
 This guide is for technicians using the supported Windows app and macOS companion. Both apps support the Windows QA workflow; the macOS companion uses the cached session so the workflow can continue on a MacBook when preferred.
 
-Laptop QA prepares, tests, and documents Windows laptops in one guided session, covering hardware and diagnostics checks, BIOS and USB workflows, device-hash and final-check links, QA-sheet output, and ServiceNow preparation.
+Laptop QA prepares, tests, and documents Windows laptops in one guided session, covering hardware and diagnostics checks, BIOS and USB workflows, device-condition checks, device-hash upload, final-check links, QA-sheet output, and ServiceNow preparation.
 
 ## Windows workflow
 
@@ -25,10 +25,6 @@ The current Windows layout is: steps 1–7 for Windows hardware and diagnostics,
 ### When the session saves
 
 Laptop QA automatically saves the active session shortly after a button click or text change, once the session is ready. It also saves during startup, when the steps 1–7 handoff is reached, before resetting to start a new QA, and when the app closes. The active session is stored in `.runtime/qa-session.json`; searchable snapshots are kept under `.runtime/sessions` for 90 days. Keep those folders with the package so the macOS companion can load the cached Windows session.
-
-### When the session saves
-
-Laptop QA automatically saves the active session shortly after a button click or text change, once the session is ready. It also saves during startup, when the steps 1-7 handoff is reached, before resetting to start a new QA, and when the app closes. The active session is stored in `.runtime/qa-session.json`; searchable snapshots are kept under `.runtime/sessions` for 90 days. Keep those folders with the package so the macOS companion can load the cached Windows session.
 
 ## macOS companion
 
