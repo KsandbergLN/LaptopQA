@@ -4347,7 +4347,9 @@ $items = @(
 		DrawQaText(dc, value, x + 8.0, y + 23.0, valueWidth, 16.0, 11.2, BrushFromHex("#13252D"), FontWeights.Bold);
 		if (status.HasValue)
 		{
-			DrawQaText(dc, status.Value ? "✓" : "X", x + width - 28.0, y + 20.0, 18.0, 20.0, 15.0, status.Value ? BrushFromHex("#16834A") : BrushFromHex("#C7353F"), FontWeights.Bold, TextAlignment.Center);
+			FormattedText valueText = CreateQaFormattedText(value, 11.2, BrushFromHex("#13252D"), FontWeights.Bold);
+			double statusX = Math.Min(x + width - 28.0, x + 8.0 + Math.Min(valueText.Width, valueWidth) + 3.0);
+			DrawQaText(dc, status.Value ? "✓" : "X", statusX, y + 20.0, 18.0, 20.0, 15.0, status.Value ? BrushFromHex("#16834A") : BrushFromHex("#C7353F"), FontWeights.Bold, TextAlignment.Center);
 		}
 	}
 
