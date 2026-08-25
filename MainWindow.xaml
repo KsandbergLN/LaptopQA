@@ -380,10 +380,11 @@
                     <TextBlock x:Name="HeaderTitle" Text="Laptop QA Testing" Canvas.Left="54" Canvas.Top="26" Width="360" Height="42" Foreground="{DynamicResource TextBrush}" FontSize="28" FontWeight="Light" MouseLeftButtonDown="DragSurface_MouseLeftButtonDown"/>
                     <TextBox x:Name="HeaderDeviceName" Text="Device Name: loading..." Canvas.Left="56" Canvas.Top="62" Width="175" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
                     <TextBox x:Name="HeaderSerial" Text="Service Tag: loading..." Canvas.Left="235" Canvas.Top="62" Width="145" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
-                    <Border x:Name="HeaderAssetBubble" Canvas.Left="384" Canvas.Top="62" Width="145" Height="20" CornerRadius="10" Padding="0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
-                        <TextBox x:Name="HeaderAsset" Text="Asset: loading..." Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <Border x:Name="HeaderAssetBubble" Canvas.Left="384" Canvas.Top="58" Width="112" Height="24" CornerRadius="12" Padding="8,0" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
+                        <TextBox x:Name="HeaderAsset" Text="Asset: loading..." Style="{StaticResource SelectableHeaderText}" FontSize="11.5" Cursor="Hand" ToolTip="Set a missing BIOS asset tag." PreviewMouseLeftButtonDown="HeaderAsset_PreviewMouseLeftButtonDown"/>
                     </Border>
-                    <TextBox x:Name="HeaderWarranty" Text="Warranty: loading..." Canvas.Left="56" Canvas.Top="80" Width="170" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <TextBox x:Name="HeaderWarranty" Text="Warranty: loading..." Canvas.Left="56" Canvas.Top="80" Width="150" Height="20" Style="{StaticResource SelectableHeaderText}" FontSize="11.5"/>
+                    <TextBlock x:Name="HeaderWarrantyStatus" Text="" Canvas.Left="184" Canvas.Top="79" Width="18" Height="20" FontFamily="Segoe UI Symbol" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     <TextBlock x:Name="HeaderTechnician" Text="Technician: loading..." Canvas.Left="230" Canvas.Top="80" Width="190" Height="18" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                     <Border x:Name="SummaryStatusBubble" Canvas.Left="545" Canvas.Top="43" Width="190" Height="32" CornerRadius="16" Background="#D9F5E6" BorderBrush="#7CCBA0" BorderThickness="1" Padding="12,4">
                         <Border.Effect>
@@ -399,7 +400,7 @@
                               SelectionChanged="CachedSessionPicker_SelectionChanged" KeyUp="CachedSessionPicker_KeyUp" DropDownOpened="CachedSessionPicker_DropDownOpened"/>
                     <TextBlock x:Name="HeaderDateTime" Text="Loading date and time..." Canvas.Left="545" Canvas.Top="16" Width="190" Height="18"
                                Foreground="{DynamicResource MutedBrush}" FontSize="10.5" FontWeight="SemiBold" TextAlignment="Center"/>
-                    <TextBlock x:Name="HeaderBatteryDots" Text="&#x25CB;&#x25CB;&#x25CB;&#x25CB;" Canvas.Left="384" Canvas.Top="79" Width="62" Height="24" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="15" FontWeight="Bold" ToolTip="The rating and circles come from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
+                    <TextBlock x:Name="HeaderBatteryDots" Text="&#x25CB;&#x25CB;&#x25CB;&#x25CB;" Canvas.Left="384" Canvas.Top="83" Width="62" Height="20" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="15" FontWeight="Bold" ToolTip="The rating and circles come from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
                     <TextBlock x:Name="HeaderBattery" Text="Battery Health: loading..." Canvas.Left="450" Canvas.Top="82" Width="340" Height="20" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold" ToolTip="The rating comes from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
 
                     <Button x:Name="MinimizeButton" Canvas.Left="1168" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Minimize" Click="MinimizeButton_Click">
@@ -519,7 +520,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="PhysicalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="96">
+                    <Border x:Name="PhysicalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="228" Width="396" Height="102">
                         <Canvas>
                             <TextBlock Text="8. Device Condition" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <TextBlock x:Name="TrackpadIcon" Text="-" Canvas.Left="27" Canvas.Top="42" Width="18" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="17" FontWeight="Bold"/>
@@ -534,7 +535,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="FinalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="336" Width="396" Height="170">
+                    <Border x:Name="FinalChecksPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="342" Width="396" Height="170">
                         <Canvas>
                             <TextBlock Text="9. Final Checks" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <CheckBox x:Name="FinalDeletedUserCheck" Content="" Canvas.Left="24" Canvas.Top="45" Width="24" Height="28" Style="{StaticResource FinalCheckToggle}" ToolTip="Mark this complete after removing the laptop from Intune." Checked="FinalCheck_Changed" Unchecked="FinalCheck_Changed"/>
@@ -547,7 +548,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="QaOutputPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="518" Width="396" Height="64">
+                    <Border x:Name="QaOutputPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="524" Width="396" Height="64">
                         <Canvas>
                             <TextBlock Text="10. QA Output" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="QaSheetButton" Content="QA Sheet" Canvas.Left="190" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Generate and open the QA sheet PNG." Click="QaSheetButton_Click"/>
@@ -555,7 +556,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="BiosSettingsPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="594" Width="396" Height="64">
+                    <Border x:Name="BiosSettingsPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="600" Width="396" Height="64">
                         <Canvas>
                             <TextBlock Text="BIOS Settings" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="BiosLoadDefaultsButton" Content="Factory Settings" Canvas.Left="168" Canvas.Top="13" Width="96" Height="32" Style="{StaticResource PrimaryButton}" Padding="5,5" FontSize="9.8" ToolTip="Load factory BIOS defaults." Click="BiosLoadDefaultsButton_Click"/>
@@ -565,8 +566,8 @@
                         </Canvas>
                     </Border>
 
-                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="854" Canvas.Top="666" Width="170" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
-                    <Button x:Name="UploadHashButton" Content="Upload Hash" Canvas.Left="1034" Canvas.Top="666" Width="168" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Open Intune Autopilot Devices in a new tab to upload a hardware hash." Click="UploadHashButton_Click"/>
+                    <Button x:Name="HashButton" Content="Export Hash" Canvas.Left="854" Canvas.Top="672" Width="170" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Collect and save this laptop's Windows Autopilot hardware hash." Click="HashButton_Click"/>
+                    <Button x:Name="UploadHashButton" Content="Upload Hash" Canvas.Left="1034" Canvas.Top="672" Width="168" Height="32" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Open Intune Autopilot Devices in a new tab to upload a hardware hash." Click="UploadHashButton_Click"/>
 
                     <Border x:Name="SheetNotesPanel" Style="{StaticResource GlassCard}" Canvas.Left="1260" Canvas.Top="104" Width="396" Height="588" Visibility="Collapsed">
                         <Canvas>
@@ -666,9 +667,9 @@
                             <TextBlock x:Name="CurrentBatteryStatusText" Text="" Visibility="Collapsed"/>
                         </Canvas>
                     </Border>
-                    <Button x:Name="PowerButton" Canvas.Left="1208" Canvas.Top="640" Width="56" Height="56" Style="{StaticResource PowerRoundButton}" ToolTip="Power menu" Click="PowerButton_Click">
-                        <Canvas Width="32" Height="32">
-                            <TextBlock Text="&#xE7E8;" Canvas.Left="3" Canvas.Top="2" Width="26" Height="28" FontFamily="Segoe MDL2 Assets" FontSize="25" TextAlignment="Center"/>
+                    <Button x:Name="PowerButton" Canvas.Left="1218" Canvas.Top="660" Width="50" Height="50" Style="{StaticResource PowerRoundButton}" ToolTip="Power menu" Click="PowerButton_Click">
+                        <Canvas Width="28" Height="28">
+                            <TextBlock Text="&#xE7E8;" Canvas.Left="3" Canvas.Top="2" Width="22" Height="24" FontFamily="Segoe MDL2 Assets" FontSize="22" TextAlignment="Center"/>
                         </Canvas>
                     </Button>
                 </Canvas>

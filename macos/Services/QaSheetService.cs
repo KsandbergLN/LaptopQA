@@ -66,18 +66,19 @@ public static class QaSheetService
         using (var overallLabel = Paint(17, Color("#D8E8EC"), bold)) DrawText(canvas, T("OVERALL"), 1328, 77, overallLabel);
         using (var overallValue = Paint(27, SKColors.White, bold)) DrawCentered(canvas, T(overall), new SKRect(1260, 80, 1528, 132), overallValue);
 
+        var warrantyCurrent = IsWarrantyCurrent(d.Hardware.Warranty);
         var meta = new[]
         {
-            (T("Device Name"), Identifier(d)), (T("Technician"), d.Config.TechnicianName), (T("Date"), DateTime.Now.ToString("g")),
-            (T("Manufacturer"), d.Hardware.Manufacturer), (T("Model"), d.Hardware.Model), (T("Service Tag"), d.Hardware.SerialNumber),
-            (T("Asset Number"), d.Hardware.AssetTag), (T("Warranty"), WarrantyDisplayText(d.Hardware.Warranty))
+            (T("Device Name"), Identifier(d), (bool?)null), (T("Technician"), d.Config.TechnicianName, (bool?)null), (T("Date"), DateTime.Now.ToString("g"), (bool?)null),
+            (T("Manufacturer"), d.Hardware.Manufacturer, (bool?)null), (T("Model"), d.Hardware.Model, (bool?)null), (T("Service Tag"), d.Hardware.SerialNumber, (bool?)null),
+            (T("Asset Number"), d.Hardware.AssetTag, (bool?)null), (T("Warranty"), WarrantyDisplayText(d.Hardware.Warranty), warrantyCurrent)
         };
         var cellWidth = 360f;
         for (var i = 0; i < meta.Length; i++)
         {
             var x = 55 + ((i % 4) * 382);
             var y = 220 + ((i / 4) * 112);
-            Field(canvas, new SKRect(x, y, x + cellWidth, y + 92), meta[i].Item1, meta[i].Item2, label, value);
+            Field(canvas, new SKRect(x, y, x + cellWidth, y + 92), meta[i].Item1, meta[i].Item2, label, value, meta[i].Item3);
         }
 
         DrawText(canvas, T("Hardware Specs").ToUpperInvariant(), 58, 486, heading);
@@ -166,15 +167,12 @@ public static class QaSheetService
     private static string BatteryState(string? value) =>
         string.IsNullOrWhiteSpace(value) || value.Contains("unavailable", StringComparison.OrdinalIgnoreCase) ? "Waiting" : "Ok";
 
-    private static string WarrantyDisplayText(string? warrantyText)
-    {
-        if (string.IsNullOrWhiteSpace(warrantyText)) return "unavailable X";
-        var trimmed = warrantyText.Trim();
-        return trimmed + (IsWarrantyCurrent(trimmed) ? " \u2713" : " X");
-    }
+    private static string WarrantyDisplayText(string? warrantyText) =>
+        string.IsNullOrWhiteSpace(warrantyText) ? "unavailable" : warrantyText.Trim();
 
-    private static bool IsWarrantyCurrent(string warrantyText)
+    private static bool? IsWarrantyCurrent(string? warrantyText)
     {
+        if (string.IsNullOrWhiteSpace(warrantyText)) return null;
         var formats = new[] { "yyyy-MM-dd", "M/d/yyyy", "MM/dd/yyyy", "M/d/yy", "MM/dd/yy" };
         return DateTime.TryParseExact(warrantyText.Trim(), formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date)
                ? date.Date >= DateTime.Today
@@ -225,11 +223,20 @@ public static class QaSheetService
         canvas.DrawRoundRect(rect, radius, radius, border);
     }
 
-    private static void Field(SKCanvas canvas, SKRect rect, string name, string? text, TextStyle label, TextStyle value)
+    private static void Field(SKCanvas canvas, SKRect rect, string name, string? text, TextStyle label, TextStyle value, bool? status = null)
     {
         FillRound(canvas, rect, Color("#F7FAFB"), 13, Color("#CBD9DF"));
         DrawText(canvas, name.ToUpperInvariant(), rect.Left + 17, rect.Top + 29, label);
-        DrawClipped(canvas, text, rect.Left + 17, rect.Top + 64, rect.Width - 34, value);
+        var content = string.IsNullOrWhiteSpace(text) ? "Not available" : text.Trim();
+        var contentWidth = rect.Width - (status.HasValue ? 70 : 34);
+        DrawClipped(canvas, content, rect.Left + 17, rect.Top + 64, contentWidth, value);
+        if (!status.HasValue) return;
+        var drawn = content;
+        while (drawn.Length > 1 && value.Font.MeasureText(drawn) > contentWidth) drawn = drawn[..^1];
+        if (!string.Equals(drawn, content, StringComparison.Ordinal) && drawn.Length > 2) drawn = drawn[..^1] + "…";
+        var statusX = Math.Min(rect.Right - 28, rect.Left + 17 + value.Font.MeasureText(drawn) + 8);
+        using var icon = Paint(25, status.Value ? Color("#16834A") : Color("#C7353F"), value.Font.Typeface!);
+        DrawText(canvas, status.Value ? "✓" : "X", statusX, rect.Top + 64, icon);
     }
 
     private static void NoteBox(SKCanvas canvas, SKRect rect, string name, string? text, TextStyle label, TextStyle body)

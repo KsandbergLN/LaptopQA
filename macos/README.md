@@ -6,20 +6,21 @@ Laptop QA prepares, tests, and documents Windows laptops through a guided sessio
 
 ## Workflow consistency
 
-Complete Windows steps 1–7 first; technicians can then use the companion starting with step 8 (QA Output) on their personal MacBook to continue the same Windows QA workflow. It mirrors the Windows workflow and presentation so cached results, notes, and QA records remain consistent. It is an alternate workstation, not a separate Mac-specific checklist.
+Complete Windows steps 1–7 first; technicians can then use the companion starting with step 8 (Device Condition) on their personal MacBook to continue the same Windows QA workflow. It mirrors the Windows workflow and presentation so cached results, notes, and QA records remain consistent. It is an alternate workstation, not a separate Mac-specific checklist.
 
 Retained functionality:
 
 - Cached Windows diagnostics, battery, hardware, network, display, keyboard, and USB results
-- Cached Final Checks (step 7), reviewed from the Windows session before the Mac handoff
-- QA Output (step 8), including printable/zoomable HTML QA sheets and ServiceNow launch
+- Device Condition (step 8), including Trackpad Working and Checked Physical Condition
+- Final Checks (step 9), including shared checkboxes and configured links
+- QA Output (step 10), including printable/zoomable HTML QA sheets and ServiceNow launch
 - QA notes, activity, cached hardware snapshots, managed folders, Light/Dark themes, Config, and Factory Settings
 - Full configuration model retained for compatibility
 
 Unavailable on the Mac companion:
 
 - Starting a new session or collecting Windows hardware results directly
-- BIOS controls, Windows Autopilot hash collection, and direct Windows device operations
+- BIOS controls, Windows Autopilot hash collection/upload, and direct Windows device operations
 - USB port testing and other steps 1–7 actions, which must be completed in the Windows app first
 
 ## Launch

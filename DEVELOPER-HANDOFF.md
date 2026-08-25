@@ -15,7 +15,7 @@ Do not edit these as source:
 
 The canonical source and its shared dependencies are maintained in this repository. Generated output and historical alternatives are excluded. Use reviewed branches; do not edit historical folders directly.
 
-Laptop QA is the technician workflow for preparing, testing, and documenting Windows laptops. The Windows app owns hardware, diagnostics, BIOS, USB, hash, and QA-output operations; the macOS companion resumes the cached Windows session from step 8 for final checks, QA-sheet generation, and ServiceNow preparation.
+Laptop QA is the technician workflow for preparing, testing, and documenting Windows laptops. The Windows app owns hardware, diagnostics, BIOS, USB, device-condition, hash upload, and QA-output operations; the macOS companion resumes the cached Windows session from step 8 for device condition, final checks, QA-sheet generation, and ServiceNow preparation.
 
 ## Build and smoke check
 
@@ -113,7 +113,7 @@ Search for a region name first, then search for the visible button/control name 
 - Exercise Wi-Fi/Ethernet, camera, keyboard, external display, and USB rows on suitable hardware.
 - Load or browse to a Dell diagnostics log and verify its result.
 - Verify an unanswered Dell diagnostics prompt names the affected prompt category in both the main UI and QA sheet.
-- Complete Windows steps 1-7 on a device with BIOS USB connector data; confirm the handoff prompt appears only after the USB port count is detected and every detected port has a result.
+- Complete Windows steps 1-7 on a device with BIOS USB connector data; confirm the handoff prompt appears only after the USB port count is detected and every detected port has a result. Then verify Device Condition, Final Checks, hash upload, and QA Output behavior.
 - Save/open a QA sheet and confirm the output image.
 - Select ServiceNow and verify the request type, assignment group, and description are populated; confirm the QA description is returned to the clipboard afterward.
 - Launch the packaged app from the root VBS and directly from the app-folder PowerShell script; verify both retain the removable package as the data root.

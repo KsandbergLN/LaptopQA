@@ -23,8 +23,8 @@ public sealed class AppConfig
     public string ServiceNowAssignmentGroupName { get; set; } = "Desktop Support (Miamisburg) - L2";
     public string ServiceNowAssignmentGroupSysId { get; set; } = "9d144e37bdef1000e25cbf141e60d715";
     public int ServiceNowAutomationDelayMilliseconds { get; set; } = 500;
-    public string CheckHashAndGroupTagUrl { get; set; } = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
-    public string RemoveUserFromIntuneUrl { get; set; } = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+    public string CheckHashAndGroupTagUrl { get; set; } = "https://intune.microsoft.com/#view/Microsoft_Intune_DeviceSettings/DevicesWindowsMenu/~/windowsDevices";
+    public string RemoveUserFromIntuneUrl { get; set; } = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
     public string UpdateStockroomsUrl { get; set; } = "https://reedelsevier.service-now.com/now/nav/ui/classic/params/target/alm_hardware_list.do%3Fsysparm_first_row%3D1%26sysparm_query%3Dserial_number%3D{SERIAL}%26sysparm_query_encoded%3Dserial_number%3D{SERIAL}%26sysparm_view%3D";
     public string UploadHashUrl { get; set; } = "https://intune.microsoft.com/#view/Microsoft_Intune_Enrollment/AutopilotDevices.ReactView/filterOnManualRemediationRequired~/false";
 }
