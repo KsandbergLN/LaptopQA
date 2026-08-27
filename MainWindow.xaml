@@ -453,20 +453,20 @@
                         </Canvas>
                     </Border>
 
-                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="186" Width="740" Height="112">
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="186" Width="740" Height="120">
                         <Canvas>
                             <TextBlock Text="2. Network Check" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="NetworkButton" Content="Start" Canvas.Left="648" Canvas.Top="14" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous Wi-Fi and Ethernet results, then run the network check again." Click="NetworkButton_Click"/>
                             <TextBlock x:Name="WifiIcon" Text="-" Canvas.Left="28" Canvas.Top="44" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
                             <TextBox x:Name="WifiMain" Text="Wi-Fi not checked yet" Canvas.Left="70" Canvas.Top="42" Width="470" Height="18" Style="{StaticResource SelectableMainText}"/>
                             <TextBox x:Name="WifiDetail" Text="Looking for a connected Wi-Fi IP or visible SSIDs." Canvas.Left="70" Canvas.Top="61" Width="470" Height="14" Style="{StaticResource SelectableDetailText}"/>
-                            <TextBlock x:Name="EthernetIcon" Text="-" Canvas.Left="28" Canvas.Top="78" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
-                            <TextBox x:Name="EthernetMain" Text="Ethernet not checked yet" Canvas.Left="70" Canvas.Top="76" Width="530" Height="18" Style="{StaticResource SelectableMainText}"/>
-                            <TextBox x:Name="EthernetDetail" Text="Looking for at least one physical Ethernet adapter that is Up." Canvas.Left="70" Canvas.Top="95" Width="640" Height="14" Style="{StaticResource SelectableDetailText}"/>
+                            <TextBlock x:Name="EthernetIcon" Text="-" Canvas.Left="28" Canvas.Top="80" Width="32" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="20" FontWeight="Bold"/>
+                            <TextBox x:Name="EthernetMain" Text="Ethernet not checked yet" Canvas.Left="70" Canvas.Top="78" Width="530" Height="18" Style="{StaticResource SelectableMainText}"/>
+                            <TextBox x:Name="EthernetDetail" Text="Looking for at least one physical Ethernet adapter that is Up." Canvas.Left="70" Canvas.Top="97" Width="640" Height="14" Style="{StaticResource SelectableDetailText}"/>
                         </Canvas>
                     </Border>
 
-                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="306" Width="740" Height="82">
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="314" Width="740" Height="82">
                         <Canvas>
                             <TextBlock Text="3. Camera Test" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button Content="Start" Canvas.Left="566" Canvas.Top="10" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous camera result and start the camera test again." Click="CameraStartButton_Click"/>
@@ -478,7 +478,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="396" Width="740" Height="88">
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="404" Width="740" Height="88">
                         <Canvas>
                             <TextBlock Text="4. External Video" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="ExternalTestButton" Content="Start" Canvas.Left="566" Canvas.Top="10" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous external-video result and scan again." Click="ExternalTestButton_Click"/>
@@ -490,7 +490,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="490" Width="740" Height="88">
+                    <Border Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="498" Width="740" Height="88">
                         <Canvas>
                             <TextBlock Text="5. Keyboard Test" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button Content="Start" Canvas.Left="566" Canvas.Top="10" Width="72" Height="62" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="12" FontWeight="Bold" ToolTip="Clear the previous keyboard result and open the keyboard tester again." Click="KeyboardLaunchButton_Click"/>
@@ -502,7 +502,7 @@
                         </Canvas>
                     </Border>
 
-                    <Border x:Name="DiagnosticsPanel" Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="586" Width="740" Height="106">
+                    <Border x:Name="DiagnosticsPanel" Style="{StaticResource GlassCard}" Canvas.Left="54" Canvas.Top="594" Width="740" Height="106">
                         <Canvas>
                             <TextBlock Text="6. Diagnostics" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="DiagnosticsBrowseButton" Content="Browse" Canvas.Left="566" Canvas.Top="10" Width="72" Height="28" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="11" ToolTip="Select a Dell preboot diagnostics log manually." Click="DiagnosticsBrowseButton_Click"/>

@@ -3738,7 +3738,6 @@ $items = @(
 	{
 		SetStep("Keyboard", KeyboardIcon, KeyboardMain, KeyboardDetail, "Working", "Preparing keyboard test", "Clearing the previous result and opening the keyboard tester.");
 		AddActivity("Keyboard", "Start selected; previous keyboard result cleared and the test restarted.");
-		await SetFnLockForKeyboardTesterAsync(enabled: false, "disable before keyboard tester");
 		try
 		{
 			KeyboardTesterWindow keyboardTesterWindow = new KeyboardTesterWindow(this, _currentTheme, _config.AppLanguage);
@@ -3751,6 +3750,7 @@ $items = @(
 			keyboardTesterWindow.Show();
 			SetStep("Keyboard", KeyboardIcon, KeyboardMain, KeyboardDetail, "Working", "Keyboard tester launched", "Press keys in the tester, then choose Pass or Fail here.");
 			AddActivity("Keyboard", "Keyboard tester launch requested; waiting for manual Pass or Fail.");
+			_ = SetFnLockForKeyboardTesterAsync(enabled: false, "disable after keyboard tester opens");
 		}
 		catch
 		{
@@ -3773,7 +3773,7 @@ $items = @(
 		{
 			try
 			{
-				await RunProcessCaptureAsync(CctkExe, "--" + option + "=" + value, 20);
+				await RunProcessCaptureAsync(CctkExe, "--" + option + "=" + value, 6);
 				AddActivity("Keyboard", $"Fn Lock {phase} succeeded with CCTK {option}={value}.");
 				return;
 			}
