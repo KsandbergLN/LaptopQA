@@ -1,6 +1,6 @@
 # Laptop QA  Developer Handoff
 
-Last reviewed: 2026-08-14
+Last reviewed: 2026-08-27
 
 > **Canonical-source marker:** `CANONICAL-SOURCE.md` is authoritative. Historical version numbers do not override it.
 
@@ -42,6 +42,40 @@ The launcher uses `LaptopQATestingV4.exe`. When changing package layout or execu
 
 For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus the package-root VBS and `Laptop-QA-Drive.json`. Preserve the target drive's `Laptop-QA-Config.json`, `.runtime`, `activity`, `logs`, `QA sheets`, `hardware`, and `hash` folders. Verify the deployed `LaptopQATestingV4.exe` SHA-256 hash against the package before calling the deployment complete.
 
+## Configuration reference
+
+`Laptop-QA-Config.json` is the package-level configuration file. The Windows app reads it from the selected data root and writes it from **Settings** using an atomic merged save, so fields added by a newer build do not discard unknown or Windows-only values. A missing or blank value falls back to the default in `AppConfig.cs`. The macOS companion reads and writes the same file for supported settings; Windows-only hardware and command-line behavior is not enabled by running on macOS.
+
+Do not put passwords, access tokens, or other secrets in this file. URLs and ServiceNow identifiers are routing/configuration values, not credentials, and should be changed only to approved organization destinations.
+
+| Setting | Purpose and behavior |
+| --- | --- |
+| `TechnicianName` | Saved technician name shown in the header, session, and QA sheet. It is requested on first run when blank. |
+| `AppTheme` | Appearance palette: `Light`, `Dark`, or `AMOLED`. |
+| `AppLanguage` | UI and report culture (default `en-US`). |
+| `CameraRoll` | Camera Roll folder used by the camera test and cleanup/open-folder actions. Environment variables are expanded. |
+| `DellDiagnosticsLogFolder` | Optional folder to search for Dell preboot diagnostics logs. |
+| `CameraRollCleanupTimeoutSeconds` | Maximum time to wait for camera files to clear (default `30`). |
+| `CameraRollCleanupRetryDelaySeconds` | Delay between camera cleanup attempts (default `2`). |
+| `WifiRescanEthernetDisableDelaySeconds` | Wait after temporarily disabling active Ethernet before a Wi-Fi rescan (default `3`). |
+| `EthernetRestoreDelaySeconds` | Wait after restoring Ethernet following the Wi-Fi rescan (default `2`). |
+| `DellWarrantyCliPath` | Optional explicit path to Dell Warranty CLI. Blank uses the normal installed-tool discovery/fallback. |
+| `AutopilotGroupTag` | Expected Windows Autopilot group tag used when validating the exported hash CSV (default `LNG AAD`). |
+| `QaComputerNameFormat` | Device-name pattern used in the app, QA sheets, and saved files. Supported tokens are `{serial}`, `{computer}`, and `{asset}` (default `LNG-{serial}`). |
+| `ServiceNowRequestUrl` | ServiceNow Generic Request page opened by the ServiceNow action. |
+| `ServiceNowTypeOfRequest` | Request type that best-effort browser automation attempts to select (default `Other`). |
+| `ServiceNowAssignmentGroupName` | Display name used by ServiceNow browser autofill. |
+| `ServiceNowAssignmentGroupSysId` | ServiceNow assignment-group `sys_id` used by browser autofill. |
+| `ServiceNowAutomationDelayMilliseconds` | Edge/page readiness wait for best-effort ServiceNow autofill; values are clamped to `500`–`30000` ms (default `500`). |
+| `CheckHashAndGroupTagUrl` | Intune page opened for manual hash and group-tag verification. |
+| `RemoveUserFromIntuneUrl` | Intune page opened for the manual user-removal step. |
+| `UpdateStockroomsUrl` | ServiceNow hardware-list page opened for stockroom updates. Keep the `{SERIAL}` token so the active service tag can be inserted. |
+| `UploadHashUrl` | Intune Autopilot Devices page opened for manual hash upload after **Export Hash**. |
+
+The Settings dialog validates timing fields as whole numbers and clamps the ServiceNow delay to the supported range. **Reset Settings** restores all defaults and removes the saved technician name; it does not delete QA sheets, logs, hardware files, or session history. Keep the package's configuration and data folders together when moving a session between Windows and the macOS companion.
+
+Compatibility behavior is intentional: both apps recognize older packages that stored the Check Hash and Remove User links in the opposite slots and normalize them when loading. A missing or unreadable config starts with `AppConfig` defaults. On the next macOS shared save, retired client/credential-era keys are removed; those keys are not supported authentication settings and no credentials should be added back.
+
 ## Code map
 
 | Area | Primary file | Notes |
@@ -50,9 +84,9 @@ For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus
 | Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, and styles. |
 | Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, ServiceNow automation, and external process calls. Foldable `#region` labels divide these responsibilities. |
 | ServiceNow launch | `ServiceNowRequestLauncher.cs`, `MainWindow.xaml.cs` | The primary route opens Edge and sends a page autofill script for the configured request type, assignment group, and QA description. A direct open plus copied description is the startup-failure fallback. |
-| Final-check actions | `MainWindow.xaml.cs`, `TransientNotificationWindow.cs` | Check Hash and Group Tag, Remove User from Laptop in Intune, and Update Stockrooms open their configured Intune or ServiceNow page in a new Edge tab and copy the service tag to the clipboard. Update Stockrooms uses Windows UI Automation to select ServiceNow's Serial number field, enter the tag, and press Enter; it must gracefully fall back to the copied tag when the page accessibility tree changes. The themed toast confirms launches without blocking the technician. Completion remains a separate manual checkbox. |
-| macOS final-check actions | `macos/MainWindow.axaml`, `macos/MainWindow.axaml.cs`, `macos/SettingsWindow.*` | The macOS companion mirrors the three action buttons, aligned manual checkboxes, shared Final Check Links configuration, service-tag clipboard behavior, and centered themed toast. Each action only opens its configured link and copies the relevant information; macOS does not automate browser forms. |
-| Configuration | `AppConfig.cs`, `Laptop-QA-Config.json`, `SettingsWindow.cs` | Defaults, persisted settings, and settings UI. The Final Check Links group holds the three external-action URLs; `UpdateStockroomsUrl` must retain `{SERIAL}` for dynamic service-tag replacement. |
+| Final-check actions | `MainWindow.xaml.cs`, `TransientNotificationWindow.cs` | Check Hash and Group Tag, Remove User from Laptop in Intune, Update Stockrooms, and Upload Hash open their configured Intune or ServiceNow page in a new Edge tab and copy the service tag when a manual search is required. Update Stockrooms uses Windows UI Automation to select ServiceNow's Serial number field, enter the tag, and press Enter; it must gracefully fall back to the copied tag when the page accessibility tree changes. The themed toast confirms launches without blocking the technician. Completion remains a separate manual checkbox. |
+| macOS final-check actions | `macos/MainWindow.axaml`, `macos/MainWindow.axaml.cs`, `macos/SettingsWindow.*` | The macOS companion mirrors the three cached final-check actions (Check Hash and Group Tag, Remove User, and Update Stockrooms), aligned manual checkboxes, shared link configuration, service-tag clipboard behavior, and centered themed toast. It does not collect or upload the Windows Autopilot hash and does not automate browser forms. |
+| Configuration | `AppConfig.cs`, `Laptop-QA-Config.json`, `SettingsWindow.cs` | Defaults, persisted settings, and settings UI. The Final Check Links group holds four external-action URLs, including Windows-only `UploadHashUrl`; `UpdateStockroomsUrl` must retain `{SERIAL}` for dynamic service-tag replacement. |
 | Session persistence | `QaSessionCache.cs`, `QaStepCache.cs`, `UsbPortCache.cs` | The active QA is saved as `.runtime/qa-session.json`; searchable 90-day history is stored as stable session files under `.runtime/sessions`, with an atomic `.runtime/sessions-index.json` metadata index that can be rebuilt from those snapshots. The steps 1-7 handoff prompt is tracked per session, so it appears once only after all test rows are complete. |
 | Logging | `ErrorLog.cs` | Activity/error log paths, migration, redaction, and session filenames. |
 | Hardware models/UI | `HardwareSnapshot.cs`, `HardwareWindow.cs` | Collected device data and hardware drawer/window. |
@@ -110,13 +144,17 @@ Search for a region name first, then search for the visible button/control name 
 - Launch as administrator and confirm startup/splash completes.
 - Confirm the selected data root and log locations.
 - Open Settings and verify theme/language changes.
+- Change and save the technician name, device-name format, Autopilot group tag, folder paths, and final-check links; confirm the values persist and that `{SERIAL}` is retained in the Update Stockrooms URL.
+- Verify **Reset Settings** restores defaults, removes the saved technician name, and leaves QA sheets, logs, hardware files, and session history intact.
 - Exercise Wi-Fi/Ethernet, camera, keyboard, external display, and USB rows on suitable hardware.
 - Load or browse to a Dell diagnostics log and verify its result.
 - Verify an unanswered Dell diagnostics prompt names the affected prompt category in both the main UI and QA sheet.
 - Complete Windows steps 1-7 on a device with BIOS USB connector data; confirm the handoff prompt appears only after the USB port count is detected and every detected port has a result. Then verify Device Condition, Final Checks, hash upload, and QA Output behavior.
 - Save/open a QA sheet and confirm the output image.
 - Select ServiceNow and verify the request type, assignment group, and description are populated; confirm the QA description is returned to the clipboard afterward.
+- Verify ServiceNow automation with the configured delay and confirm the direct-open/clipboard fallback remains usable when Edge automation cannot start.
 - Launch the packaged app from the root VBS and directly from the app-folder PowerShell script; verify both retain the removable package as the data root.
 - When deploying to a removable drive, verify the executable hash and confirm that the existing configuration and QA data folders were preserved.
 - Reset the QA session, close/reopen the app, and confirm cache behavior.
+- Open the cached session with the macOS companion and confirm shared technician name, theme/language, notes, final-check links, and session data remain intact; confirm Windows-only hash upload, BIOS, USB, and steps 1–7 remain unavailable there.
 - Test shutdown/reboot/BIOS actions only on a disposable QA device.

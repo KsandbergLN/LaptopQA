@@ -56,7 +56,7 @@ Windows keeps searchable QA session history for 90 days under `.runtime/sessions
 
 Technicians should use [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). Developers and maintainers should start with [`DEVELOPER-HANDOFF.md`](DEVELOPER-HANDOFF.md).
 
-Final-check navigation links are configurable from **Settings > Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` so Laptop QA can insert the active device's service tag.
+Final-check navigation links are configurable from **Settings > Final Check Links**. Windows includes Check Hash and Group Tag, Remove User, Update Stockrooms, and Upload Hash; the macOS companion exposes the three cached manual actions and does not upload the Windows hash. The Update Stockrooms URL must retain `{SERIAL}` so Laptop QA can insert the active device's service tag. See [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md) for the technician-facing settings reference.
 
 ## Where to make changes
 
