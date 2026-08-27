@@ -1,13 +1,13 @@
 # Laptop QA
 
-![Laptop QA application](assets/laptop-qa-app.png)
+![Laptop QA application](assets/laptop-qa-app-20260825.png)
 
 Laptop QA contains two supported technician applications:
 
 - **Windows app** — WPF on .NET 10, built from the repository root.
 - **macOS companion** — Avalonia on .NET 10, built from `macos\`.
 
-Laptop QA is a technician workflow for preparing, testing, and documenting Windows laptops. It brings hardware and diagnostics checks, BIOS and USB workflows, device-hash and final-check links, QA-sheet output, and ServiceNow preparation into one session. The macOS companion can open the cached Windows session from step 8 onward when a technician prefers to finish on a MacBook.
+Laptop QA is a technician workflow for preparing, testing, and documenting Windows laptops. It brings hardware and diagnostics checks, BIOS and USB workflows, device-condition checks, device-hash upload, final-check links, QA-sheet output, and ServiceNow preparation into one session. The macOS companion can open the cached Windows session from step 8 onward when a technician prefers to finish on a MacBook.
 
 The repository root is the canonical Windows source. The `main` branch is authoritative. Generated build output, runtime data, logs, and release packages are intentionally ignored.
 
@@ -50,7 +50,7 @@ For normal technician use on Windows, double-click `Windows Laptop QA Launcher.v
 
 For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.
 
-Technician handoff: complete Windows QA steps 1–7 on the test laptop first. Starting with step 8 (QA Output), the technician may open the macOS companion on their personal Mac and continue the same Windows QA workflow from the cached session, including final checks, QA sheet generation, and ServiceNow preparation.
+Technician handoff: complete Windows QA steps 1–7 on the test laptop first. Starting with step 8 (Device Condition), the technician may open the macOS companion on their personal Mac and continue the same Windows QA workflow from the cached session, including device-condition checks, final checks, QA sheet generation, and ServiceNow preparation.
 
 Windows keeps searchable QA session history for 90 days under `.runtime/sessions`. Use the Cached Sessions selector in the header to find a session by service tag, date, or time and restore it as the active QA. The `.runtime/sessions-index.json` file is only an index; the full session snapshots remain independently recoverable if the index is damaged.
 
