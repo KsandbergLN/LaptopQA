@@ -4868,23 +4868,9 @@ $items = @(
 			return;
 		}
 
-		int cleared = 0;
-		foreach (UsbPortCache port in _usbPorts.Where(port => port.Failed))
-		{
-			port.Failed = false;
-			port.LocationPath = "";
-			port.DeviceName = "";
-			cleared++;
-		}
-
-		_usbPortTestFinished = _usbPorts.All(port => port.Passed);
-		_usbPreviousPresentPaths.Clear();
-		await RestartUsbPortMonitoringAsync(clearResults: false);
-		UpdateUsbPortUi();
+		await RestartUsbPortMonitoringAsync(clearResults: true);
 		SaveQaSessionCache();
-		AddActivity("USB", cleared > 0
-			? $"Retest selected; cleared {cleared} failed USB port result(s). Reconnect the test drive to each failed port."
-			: "Retest selected; no failed USB port results were present. Live monitoring was refreshed.");
+		AddActivity("USB", $"Retest selected; cleared all {_usbPorts.Count} USB port result(s). Move the readable test drive through every detected port again.");
 	}
 
 	private async Task PollUsbPortsAsync()
