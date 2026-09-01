@@ -516,6 +516,7 @@
                     <Border x:Name="UsbPortTestPanel" Style="{StaticResource GlassCard}" Background="{DynamicResource SectionSurfaceBrush}" Canvas.Left="830" Canvas.Top="104" Width="396" Height="112">
                         <Canvas>
                             <TextBlock Text="7. USB Port Test" Canvas.Left="24" Canvas.Top="11" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
+                            <Button x:Name="UsbPortRetestButton" Content="Retest" Canvas.Left="296" Canvas.Top="10" Width="80" Height="28" Style="{StaticResource PrimaryButton}" Padding="6,3" FontSize="11" ToolTip="Clear failed USB port results and keep passed ports." Click="UsbPortRetestButton_Click"/>
                             <WrapPanel x:Name="UsbPortIndicatorsPanel" Canvas.Left="24" Canvas.Top="42" Width="348" Height="62" Orientation="Horizontal"/>
                         </Canvas>
                     </Border>

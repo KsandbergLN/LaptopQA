@@ -4859,6 +4859,34 @@ $items = @(
 		return Task.CompletedTask;
 	}
 
+	private async void UsbPortRetestButton_Click(object sender, RoutedEventArgs e)
+	{
+		if (_usbPorts.Count == 0)
+		{
+			AddActivity("USB", "Retest selected with no detected ports; refreshing USB connector detection.");
+			await InitializeUsbPortTestAsync();
+			return;
+		}
+
+		int cleared = 0;
+		foreach (UsbPortCache port in _usbPorts.Where(port => port.Failed))
+		{
+			port.Failed = false;
+			port.LocationPath = "";
+			port.DeviceName = "";
+			cleared++;
+		}
+
+		_usbPortTestFinished = _usbPorts.All(port => port.Passed);
+		_usbPreviousPresentPaths.Clear();
+		await RestartUsbPortMonitoringAsync(clearResults: false);
+		UpdateUsbPortUi();
+		SaveQaSessionCache();
+		AddActivity("USB", cleared > 0
+			? $"Retest selected; cleared {cleared} failed USB port result(s). Reconnect the test drive to each failed port."
+			: "Retest selected; no failed USB port results were present. Live monitoring was refreshed.");
+	}
+
 	private async Task PollUsbPortsAsync()
 	{
 		if (!_usbPortTestActive || _usbPortScanRunning)
