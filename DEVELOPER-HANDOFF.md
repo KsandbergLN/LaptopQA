@@ -47,7 +47,8 @@ For a removable-drive update, copy the candidate's `LAPTOP QA\App` contents plus
 | Area | Primary file | Notes |
 | --- | --- | --- |
 | Application startup | `App.xaml`, `App.xaml.cs`, `Start-LaptopQA-Local.ps1`, `Start-LaptopQA-Silent.vbs` | WPF entry point, top-level exception handling, and portable-drive staging/launch behavior. |
-| Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, and styles. |
+| Main UI layout | `MainWindow.xaml` | Main shell, test rows, drawers, menus, styles, fixed 1280x720 design surface, and proportional `Viewbox` scaling. |
+| Borderless window behavior | `BorderlessWindowResizer.cs`, `MainWindow.xaml`, `MainWindow.xaml.cs` | Adds `WS_THICKFRAME`, DPI-aware 14-DIP native hit testing, `WM_SIZING` aspect-ratio enforcement, and lifecycle-safe hook cleanup. The restored window keeps the 16:9 design ratio; maximized mode uses the normal Windows work area with square shell corners and no ratio constraint. |
 | Main workflow | `MainWindow.xaml.cs` | Startup, hardware collection, QA actions, USB detection, caching, report output, ServiceNow automation, and external process calls. Foldable `#region` labels divide these responsibilities. |
 | ServiceNow launch | `ServiceNowRequestLauncher.cs`, `MainWindow.xaml.cs` | The primary route opens Edge and sends a page autofill script for the configured request type, assignment group, and QA description. A direct open plus copied description is the startup-failure fallback. |
 | Final-check actions | `MainWindow.xaml.cs`, `TransientNotificationWindow.cs` | Check Hash and Group Tag, Remove User from Laptop in Intune, and Update Stockrooms open their configured Intune or ServiceNow page in a new Edge tab and copy the service tag to the clipboard. Update Stockrooms uses Windows UI Automation to select ServiceNow's Serial number field, enter the tag, and press Enter; it must gracefully fall back to the copied tag when the page accessibility tree changes. The themed toast confirms launches without blocking the technician. Completion remains a separate manual checkbox. |
@@ -115,6 +116,7 @@ Search for a region name first, then search for the visible button/control name 
 - Load or browse to a Dell diagnostics log and verify its result.
 - Verify an unanswered Dell diagnostics prompt names the affected prompt category in both the main UI and QA sheet.
 - Complete Windows steps 1-7 on a device with BIOS USB connector data; confirm the handoff prompt appears only after the USB port count is detected and every detected port has a result. Then verify Device Condition, Final Checks, hash upload, and QA Output behavior.
+- Resize the restored Windows app from every edge and corner at the supported display scaling values; confirm the UI remains proportionate, the cursor matches the edge, and the opposite edge remains anchored. Maximize and restore it; confirm the shell becomes square only while maximized and the maximize glyph/tool tip remains accurate.
 - Save/open a QA sheet and confirm the output image.
 - Select ServiceNow and verify the request type, assignment group, and description are populated; confirm the QA description is returned to the clipboard afterward.
 - Launch the packaged app from the root VBS and directly from the app-folder PowerShell script; verify both retain the removable package as the data root.

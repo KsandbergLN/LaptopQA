@@ -22,6 +22,8 @@ Laptop QA prepares, tests, and documents Windows laptops in one guided session, 
 
 The current Windows layout is: steps 1–7 for Windows hardware and diagnostics, step 8 for device condition, step 9 for final checks, and step 10 for QA output.
 
+The Windows app can be resized from any edge or corner while restored; its layout scales together and keeps the same proportions. Use the title-bar controls to minimize, maximize or restore, and close the app. Maximized mode uses the normal usable desktop area.
+
 ### When the session saves
 
 Laptop QA automatically saves the active session shortly after a button click or text change, once the session is ready. It also saves during startup, when the steps 1–7 handoff is reached, before resetting to start a new QA, and when the app closes. The active session is stored in `.runtime/qa-session.json`; searchable snapshots are kept under `.runtime/sessions` for 90 days. Keep those folders with the package so the macOS companion can load the cached Windows session.
