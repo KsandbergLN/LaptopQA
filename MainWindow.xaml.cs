@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Markup;
@@ -369,6 +370,8 @@ public partial class MainWindow : Window, IComponentConnector
 	public MainWindow()
 	{
 		InitializeComponent();
+		BorderlessWindowResizer.Attach(this, 1280.0, 720.0);
+		SetWindowFitToScreen(recordActivity: false);
 		_qaSessionSaveTimer = new DispatcherTimer
 		{
 			Interval = TimeSpan.FromMilliseconds(400)
@@ -412,7 +415,6 @@ public partial class MainWindow : Window, IComponentConnector
 		LanguageCatalog.ApplyCulture(_config.AppLanguage);
 		ApplyAppTheme(_config.AppTheme);
 		WpfLocalization.Apply(this, _config.AppLanguage);
-		SetWindowFitToScreen();
 		BringStartupSplashToFront();
 		await SetStartupSplashStatusAsync(NextStartupJokeForLaunch());
 		PromptForTechnicianNameIfNeeded();
@@ -782,20 +784,31 @@ public partial class MainWindow : Window, IComponentConnector
 		}
 	}
 
-	private void SetWindowFitToScreen()
+	private void SetWindowFitToScreen(bool recordActivity = true)
 	{
 		Rect workArea = SystemParameters.WorkArea;
-		double num = Math.Max(1.0, workArea.Width);
-		double val = Math.Min(val2: Math.Max(1.0, workArea.Height) / 720.0, val1: num / 1280.0);
-		double num2 = Math.Max(0.5, val);
-		base.Width = Math.Round(1280.0 * num2);
-		base.Height = Math.Round(720.0 * num2);
+		const double designWidth = 1280.0;
+		const double designHeight = 720.0;
+		const double initialDesignWidth = 1180.0;
+		const double workAreaMargin = 32.0;
+		double availableWidth = Math.Max(1.0, workArea.Width - workAreaMargin * 2.0);
+		double availableHeight = Math.Max(1.0, workArea.Height - workAreaMargin * 2.0);
+		double scale = Math.Min(availableWidth / designWidth, availableHeight / designHeight);
+		double desiredWidth = Math.Min(initialDesignWidth, designWidth * scale);
+		double desiredHeight = desiredWidth / (designWidth / designHeight);
+		if (desiredHeight > availableHeight)
+		{
+			desiredHeight = availableHeight;
+			desiredWidth = desiredHeight * (designWidth / designHeight);
+		}
+		base.Width = Math.Max(base.MinWidth, Math.Round(desiredWidth));
+		base.Height = Math.Max(base.MinHeight, Math.Round(desiredHeight));
 		base.WindowStartupLocation = WindowStartupLocation.Manual;
 		base.Left = Math.Round(workArea.Left + (workArea.Width - base.Width) / 2.0);
 		base.Top = Math.Round(workArea.Top + (workArea.Height - base.Height) / 2.0);
-		if (Math.Abs(num2 - 1.0) > 0.001)
+		if (recordActivity && Math.Abs(base.Width - initialDesignWidth) > 0.001)
 		{
-			AddActivity("System", $"Window scaled to {num2:P0} to fill this display's usable work area while preserving its proportions.");
+			AddActivity("System", $"Window sized to fit this display's usable work area while preserving its proportions.");
 		}
 	}
 
@@ -6743,6 +6756,24 @@ $items = @(
 		base.WindowState = WindowState.Minimized;
 	}
 
+	private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
+	{
+		base.WindowState = (base.WindowState == WindowState.Maximized) ? WindowState.Normal : WindowState.Maximized;
+	}
+
+	private void Window_StateChanged(object sender, EventArgs e)
+	{
+		bool maximized = base.WindowState == WindowState.Maximized;
+		MaximizeRestoreGlyph.Text = maximized ? "\uE923" : "\uE922";
+		MaximizeRestoreButton.ToolTip = maximized ? "Restore" : "Maximize";
+		CornerRadius cornerRadius = maximized ? new CornerRadius(0.0) : new CornerRadius(22.0);
+		Shell.CornerRadius = cornerRadius;
+		WindowScaleClip.RadiusX = maximized ? 0.0 : 22.0;
+		WindowScaleClip.RadiusY = maximized ? 0.0 : 22.0;
+		ShellContentClip.RadiusX = maximized ? 0.0 : 22.0;
+		ShellContentClip.RadiusY = maximized ? 0.0 : 22.0;
+	}
+
 	private void CloseButton_Click(object sender, RoutedEventArgs e)
 	{
 		Close();
@@ -6750,10 +6781,7 @@ $items = @(
 
 	private void Shell_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 	{
-		if (e.OriginalSource == Shell)
-		{
-			DragMove();
-		}
+		TryDragWindow(e.OriginalSource as DependencyObject);
 	}
 
 	#endregion
@@ -6762,7 +6790,35 @@ $items = @(
 
 	private void DragSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 	{
-		DragMove();
+		TryDragWindow(e.OriginalSource as DependencyObject);
+	}
+
+	private void TryDragWindow(DependencyObject? source)
+	{
+		if (base.WindowState != WindowState.Normal || IsInteractiveElement(source))
+		{
+			return;
+		}
+		try
+		{
+			DragMove();
+		}
+		catch (InvalidOperationException)
+		{
+			// The mouse can be released between the title-bar event and DragMove.
+		}
+	}
+
+	private static bool IsInteractiveElement(DependencyObject? source)
+	{
+		for (DependencyObject? current = source; current != null; current = VisualTreeHelper.GetParent(current))
+		{
+			if (current is ButtonBase or TextBoxBase or ComboBox or ListBox or ScrollBar or Selector)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void AddActivity(string section, string message)

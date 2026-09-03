@@ -2,11 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Laptop QA Testing"
-        Width="1280"
-        Height="720"
-        ResizeMode="NoResize"
+        Width="1180"
+        Height="664"
+        MinWidth="960"
+        MinHeight="540"
+        ResizeMode="CanResize"
         WindowStyle="None"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="Manual"
         Topmost="True"
         AllowsTransparency="True"
         Background="Transparent"
@@ -16,7 +18,8 @@
         TextOptions.TextFormattingMode="Display"
         TextOptions.TextRenderingMode="ClearType"
         TextOptions.TextHintingMode="Fixed"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        StateChanged="Window_StateChanged">
     <Window.Resources>
         <SolidColorBrush x:Key="TextBrush" Color="#F3F7F8"/>
         <SolidColorBrush x:Key="MutedBrush" Color="#B9C7CB"/>
@@ -357,10 +360,10 @@
         </Style>
     </Window.Resources>
 
-    <Viewbox x:Name="WindowFitViewbox" Stretch="Uniform" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Viewbox x:Name="WindowFitViewbox" Stretch="Uniform" StretchDirection="Both" UseLayoutRounding="True" SnapsToDevicePixels="True">
     <Grid x:Name="WindowScaleRoot" Width="1280" Height="720" Background="Transparent" UseLayoutRounding="True" SnapsToDevicePixels="True" ClipToBounds="True">
         <Grid.Clip>
-            <RectangleGeometry Rect="0,0,1280,720" RadiusX="22" RadiusY="22"/>
+            <RectangleGeometry x:Name="WindowScaleClip" Rect="0,0,1280,720" RadiusX="22" RadiusY="22"/>
         </Grid.Clip>
         <Border x:Name="Shell" CornerRadius="22" Background="{DynamicResource ShellBrush}" MouseLeftButtonDown="Shell_MouseLeftButtonDown">
             <Border.Effect>
@@ -368,7 +371,7 @@
             </Border.Effect>
             <Grid ClipToBounds="True">
                 <Grid.Clip>
-                    <RectangleGeometry Rect="0,0,1280,720" RadiusX="22" RadiusY="22"/>
+                    <RectangleGeometry x:Name="ShellContentClip" Rect="0,0,1280,720" RadiusX="22" RadiusY="22"/>
                 </Grid.Clip>
                 <Path x:Name="WavePathBack" Data="M -20,440 C 190,370 380,550 580,470 C 760,400 980,555 1300,465 L1300,740 L-20,740 Z" Fill="#2B17495C" Opacity="0.75"/>
                 <Path x:Name="WavePathFront" Data="M -20,500 C 230,430 420,615 680,525 C 880,455 1080,600 1300,515 L1300,740 L-20,740 Z" Fill="#3510394A" Opacity="0.70"/>
@@ -403,10 +406,13 @@
                     <TextBlock x:Name="HeaderBatteryDots" Text="&#x25CB;&#x25CB;&#x25CB;&#x25CB;" Canvas.Left="384" Canvas.Top="83" Width="62" Height="20" Foreground="{DynamicResource MutedBrush}" FontFamily="Segoe UI Symbol" FontSize="15" FontWeight="Bold" ToolTip="The rating and circles come from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
                     <TextBlock x:Name="HeaderBattery" Text="Battery Health: loading..." Canvas.Left="450" Canvas.Top="82" Width="340" Height="20" Foreground="{DynamicResource MutedBrush}" FontSize="11.5" FontWeight="SemiBold" ToolTip="The rating comes from the Dell diagnostics log. The percentage continues to use Windows battery capacity data."/>
 
-                    <Button x:Name="MinimizeButton" Canvas.Left="1168" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Minimize" Click="MinimizeButton_Click">
+                    <Button x:Name="MinimizeButton" Canvas.Left="1126" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Minimize" Click="MinimizeButton_Click">
                         <Grid Width="34" Height="30">
                             <Rectangle Width="12" Height="2" RadiusX="1" RadiusY="1" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                         </Grid>
+                    </Button>
+                    <Button x:Name="MaximizeRestoreButton" Canvas.Left="1168" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Maximize" Click="MaximizeRestoreButton_Click">
+                        <TextBlock x:Name="MaximizeRestoreGlyph" Text="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="14" FontWeight="Normal" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
                     <Button x:Name="CloseButton" Canvas.Left="1210" Canvas.Top="14" Width="34" Height="30" Style="{StaticResource HeaderIconButton}" ToolTip="Close" Click="CloseButton_Click">
                         <Grid Width="34" Height="30">
