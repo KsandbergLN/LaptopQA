@@ -2929,19 +2929,57 @@ public partial class MainWindow : Window, IComponentConnector
 	{
 		try
 		{
-			return (from d in DriveInfo.GetDrives().Where(delegate(DriveInfo d)
+			List<DriveInfo> diagnosticsDrives = DriveInfo.GetDrives().Where(delegate(DriveInfo drive)
+			{
+				try
 				{
-					try
-					{
-					return d.IsReady && string.Equals(d.DriveFormat, "FAT32", StringComparison.OrdinalIgnoreCase) && d.TotalSize > 0 && d.TotalSize <= 134217728 && File.Exists(Path.Combine(d.RootDirectory.FullName, "DellPrebootDiagnosticsLog.txt"));
-					}
-					catch
-					{
-						return false;
-					}
-				})
-				orderby Math.Abs(d.TotalSize - 52428800)
-				select Path.Combine(d.RootDirectory.FullName, "DellPrebootDiagnosticsLog.txt")).FirstOrDefault() ?? "";
+					return drive.IsReady && string.Equals(drive.DriveFormat, "FAT32", StringComparison.OrdinalIgnoreCase) && drive.TotalSize > 0 && drive.TotalSize <= 134217728;
+				}
+				catch
+				{
+					return false;
+				}
+			}).OrderBy((DriveInfo drive) => Math.Abs(drive.TotalSize - 52428800)).ToList();
+
+			// Dell writes this canonical name for a fresh run. Always use it before
+			// considering retained, timestamped copies from an earlier QA session.
+			foreach (DriveInfo diagnosticsDrive in diagnosticsDrives)
+			{
+				string canonicalPath = Path.Combine(diagnosticsDrive.RootDirectory.FullName, "DellPrebootDiagnosticsLog.txt");
+				if (File.Exists(canonicalPath))
+				{
+					return canonicalPath;
+				}
+			}
+
+			string serviceTag = SafeFile(_serviceTag, "").Trim();
+			List<string> retainedCandidates = diagnosticsDrives.SelectMany(delegate(DriveInfo drive)
+			{
+				try
+				{
+					return Directory.EnumerateFiles(drive.RootDirectory.FullName, "DellPrebootDiagnosticsLog*.txt", SearchOption.TopDirectoryOnly)
+						.Where((string path) => Path.GetFileName(path).StartsWith("DellPrebootDiagnosticsLog", StringComparison.OrdinalIgnoreCase));
+				}
+				catch
+				{
+					return Enumerable.Empty<string>();
+				}
+			}).OrderByDescending((string path) => File.GetLastWriteTimeUtc(path)).ToList();
+
+			if (retainedCandidates.Count == 1)
+			{
+				return retainedCandidates[0];
+			}
+			if (!string.IsNullOrWhiteSpace(serviceTag))
+			{
+				Regex serviceTagInFileName = new Regex("(?:^|[-_])" + Regex.Escape(serviceTag) + "(?:[-_]|$)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+				List<string> serviceTagMatches = retainedCandidates.Where((string path) => serviceTagInFileName.IsMatch(Path.GetFileNameWithoutExtension(path))).ToList();
+				if (serviceTagMatches.Count == 1)
+				{
+					return serviceTagMatches[0];
+				}
+			}
+			return "";
 		}
 		catch
 		{
@@ -4617,8 +4655,8 @@ $items = @(
 		{
 			Title = "Select Dell diagnostics log",
 			InitialDirectory = (Directory.Exists(text) ? text : ""),
-			FileName = "DellPrebootDiagnosticsLog.txt",
-			Filter = "Dell diagnostics log (DellPrebootDiagnosticsLog.txt)|DellPrebootDiagnosticsLog.txt|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+			FileName = "DellPrebootDiagnosticsLog*.txt",
+			Filter = "Dell diagnostics logs (DellPrebootDiagnosticsLog*.txt)|DellPrebootDiagnosticsLog*.txt|Text files (*.txt)|*.txt|All files (*.*)|*.*",
 			FilterIndex = 3,
 			CheckFileExists = true,
 			Multiselect = false
