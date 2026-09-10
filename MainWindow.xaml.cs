@@ -435,6 +435,11 @@ public partial class MainWindow : Window, IComponentConnector
 		if (cachedSession != null && ShouldSkipStartupRefresh(cachedSession))
 		{
 			RestoreQaSessionCache(cachedSession);
+			if (string.IsNullOrWhiteSpace(_diagnosticsRawText))
+			{
+				AddActivity("Diagnostics", "No diagnostics log is cached for this QA session; checking connected Dell diagnostics media.");
+				await ApplyStartupDiagnosticsAsync(GetDiagnosticsResultAsync());
+			}
 			await ApplyStartupCurrentBatteryAsync(GetCurrentBatterySnapshotAsync());
 			SaveQaSessionCache();
 			_completionCelebrated = IsQaComplete();
