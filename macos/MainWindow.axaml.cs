@@ -127,6 +127,8 @@ public sealed partial class MainWindow : Window
         ShowStep("ExternalVideo", ExternalIcon, ExternalMain, ExternalDetail);
         ShowStep("Keyboard", KeyboardIcon, KeyboardMain, KeyboardDetail);
         LoadCachedDiagnostics();
+        if (string.IsNullOrWhiteSpace(_cache.DiagnosticsRawText))
+            await LoadMissingDiagnosticsFromMountedMediaAsync();
         _completionCelebrated = IsQaComplete();
         _completionMonitoringEnabled = true;
         AddActivity("Cache", $"Loaded Windows QA session cached {_cache.SavedAt:yyyy-MM-dd HH:mm:ss}. No macOS machine information was collected.");
@@ -555,6 +557,66 @@ public sealed partial class MainWindow : Window
             _diagnostics = new(step.State, step.MainText, step.DetailText, _cache.DiagnosticsLogPath, "", false);
 
         UpdateDiagnosticsUi();
+    }
+
+    private async Task LoadMissingDiagnosticsFromMountedMediaAsync()
+    {
+        var path = FindMountedDiagnosticsLogPath();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            AddActivity("Diagnostics", "No cached diagnostics log and no unambiguous Dell diagnostics log were found on mounted media.");
+            return;
+        }
+
+        try
+        {
+            var raw = await File.ReadAllTextAsync(path);
+            _diagnostics = DiagnosticsParser.Parse(path, raw);
+            _cache.DiagnosticsLogPath = path;
+            _cache.DiagnosticsRawText = raw;
+            _cache.BatteryHealthRating = BatteryHealthRatingFromDiagnostics(raw);
+            _hardware = SnapshotFrom(_cache);
+            UpdateBatteryHealthDisplay();
+            UpdateDiagnosticsUi();
+            SaveSharedQaSession();
+            AddActivity("Diagnostics", $"Loaded missing diagnostics log from mounted media: {path}.");
+        }
+        catch (Exception ex)
+        {
+            AddActivity("Diagnostics", $"Could not load diagnostics log from mounted media: {ex.Message}");
+        }
+    }
+
+    private string FindMountedDiagnosticsLogPath()
+    {
+        var folder = FindFat32DiagnosticsVolume();
+        if (string.IsNullOrWhiteSpace(folder)) return "";
+
+        try
+        {
+            var canonical = Path.Combine(folder, "DellPrebootDiagnosticsLog.txt");
+            if (File.Exists(canonical)) return canonical;
+
+            var candidates = Directory.EnumerateFiles(folder, "DellPrebootDiagnosticsLog*.txt", SearchOption.TopDirectoryOnly)
+                .Where(path => Path.GetFileName(path).StartsWith("DellPrebootDiagnosticsLog", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(File.GetLastWriteTimeUtc)
+                .ToList();
+            if (candidates.Count == 1) return candidates[0];
+
+            var serviceTag = _cache.ServiceTag?.Trim() ?? "";
+            if (string.IsNullOrWhiteSpace(serviceTag)) return "";
+            var matchingServiceTag = candidates.Where(path =>
+            {
+                var name = Path.GetFileNameWithoutExtension(path);
+                return name.Contains($"-{serviceTag}-", StringComparison.OrdinalIgnoreCase) ||
+                       name.EndsWith($"-{serviceTag}", StringComparison.OrdinalIgnoreCase);
+            }).ToList();
+            return matchingServiceTag.Count == 1 ? matchingServiceTag[0] : "";
+        }
+        catch
+        {
+            return "";
+        }
     }
 
     private void UpdateDiagnosticsUi()
@@ -1354,7 +1416,7 @@ public sealed partial class MainWindow : Window
                 })
                 .Select(drive => drive.RootDirectory.FullName.TrimEnd(Path.DirectorySeparatorChar))
                 .Where(Directory.Exists)
-                .OrderByDescending(path => File.Exists(Path.Combine(path, "DellPrebootDiagnosticsLog.txt")))
+                .OrderByDescending(ContainsDellDiagnosticsLog)
                 .ThenByDescending(path => Path.GetFileName(path).Contains("DELL DIAG", StringComparison.OrdinalIgnoreCase))
                 .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -1365,7 +1427,7 @@ public sealed partial class MainWindow : Window
             // Some macOS USB mounts are not surfaced through .NET DriveInfo.
             // The Dell log name at a mounted volume root is a stronger fallback signal.
             return Directory.EnumerateDirectories("/Volumes")
-                .Where(path => File.Exists(Path.Combine(path, "DellPrebootDiagnosticsLog.txt")))
+                .Where(ContainsDellDiagnosticsLog)
                 .OrderByDescending(path => Path.GetFileName(path).Contains("DELL DIAG", StringComparison.OrdinalIgnoreCase))
                 .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
                 .FirstOrDefault() ?? "";
@@ -1373,6 +1435,20 @@ public sealed partial class MainWindow : Window
         catch
         {
             return "";
+        }
+    }
+
+    private static bool ContainsDellDiagnosticsLog(string folder)
+    {
+        try
+        {
+            return File.Exists(Path.Combine(folder, "DellPrebootDiagnosticsLog.txt")) ||
+                   Directory.EnumerateFiles(folder, "DellPrebootDiagnosticsLog*.txt", SearchOption.TopDirectoryOnly)
+                       .Any(path => Path.GetFileName(path).StartsWith("DellPrebootDiagnosticsLog", StringComparison.OrdinalIgnoreCase));
+        }
+        catch
+        {
+            return false;
         }
     }
 
