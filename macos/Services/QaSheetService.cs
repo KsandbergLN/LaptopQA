@@ -156,16 +156,22 @@ public static class QaSheetService
             new("5", T("Keyboard test result"), keyboard.State, T(Detail(keyboard, "Keyboard not checked yet."))),
             new("6", T("Dell preboot diagnostics"), d.Diagnostics.State, T(string.IsNullOrWhiteSpace(d.Diagnostics.DetailText) ? "Diagnostics log not found." : d.Diagnostics.DetailText)),
             new("7", T("USB ports verified"), usbState, usbDetail),
-            new("", T("Battery health checked"), BatteryState(d.Hardware.Battery), T(string.IsNullOrWhiteSpace(d.Hardware.Battery) ? "Battery information unavailable in Windows cache" : d.Hardware.Battery)),
             ManualCheck("8", "Trackpad working", d.Cache.TrackpadState, d.Trackpad, d.Config.AppLanguage),
             ManualCheck("8", "Checked physical condition", d.Cache.PhysicalConditionState, d.ConditionSuitable, d.Config.AppLanguage),
             Check("9", "Hash and group tag checked", d.HashGroupTag, d.Config.AppLanguage), Check("9", "Laptop cleaned", d.Cleaned, d.Config.AppLanguage),
-            Check("9", "Removed User from Laptop in Intune", d.RemovedUser, d.Config.AppLanguage), Check("9", "Update Stockrooms", d.Stockrooms, d.Config.AppLanguage)
+            Check("9", "Removed User from Laptop in Intune", d.RemovedUser, d.Config.AppLanguage), Check("9", "Update Stockrooms", d.Stockrooms, d.Config.AppLanguage),
+            new("", T("Battery health checked"), BatteryState(d.Hardware.Battery), T(BatteryDetail(d.Hardware.Battery)))
         ];
     }
 
-    private static string BatteryState(string? value) =>
-        string.IsNullOrWhiteSpace(value) || value.Contains("unavailable", StringComparison.OrdinalIgnoreCase) ? "Waiting" : "Ok";
+    private static string BatteryState(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Contains("unavailable", StringComparison.OrdinalIgnoreCase)) return "Waiting";
+        return value.Contains("excellent", StringComparison.OrdinalIgnoreCase) || value.Contains("good", StringComparison.OrdinalIgnoreCase) ? "Ok" : "Bad";
+    }
+
+    private static string BatteryDetail(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "Battery health information unavailable in Windows cache." : value.Trim();
 
     private static string WarrantyDisplayText(string? warrantyText) =>
         string.IsNullOrWhiteSpace(warrantyText) ? "unavailable" : warrantyText.Trim();

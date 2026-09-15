@@ -559,7 +559,7 @@
                         <Canvas>
                             <TextBlock Text="10. QA Output" Canvas.Left="24" Canvas.Top="13" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="Bold"/>
                             <Button x:Name="QaSheetButton" Content="QA Sheet" Canvas.Left="190" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="11" ToolTip="Generate and open the QA sheet PNG." Click="QaSheetButton_Click"/>
-                            <Button x:Name="ServiceNowButton" Content="ServiceNow" Canvas.Left="284" Canvas.Top="15" Width="82" Height="34" Style="{StaticResource PrimaryButton}" FontSize="10.2" ToolTip="Copy the ServiceNow request details and open the request page." Click="ServiceNowButton_Click"/>
+                            <Button x:Name="ServiceNowButton" Content="Create Ticket" Canvas.Left="270" Canvas.Top="15" Width="96" Height="34" Style="{StaticResource PrimaryButton}" FontSize="10.2" ToolTip="Copy the ticket details and open the request page." Click="ServiceNowButton_Click"/>
                         </Canvas>
                     </Border>
 

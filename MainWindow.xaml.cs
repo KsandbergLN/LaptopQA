@@ -7403,6 +7403,8 @@ $items = @(
 		string text6 = _states.GetValueOrDefault("PhysicalCondition", "Waiting");
 		string item = ((!_usbPortTestFinished) ? "Waiting" : (_usbPorts.Any((UsbPortCache port) => port.Failed) ? "Bad" : "Ok"));
 		string item2 = ((_usbPorts.Count == 0) ? "USB port count unavailable from BIOS connector data." : $"{_usbPorts.Count((UsbPortCache port) => port.Passed)} passed, {_usbPorts.Count((UsbPortCache port) => port.Failed)} failed, {_usbPorts.Count((UsbPortCache port) => !port.Passed && !port.Failed)} pending.");
+		string item3 = BatteryQaSheetState();
+		string item4 = BatteryQaSheetDetail();
 		(string, string, string, string)[] source = new(string, string, string, string)[14]
 		{
 			("2", "Wi-Fi connected or SSIDs visible", _states["WiFi"], Detail("WiFi", "Wi-Fi not checked yet. Looking for a connected Wi-Fi IP or visible SSIDs.")),
@@ -7412,13 +7414,13 @@ $items = @(
 			("5", "Keyboard test result", _states["Keyboard"], Detail("Keyboard", "Keyboard not checked yet. Start tester, then choose Pass or Fail.")),
 			("6", "Dell preboot diagnostics", _states["Diagnostics"], Detail("Diagnostics", "Diagnostics log not found.")),
 			("7", "USB ports verified", item, item2),
-			("", "Battery health checked", "Ok", _batterySummary),
 			("8", "Trackpad working", text5, (text5 == "Ok") ? "Trackpad working checked off." : "Trackpad working not checked off."),
 			("8", "Checked physical condition", text6, (text6 == "Ok") ? "Physical laptop condition confirmed suitable for use." : "Physical laptop condition not confirmed suitable for use."),
 			("9", "Check hash and group tag", text, (text == "Ok") ? "Hash and group tag checked off." : "Hash and group tag not checked off."),
 			("9", "Laptop cleaned", text2, (text2 == "Ok") ? "Cleaned laptop checked off." : "Cleaned laptop not checked off."),
 			("9", "Removed User from Laptop in Intune", text3, (text3 == "Ok") ? "User removal from laptop in Intune checked off." : "User removal from laptop in Intune not checked off."),
-			("9", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated.")
+			("9", "Update Stockrooms", text4, (text4 == "Ok") ? "Stockrooms updated." : "Stockrooms not updated."),
+			("", "Battery health checked", item3, item4)
 		};
 		string text7 = (source.Any(((string, string, string, string) r) => r.Item3 == "Bad") ? "Needs Attention" : (source.Any(((string, string, string, string) r) => r.Item3 == "Warning") ? "Warning" : (source.All(((string, string, string, string) r) => r.Item3 == "Ok" || r.Item3 == "Ignored") ? "Passed" : "Incomplete")));
 		string value = ((text7 == "Passed") ? "overall-pass" : ((text7 == "Needs Attention") ? "overall-fail" : "overall-incomplete"));
@@ -7465,6 +7467,27 @@ $items = @(
 				_ => "Not Run",
 			};
 		}
+	}
+
+	private string BatteryQaSheetState()
+	{
+		return NormalizeBatteryHealthRating(_batteryHealthRating) switch
+		{
+			"Excellent" or "Good" => "Ok",
+			"" => "Waiting",
+			_ => "Bad"
+		};
+	}
+
+	private string BatteryQaSheetDetail()
+	{
+		string text = NormalizeBatteryHealthRating(_batteryHealthRating);
+		Match match = Regex.Match(_batterySummary ?? "", "(?<percent>\\d{1,3})\\s*%");
+		if (string.IsNullOrWhiteSpace(text))
+		{
+			return match.Success ? $"Battery health rating unavailable; Windows capacity health: {match.Groups["percent"].Value}%." : "Battery health information unavailable.";
+		}
+		return match.Success ? $"Battery health: {text}; Windows capacity health: {match.Groups["percent"].Value}%." : $"Battery health: {text}.";
 	}
 
 	private static string PsQuote(string value)
