@@ -7,7 +7,7 @@ Laptop QA contains two supported technician applications:
 - **Windows app** — WPF on .NET 10, built from the repository root.
 - **macOS companion** — Avalonia on .NET 10, built from `macos\`.
 
-Laptop QA is a technician workflow for preparing, testing, and documenting Windows laptops. It brings hardware and diagnostics checks, BIOS and USB workflows, device-condition checks, device-hash upload, final-check links, QA-sheet output, and Create Ticket preparation into one session. The QA sheet ends with a battery-health result: Excellent and Good pass, lower health ratings fail, and the detail records the Dell health rating plus Windows capacity percentage. The macOS companion can open the cached Windows session from step 8 onward when a technician prefers to finish on a MacBook.
+Laptop QA is a technician workflow for preparing, testing, and documenting Windows laptops. It brings hardware and diagnostics checks, BIOS and USB workflows, device-condition checks, battery-health reporting, device-hash upload, final-check links, QA-sheet output, and Create Ticket preparation into one session. The QA sheet ends with a battery-health result: Excellent and Good pass, lower health ratings fail, and the detail records the Dell health rating plus Windows capacity percentage. The macOS companion can open the cached Windows session from step 8 onward when a technician prefers to finish on a MacBook; it does not add a Mac-specific hardware checklist.
 
 The repository root is the canonical Windows source. The `main` branch is authoritative. Generated build output, runtime data, logs, and release packages are intentionally ignored.
 
@@ -34,7 +34,7 @@ dotnet build .\LaptopQA.Windows.csproj -c Release --no-incremental
 dotnet build .\macos\LaptopQA.Mac.csproj -c Release --no-incremental
 ```
 
-The Windows project explicitly excludes `macos\**\*.cs`; do not remove that boundary or add macOS files to the Windows project. The current Windows validation target is 0 warnings and 0 errors. The macOS project currently has 24 Avalonia/Skia deprecation warnings and 0 errors.
+The Windows project explicitly excludes `macos\**\*.cs`; do not remove that boundary or add macOS files to the Windows project. The current Windows and macOS validation targets are both 0 warnings and 0 errors. A clean build is necessary but does not replace the hardware, removable-media, diagnostics, and packaging smoke tests in the handoff.
 
 ## Quick start
 
@@ -50,13 +50,13 @@ For normal technician use on Windows, double-click `Windows Laptop QA Launcher.v
 
 For a Windows release candidate, use `Build-LaptopQAIteration.ps1 -NoDeploy`. It writes packages under `dist\`; do not commit those generated folders. For the macOS companion, run `macos\Build-MacRelease.ps1` on the approved build machine and validate the resulting Apple Silicon app bundle.
 
-Technician handoff: complete Windows QA steps 1–7 on the test laptop first. Starting with step 8 (Device Condition), the technician may open the macOS companion on their personal Mac and continue the same Windows QA workflow from the cached session, including device-condition checks, final checks, QA sheet generation, and ServiceNow preparation.
+Technician handoff: complete Windows QA steps 1–7 on the test laptop first. Starting with step 8 (Device Condition), the technician may open the macOS companion on their personal Mac and continue the same Windows QA workflow from the cached session, including diagnostics review, device-condition checks, final checks, QA sheet generation, and Create Ticket preparation.
 
 Windows keeps searchable QA session history for 90 days under `.runtime/sessions`. Use the Cached Sessions selector in the header to find a session by service tag, date, or time and restore it as the active QA. The `.runtime/sessions-index.json` file is only an index; the full session snapshots remain independently recoverable if the index is damaged.
 
 Technicians should use [`docs/USER-GUIDE.md`](docs/USER-GUIDE.md). Developers and maintainers should start with [`DEVELOPER-HANDOFF.md`](DEVELOPER-HANDOFF.md).
 
-Final-check navigation links are configurable from **Settings > Final Check Links**. The Update Stockrooms URL must retain `{SERIAL}` so Laptop QA can insert the active device's service tag.
+Final-check navigation links are configurable from **Settings > Final Check Links**. Windows exposes Check Hash and Group Tag, Remove User, Update Stockrooms, and Upload Hash; macOS exposes the three cached manual actions and retains the upload setting only for shared-config compatibility. The Update Stockrooms URL must retain `{SERIAL}` so Laptop QA can insert the active device's service tag.
 
 ## Where to make changes
 
